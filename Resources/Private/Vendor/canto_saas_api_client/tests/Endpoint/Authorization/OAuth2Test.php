@@ -97,11 +97,12 @@ class OAuth2Test extends TestCase
 
         $clientMock = $this->getMockBuilder(Client::class)
             ->disableOriginalConstructor()
-            ->onlyMethods(['getHttpClient', 'getLogger', 'getOptions'])
+            ->onlyMethods(['getHttpClient', 'getLogger', 'getOptions', 'getAccessToken'])
             ->getMock();
         $clientMock->method('getHttpClient')->willReturn($httpClient);
         $clientMock->method('getLogger')->willReturn(new NullLogger());
         $clientMock->method('getOptions')->willReturn($optionsMock);
+        $clientMock->method('getAccessToken')->willReturn(null);
 
         return $clientMock;
     }

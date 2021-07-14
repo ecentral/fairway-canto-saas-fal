@@ -23,8 +23,10 @@ class OAuth2ResponseTest extends TestCase
     public function createValidResponse(): void
     {
         $response = new OAuth2Response(
-            $this->buildHttpResponse(
-                '{"accessToken":"access-token-1234","expiresIn":3600,"tokenType":"Bearer","refreshToken":"refresh-token-1234"}'
+            new Response(
+                200,
+                [],
+                '{"accessToken":"access-token-1234","expiresIn":"3600","tokenType":"Bearer","refreshToken":"refresh-token-1234"}'
             )
         );
 
@@ -41,7 +43,7 @@ class OAuth2ResponseTest extends TestCase
     {
         self::expectExceptionCode(1626449779);
 
-        new OAuth2Response($this->buildHttpResponse(''));
+        new OAuth2Response(new Response(200, [], ''));
     }
 
     /**
@@ -51,13 +53,6 @@ class OAuth2ResponseTest extends TestCase
     {
         self::expectExceptionCode(1626449779);
 
-        new OAuth2Response($this->buildHttpResponse('invalid-json'));
-    }
-
-    protected function buildHttpResponse(string $body = ''): Response
-    {
-        $httpResponse = new Response(200, [], $body);
-        $httpResponse->getBody()->rewind();
-        return $httpResponse;
+        new OAuth2Response(new Response(200, [], 'invalid-json'));
     }
 }

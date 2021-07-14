@@ -15,11 +15,18 @@ use Ecentral\CantoSaasApiClient\Http\RequestInterface;
 
 class OAuth2Request implements RequestInterface
 {
+    const GRANT_TYPE_AUTHORIZATION_CODE = 'authorization_code';
+    const GRANT_TYPE_CLIENT_CREDENTIALS = 'client_credentials';
+    const GRANT_TYPE_REFRESH_TOKEN = 'refresh_token';
+    const SCOPE_ADMIN = 'admin';
+    const SCOPE_CONTRIBUTOR = 'contributor';
+    const SCOPE_CONSUMER = 'consumer';
+
     protected string $appId = '';
 
     protected string $appSecret = '';
 
-    protected string $grantType = 'client_credentials';
+    protected string $grantType = self::GRANT_TYPE_CLIENT_CREDENTIALS;
 
     protected string $redirectUri = '';
 
@@ -27,7 +34,7 @@ class OAuth2Request implements RequestInterface
 
     protected string $refreshToken = '';
 
-    protected string $scope = 'admin';
+    protected string $scope = self::SCOPE_ADMIN;
 
     protected string $userId = '';
 
@@ -43,6 +50,9 @@ class OAuth2Request implements RequestInterface
         return $this;
     }
 
+    /**
+     * See GRANT_TYPE_* constants.
+     */
     public function setGrantType(string $grantType): OAuth2Request
     {
         $this->grantType = $grantType;
@@ -67,6 +77,9 @@ class OAuth2Request implements RequestInterface
         return $this;
     }
 
+    /**
+     * See SCOPE_* constants.
+     */
     public function setScope(string $scope): OAuth2Request
     {
         $this->scope = $scope;
