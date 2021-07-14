@@ -1,0 +1,48 @@
+stages:
+  - test
+
+validate-composer:
+  image: registry.gitlab.com/codemonkey1988/docker-composer-image:2-php8.0
+  stage: test
+  script:
+    - composer validate --no-check-publish --no-check-all --no-interaction
+
+lint-php:
+  stage: test
+  image: registry.gitlab.com/codemonkey1988/docker-composer-image:2-php$PHP_VERSION
+  script:
+    - find . -name \*.php ! -path "./.Build/*" -exec php -d display_errors=stderr -l {} > /dev/null \;
+  parallel:
+    matrix:
+      - PHP_VERSION: ['7.4', '8.0']
+
+php-cs-fixer:
+  stage: test
+  image: registry.gitlab.com/codemonkey1988/docker-composer-image:2-php7.4
+  before_script:
+    - mkdir -p .composer/cache
+    - COMPOSER_CACHE_DIR=.composer/cache composer install
+  script:
+    - composer phpcsfixer
+  cache:
+    key: composer-cache
+    paths:
+      - .composer/cache
+
+phpstan:
+  image: registry.gitlab.com/codemonkey1988/docker-composer-image:2-php$PHP_VERSION
+  stage: test
+  except:
+    - schedules
+  before_script:
+    - mkdir -p .composer/cache
+    - COMPOSER_CACHE_DIR=.composer/cache composer install
+  script:
+    - composer phpstan
+  parallel:
+    matrix:
+      - PHP_VERSION: [ '7.4', '8.0' ]
+  cache:
+    key: composer-cache
+    paths:
+      - .composer/cache

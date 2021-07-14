@@ -1,0 +1,7 @@
+parameters:
+  level: 5
+  paths:
+    - Classes
+    - Configuration
+    - Resources/Private/Vendor
+    - ext_localconf.php

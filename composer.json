@@ -1,0 +1,61 @@
+{
+  "name": "ecentral/canto-saas-fal",
+  "type": "typo3-cms-extension",
+  "description": "Adds Canto SaaS FAL driver.",
+  "homepage": "https://gitlab.ecentral.de/canto-saas/ext-canto-saas-fal",
+  "license": "GPL-2.0-or-later",
+  "keywords": [
+    "TYPO3 CMS",
+    "Canto",
+	  "FAL"
+  ],
+  "authors": [
+    {
+      "name": "Tim Schreiner",
+      "role": "Developer",
+	    "email": "tim.schreiner@km2.de"
+    }
+  ],
+  "require": {
+    "php": "^7.2 || ^8.0",
+    "typo3/cms-core": "^10.4 || 11.2.*"
+  },
+  "require-dev": {
+    "friendsofphp/php-cs-fixer": "^3.0",
+		"phpstan/phpstan": "^0.12.92",
+    "typo3/testing-framework": "^6.8"
+  },
+  "autoload": {
+    "psr-4": {
+      "Ecentral\\CantoSaasFal\\": "Classes",
+			"Ecentral\\CantoSaasConnector\\": "Resources/Private/Vendor/canto_saas_connector/src"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Ecentral\\CantoSaasFal\\Tests\\": "Tests",
+			"Ecentral\\CantoSaasConnector\\Tests\\": "Resources/Private/Vendor/canto_saas_connector/tests"
+    }
+  },
+  "replace": {
+    "typo3-ter/canto-saas-fal": "self.version"
+  },
+  "config": {
+    "vendor-dir": ".Build/vendor",
+    "bin-dir": ".Build/bin"
+  },
+  "scripts": {
+    "post-autoload-dump": [
+      "mkdir -p .Build/Web/typo3conf/ext/",
+      "[ -L .Build/Web/typo3conf/ext/canto_saas_fal ] || ln -snvf ../../../../. .Build/Web/typo3conf/ext/canto_saas_fal"
+    ],
+		"phpcsfixer": "php-cs-fixer fix --config=.php-cs-fixer.dist.php -v --dry-run --using-cache=no --diff",
+		"phpstan": "phpstan analyse -c phpstan.neon"
+	},
+  "extra": {
+    "typo3/cms": {
+      "web-dir": ".Build/Web",
+      "extension-key": "canto_saas_fal"
+    }
+  }
+}

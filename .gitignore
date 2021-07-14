@@ -1,0 +1,8 @@
+/.idea
+/.ddev
+/composer.lock
+/.php_cs.cache
+/.Build
+/var
+/config
+/Documentation-GENERATED-temp
