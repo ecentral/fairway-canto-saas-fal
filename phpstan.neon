@@ -3,5 +3,7 @@ parameters:
   paths:
     - Classes
     - Configuration
-    - Resources/Private/Vendor
-    - ext_localconf.php
+    - Resources/Private/Vendor/canto_saas_api_client/src
+  reportUnmatchedIgnoredErrors: false
+  ignoreErrors:
+    - '#JetBrains\\PhpStorm\\ArrayShape#'
