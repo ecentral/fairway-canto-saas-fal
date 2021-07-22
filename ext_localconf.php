@@ -8,12 +8,36 @@
  */
 
 // Register new fal driver
-$GLOBALS['TYPO3_CONF_VARS']['SYS']['fal']['registeredDrivers']['Canto'] = [
+$GLOBALS['TYPO3_CONF_VARS']['SYS']['fal']['registeredDrivers'][\Ecentral\CantoSaasFal\Resource\Driver\CantoDriver::DRIVER_NAME] = [
     'class' => \Ecentral\CantoSaasFal\Resource\Driver\CantoDriver::class,
-    'shortName' => 'Canto',
+    'shortName' => \Ecentral\CantoSaasFal\Resource\Driver\CantoDriver::DRIVER_NAME,
     'flexFormDS' => 'FILE:EXT:canto_saas_fal/Configuration/FlexForm/CantoDriver.xml',
     'label' => 'Canto DAM',
 ];
+
+// Register canto specific file processors.
+$GLOBALS['TYPO3_CONF_VARS']['SYS']['fal']['processors']['CantoPreviewProcessor'] = [
+    'className' => \Ecentral\CantoSaasFal\Resource\Processing\CantoPreviewProcessor::class,
+    'before' => [
+        'SvgImageProcessor'
+    ]
+];
+
+// Register XClasses to handle multi folder assignments.
+$GLOBALS['TYPO3_CONF_VARS']['SYS']['Objects'][\TYPO3\CMS\Core\Resource\ResourceStorage::class] = [
+    'className' => \Ecentral\CantoSaasFal\Xclass\ResourceStorage::class,
+];
+$GLOBALS['TYPO3_CONF_VARS']['SYS']['Objects'][\TYPO3\CMS\Core\Resource\Index\Indexer::class] = [
+    'className' => \Ecentral\CantoSaasFal\Xclass\Indexer::class,
+];
+
+// Hooks
+$GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processDatamapClass'][1627626213]
+    = \Ecentral\CantoSaasFal\Hooks\DataHandlerHooks::class;
+
+$extractorRegistry = \TYPO3\CMS\Core\Resource\Index\ExtractorRegistry::getInstance();
+$extractorRegistry->registerExtractionService(\Ecentral\CantoSaasFal\Resource\Metadata\Extractor::class);
+unset($extractorRegistry);
 
 // Register files and folder information cache
 if (!is_array($GLOBALS['TYPO3_CONF_VARS']['SYS']['caching']['cacheConfigurations']['canto_saas_fal_folder'])) {
@@ -29,7 +53,6 @@ if (!is_array($GLOBALS['TYPO3_CONF_VARS']['SYS']['caching']['cacheConfigurations
         ],
     ];
 }
-// TODO Check if this cache can be replaced using the sys_file table.
 if (!is_array($GLOBALS['TYPO3_CONF_VARS']['SYS']['caching']['cacheConfigurations']['canto_saas_fal_file'])) {
     $GLOBALS['TYPO3_CONF_VARS']['SYS']['caching']['cacheConfigurations']['canto_saas_fal_file'] = [
         'backend' => \TYPO3\CMS\Core\Cache\Backend\Typo3DatabaseBackend::class,
