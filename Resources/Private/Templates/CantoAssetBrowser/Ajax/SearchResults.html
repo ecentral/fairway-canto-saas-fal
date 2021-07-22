@@ -1,0 +1,20 @@
+<html data-namespace-typo3-fluid="true"
+      xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers">
+
+<div class="row">
+    <div class="col-xs-12">
+        <p class="canto-result-count">
+            {f:translate(
+                id: 'LLL:EXT:canto_saas_fal/Resources/Private/Language/locallang_be.xlf:canto_asset_browser.searchResults.numberOfResults',
+                arguments: {0: results.numberOfAllItems}
+            )}
+        </p>
+    </div>
+    <f:for each="{results.paginatedItems}" as="result">
+        <f:render partial="SearchResult/ResultItem" arguments="{result: result}" />
+    </f:for>
+</div>
+
+<f:render partial="SearchResult/Pagination" arguments="{pagination: pagination, results: results}" />
+
+</html>

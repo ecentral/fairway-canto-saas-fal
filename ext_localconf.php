@@ -35,6 +35,16 @@ $GLOBALS['TYPO3_CONF_VARS']['SYS']['Objects'][\TYPO3\CMS\Core\Resource\Index\Ind
 $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processDatamapClass'][1627626213]
     = \Ecentral\CantoSaasFal\Hooks\DataHandlerHooks::class;
 
+// Override Inline node type to add canto asset button.
+$GLOBALS['TYPO3_CONF_VARS']['SYS']['formEngine']['nodeRegistry'][1628070217] = [
+    'nodeName' => 'inline',
+    'priority' => 100,
+    'class' => \Ecentral\CantoSaasFal\Form\Container\InlineControlContainer::class,
+];
+
+$GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['ElementBrowsers']['canto']
+    = \Ecentral\CantoSaasFal\Browser\CantoAssetBrowser::class;
+
 $extractorRegistry = \TYPO3\CMS\Core\Resource\Index\ExtractorRegistry::getInstance();
 $extractorRegistry->registerExtractionService(\Ecentral\CantoSaasFal\Resource\Metadata\Extractor::class);
 unset($extractorRegistry);

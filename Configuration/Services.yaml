@@ -27,6 +27,9 @@ services:
   Ecentral\CantoSaasFal\Resource\Processing\CantoPreviewProcessor:
     public: true
 
+  Ecentral\CantoSaasFal\Controller\Backend\CantoAssetBrowserController:
+    public: true
+
   Ecentral\CantoSaasFal\Resource\Repository\CantoAlbumRepository:
     arguments:
       - 'sys_file_canto_album'
