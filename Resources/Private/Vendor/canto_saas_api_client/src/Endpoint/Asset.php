@@ -13,16 +13,17 @@ namespace Ecentral\CantoSaasApiClient\Endpoint;
 
 use Ecentral\CantoSaasApiClient\Http\Asset\BatchUpdatePropertiesRequest;
 use Ecentral\CantoSaasApiClient\Http\Asset\BatchUpdatePropertiesResponse;
+use Ecentral\CantoSaasApiClient\Http\Asset\GetContentDetailsRequest;
+use Ecentral\CantoSaasApiClient\Http\Asset\GetContentDetailsResponse;
 use Ecentral\CantoSaasApiClient\Http\InvalidRequestException;
 use Ecentral\CantoSaasApiClient\Http\InvalidResponseException;
+use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Psr7\Request;
-use Psr\Http\Client\ClientExceptionInterface;
 
 class Asset extends AbstractEndpoint
 {
     /**
      * @throws InvalidResponseException
-     * @throws ClientExceptionInterface
      * @throws Authorization\NotAuthorizedException
      * @throws InvalidRequestException
      */
@@ -31,20 +32,44 @@ class Asset extends AbstractEndpoint
         $uri = $this->buildRequestUrl('batch/edit', $request);
         $httpRequest = new Request('PUT', $uri, [], $request->getBody());
 
-        $response = $this->sendRequest($httpRequest);
-
-        if ($response->getStatusCode() !== 200) {
+        try {
+            $response = $this->sendRequest($httpRequest);
+        } catch (GuzzleException $e) {
             throw new InvalidResponseException(
                 sprintf(
                     'Invalid http status code received. Expected 200, got %s.',
-                    $response->getStatusCode()
+                    $e->getCode()
                 ),
                 1626717610,
-                null,
-                $response
+                $e
             );
         }
 
         return new BatchUpdatePropertiesResponse($response);
+    }
+
+    /**
+     * @throws InvalidResponseException
+     * @throws Authorization\NotAuthorizedException
+     */
+    public function getContentDetails(GetContentDetailsRequest $request): GetContentDetailsResponse
+    {
+        $uri = $this->buildRequestUrl('', $request);
+        $httpRequest = new Request('GET', $uri);
+
+        try {
+            $response = $this->sendRequest($httpRequest);
+        } catch (GuzzleException $e) {
+            throw new InvalidResponseException(
+                sprintf(
+                    'Invalid http status code received. Expected 200, got %s.',
+                    $e->getCode()
+                ),
+                1626717610,
+                $e
+            );
+        }
+
+        return new GetContentDetailsResponse($response);
     }
 }

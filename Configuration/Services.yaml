@@ -1,0 +1,24 @@
+services:
+  _defaults:
+    autowire: true
+    autoconfigure: true
+    public: false
+
+  Ecentral\CantoSaasFal\:
+    resource: '../Classes/*'
+
+  Ecentral\CantoSaasFal\Resource\Driver\CantoClientFactory:
+    public: true
+    shared: true
+
+  cache.canto_folder:
+    class: TYPO3\CMS\Core\Cache\Frontend\FrontendInterface
+    public: true
+    factory: ['@TYPO3\CMS\Core\Cache\CacheManager', 'getCache']
+    arguments: ['canto_saas_fal_folder']
+
+  cache.canto_file:
+    class: TYPO3\CMS\Core\Cache\Frontend\FrontendInterface
+    public: true
+    factory: [ '@TYPO3\CMS\Core\Cache\CacheManager', 'getCache' ]
+    arguments: [ 'canto_saas_fal_file' ]

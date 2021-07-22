@@ -15,10 +15,12 @@ use Ecentral\CantoSaasApiClient\Client;
 use Ecentral\CantoSaasApiClient\ClientOptions;
 use Ecentral\CantoSaasApiClient\Endpoint\LibraryTree;
 use Ecentral\CantoSaasApiClient\Http\LibraryTree\GetTreeRequest;
-use Ecentral\CantoSaasApiClient\Http\LibraryTree\ListContentRequest;
+use Ecentral\CantoSaasApiClient\Http\LibraryTree\SearchFolderRequest;
 use GuzzleHttp\Client as HttpClient;
+use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -29,7 +31,7 @@ class LibraryTreeTest extends TestCase
     /**
      * @test
      */
-    public function listFolderContentSuccessfulObtainResponse(): void
+    public function searchFolderContentSuccessfulObtainResponse(): void
     {
         $responseBody = '{' .
             '"facets":[{"key":"facet-value"}],' .
@@ -44,7 +46,7 @@ class LibraryTreeTest extends TestCase
         $clientMock = $this->buildClientMock($mockHandler);
 
         $libraryTreeEndpoint = new LibraryTree($clientMock);
-        $response = $libraryTreeEndpoint->listContent($this->buildListFolderContentRequestMock());
+        $response = $libraryTreeEndpoint->searchFolderContent($this->buildListFolderContentRequestMock());
 
         self::assertSame([['key' => 'facet-value']], $response->getFacets());
         self::assertSame([['result-id' => 1234]], $response->getResults());
@@ -58,29 +60,41 @@ class LibraryTreeTest extends TestCase
     /**
      * @test
      */
-    public function listFolderContentExpectNotAuthorizedException(): void
+    public function searchFolderContentExpectNotAuthorizedException(): void
     {
         self::expectExceptionCode(1626717511);
 
-        $mockHandler = new MockHandler([new Response(401, [], '[]')]);
+        $mockHandler = new MockHandler([
+            new RequestException(
+                'Error Communicating with Server',
+                new Request('GET', 'test'),
+                new Response(401, [], '[]')
+            )
+        ]);
         $clientMock = $this->buildClientMock($mockHandler);
 
         $libraryTreeEndpoint = new LibraryTree($clientMock);
-        $libraryTreeEndpoint->listContent($this->buildListFolderContentRequestMock());
+        $libraryTreeEndpoint->searchFolderContent($this->buildListFolderContentRequestMock());
     }
 
     /**
      * @test
      */
-    public function listFolderContentExpectUnexpectedHttpStatusException(): void
+    public function searchFolderContentExpectUnexpectedHttpStatusException(): void
     {
         self::expectExceptionCode(1626717610);
 
-        $mockHandler = new MockHandler([new Response(400, [], '[]')]);
+        $mockHandler = new MockHandler([
+            new RequestException(
+                'Error Communicating with Server',
+                new Request('GET', 'test'),
+                new Response(400, [], '[]')
+            )
+        ]);
         $clientMock = $this->buildClientMock($mockHandler);
 
         $libraryTreeEndpoint = new LibraryTree($clientMock);
-        $libraryTreeEndpoint->listContent($this->buildListFolderContentRequestMock());
+        $libraryTreeEndpoint->searchFolderContent($this->buildListFolderContentRequestMock());
     }
 
     /**
@@ -155,7 +169,7 @@ class LibraryTreeTest extends TestCase
 
     protected function buildListFolderContentRequestMock(): MockObject
     {
-        $requestMock = $this->getMockBuilder(ListContentRequest::class)
+        $requestMock = $this->getMockBuilder(SearchFolderRequest::class)
             ->disableOriginalConstructor()
             ->onlyMethods(['getQueryParams', 'getPathVariables'])
             ->getMock();

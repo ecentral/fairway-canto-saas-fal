@@ -11,11 +11,11 @@ declare(strict_types=1);
 
 namespace Ecentral\CantoSaasApiClient\Tests\Http\LibraryTree;
 
-use Ecentral\CantoSaasApiClient\Http\LibraryTree\ListContentResponse;
+use Ecentral\CantoSaasApiClient\Http\LibraryTree\SearchFolderResponse;
 use GuzzleHttp\Psr7\Response;
 use PHPUnit\Framework\TestCase;
 
-class ListContentResponseTest extends TestCase
+class SearchFolderResponseTest extends TestCase
 {
     /**
      * @test
@@ -31,7 +31,7 @@ class ListContentResponseTest extends TestCase
             '"sortDirection":"ascending",' .
             '"matchExpr":"test"' .
             '}';
-        $response = new ListContentResponse(new Response(200, [], $responseBody));
+        $response = new SearchFolderResponse(new Response(200, [], $responseBody));
 
         self::assertSame([['key' => 'facet-value']], $response->getFacets());
         self::assertSame([['result-id' => 1234]], $response->getResults());
@@ -49,7 +49,7 @@ class ListContentResponseTest extends TestCase
     {
         self::expectExceptionCode(1626434956);
 
-        new ListContentResponse(new Response(200, [], ''));
+        new SearchFolderResponse(new Response(200, [], ''));
     }
 
     /**
@@ -59,6 +59,6 @@ class ListContentResponseTest extends TestCase
     {
         self::expectExceptionCode(1626434988);
 
-        new ListContentResponse(new Response(200, [], 'invalid-json'));
+        new SearchFolderResponse(new Response(200, [], 'invalid-json'));
     }
 }

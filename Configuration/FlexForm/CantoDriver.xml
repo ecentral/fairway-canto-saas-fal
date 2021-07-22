@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<T3DataStructure>
+    <ROOT>
+        <type>array</type>
+        <el>
+            <appId>
+                <TCEforms>
+                    <label>LLL:EXT:canto_saas_fal/Resources/Private/Language/locallang_be.xlf:sys_file_storage.cantoDriverFlexform_appId</label>
+                    <config>
+                        <type>input</type>
+                        <eval>required</eval>
+                        <size>30</size>
+                    </config>
+                </TCEforms>
+            </appId>
+            <appSecret>
+                <TCEforms>
+                    <label>LLL:EXT:canto_saas_fal/Resources/Private/Language/locallang_be.xlf:sys_file_storage.cantoDriverFlexform_appSecret</label>
+                    <config>
+                        <type>input</type>
+                        <eval>required</eval>
+                        <size>30</size>
+                        <eval>password</eval>
+                    </config>
+                </TCEforms>
+            </appSecret>
+            <cantoName>
+                <TCEforms>
+                    <label>LLL:EXT:canto_saas_fal/Resources/Private/Language/locallang_be.xlf:sys_file_storage.cantoDriverFlexform_cantoName</label>
+                    <config>
+                        <type>input</type>
+                        <eval>required</eval>
+                        <size>30</size>
+                    </config>
+                </TCEforms>
+            </cantoName>
+            <cantoDomain>
+                <TCEforms>
+                    <label>LLL:EXT:canto_saas_fal/Resources/Private/Language/locallang_be.xlf:sys_file_storage.cantoDriverFlexform_cantoDomain</label>
+                    <config>
+                        <type>select</type>
+                        <renderType>selectSingle</renderType>
+                        <items type="array">
+                            <numIndex index="0" type="array">
+                                <numIndex index="0">canto.com</numIndex>
+                                <numIndex index="1">canto.com</numIndex>
+                            </numIndex>
+                            <numIndex index="1" type="array">
+                                <numIndex index="0">canto.de</numIndex>
+                                <numIndex index="1">canto.de</numIndex>
+                            </numIndex>
+                            <numIndex index="2" type="array">
+                                <numIndex index="0">canto.global</numIndex>
+                                <numIndex index="1">canto.global</numIndex>
+                            </numIndex>
+                        </items>
+                        <default>canto.com</default>
+                    </config>
+                </TCEforms>
+            </cantoDomain>
+            <userId>
+                <TCEforms>
+                    <label>LLL:EXT:canto_saas_fal/Resources/Private/Language/locallang_be.xlf:sys_file_storage.cantoDriverFlexform_userId</label>
+                    <config>
+                        <type>input</type>
+                        <eval>required</eval>
+                        <size>30</size>
+                    </config>
+                </TCEforms>
+            </userId>
+        </el>
+    </ROOT>
+</T3DataStructure>

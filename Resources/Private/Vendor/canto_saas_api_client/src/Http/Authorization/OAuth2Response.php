@@ -24,7 +24,7 @@ class OAuth2Response extends Response
 
     private string $tokenType = '';
 
-    private string $refreshToken = '';
+    private ?string $refreshToken = null;
 
     /**
      * @throws AuthorizationFailedException

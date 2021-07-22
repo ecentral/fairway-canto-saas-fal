@@ -13,8 +13,8 @@ namespace Ecentral\CantoSaasApiClient\Endpoint;
 
 use Ecentral\CantoSaasApiClient\Client;
 use Ecentral\CantoSaasApiClient\Endpoint\Authorization\NotAuthorizedException;
+use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Psr7\Uri;
-use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 
@@ -38,13 +38,14 @@ abstract class AbstractEndpoint
             'https://%s.%s/api/v1/%s',
             $this->client->getOptions()->getCantoName(),
             $this->client->getOptions()->getCantoDomain(),
-            urlencode(trim($path, '/'))
+            trim($path, '/')
         );
 
         $pathVariables = $request->getPathVariables();
         $queryParams = $request->getQueryParams();
         if (is_array($pathVariables) === true) {
-            $url .= '/' . urlencode(implode($pathVariables));
+            $url = rtrim($url, '/');
+            $url .= '/' . implode('/', $pathVariables);
         }
         if (is_array($queryParams) && count($queryParams) > 0) {
             $url .= '?' . http_build_query($queryParams);
@@ -54,8 +55,8 @@ abstract class AbstractEndpoint
     }
 
     /**
-     * @throws ClientExceptionInterface
      * @throws NotAuthorizedException
+     * @throws GuzzleException
      */
     protected function sendRequest(RequestInterface $request): ResponseInterface
     {
@@ -67,14 +68,20 @@ abstract class AbstractEndpoint
             );
         }
 
-        $response = $this->client->getHttpClient()->sendRequest($request);
-        if ($response->getStatusCode() === 401) {
-            throw new NotAuthorizedException(
-                'Not authorized',
-                1626717511,
-                null,
-                $response
-            );
+        try {
+            $response = $this->client->getHttpClient()->send($request);
+        } catch (GuzzleException $e) {
+            /*
+             * API seems to respond with 404 when no authentication token is given but needed.
+             * When token is given but invalid, API responds with 401.
+             */
+            if (($accessToken === null && $e->getCode() === 404) || $e->getCode() === 401) {
+                throw new NotAuthorizedException(
+                    'Not authorized',
+                    1626717511,
+                );
+            }
+            throw $e;
         }
 
         return $response;

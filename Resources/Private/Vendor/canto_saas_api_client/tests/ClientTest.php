@@ -13,8 +13,8 @@ namespace Ecentral\CantoSaasApiClient\Tests;
 
 use Ecentral\CantoSaasApiClient\Client;
 use Ecentral\CantoSaasApiClient\ClientOptions;
+use GuzzleHttp\ClientInterface;
 use PHPUnit\Framework\TestCase;
-use Psr\Http\Client\ClientInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 

@@ -13,45 +13,71 @@ namespace Ecentral\CantoSaasApiClient\Endpoint;
 
 use Ecentral\CantoSaasApiClient\Endpoint\Authorization\NotAuthorizedException;
 use Ecentral\CantoSaasApiClient\Http\InvalidResponseException;
+use Ecentral\CantoSaasApiClient\Http\LibraryTree\GetDetailsRequest;
+use Ecentral\CantoSaasApiClient\Http\LibraryTree\GetDetailsResponse;
 use Ecentral\CantoSaasApiClient\Http\LibraryTree\GetTreeRequest;
 use Ecentral\CantoSaasApiClient\Http\LibraryTree\GetTreeResponse;
-use Ecentral\CantoSaasApiClient\Http\LibraryTree\ListContentRequest;
-use Ecentral\CantoSaasApiClient\Http\LibraryTree\ListContentResponse;
+use Ecentral\CantoSaasApiClient\Http\LibraryTree\ListAlbumContentRequest;
+use Ecentral\CantoSaasApiClient\Http\LibraryTree\ListAlbumContentResponse;
+use Ecentral\CantoSaasApiClient\Http\LibraryTree\SearchFolderRequest;
+use Ecentral\CantoSaasApiClient\Http\LibraryTree\SearchFolderResponse;
+use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Psr7\Request;
-use Psr\Http\Client\ClientExceptionInterface;
 
 class LibraryTree extends AbstractEndpoint
 {
     /**
-     * @throws ClientExceptionInterface
      * @throws InvalidResponseException
      * @throws NotAuthorizedException
      */
-    public function listContent(ListContentRequest $request): ListContentResponse
+    public function searchFolderContent(SearchFolderRequest $request): SearchFolderResponse
     {
         $uri = $this->buildRequestUrl('folder', $request);
         $httpRequest = new Request('GET', $uri);
 
-        $response = $this->sendRequest($httpRequest);
-
-        if ($response->getStatusCode() !== 200) {
+        try {
+            $response = $this->sendRequest($httpRequest);
+        } catch (GuzzleException $e) {
             throw new InvalidResponseException(
                 sprintf(
                     'Invalid http status code received. Expected 200, got %s.',
-                    $response->getStatusCode()
+                    $e->getCode()
                 ),
                 1626717610,
-                null,
-                $response
+                $e
             );
         }
 
-        return new ListContentResponse($response);
+        return new SearchFolderResponse($response);
     }
 
     /**
      * @throws InvalidResponseException
-     * @throws ClientExceptionInterface
+     * @throws NotAuthorizedException
+     */
+    public function listAlbumContent(ListAlbumContentRequest $request): ListAlbumContentResponse
+    {
+        $uri = $this->buildRequestUrl('album', $request);
+        $httpRequest = new Request('GET', $uri);
+
+        try {
+            $response = $this->sendRequest($httpRequest);
+        } catch (GuzzleException $e) {
+            throw new InvalidResponseException(
+                sprintf(
+                    'Invalid http status code received. Expected 200, got %s.',
+                    $e->getCode()
+                ),
+                1626717610,
+                $e
+            );
+        }
+
+        return new ListAlbumContentResponse($response);
+    }
+
+    /**
+     * @throws InvalidResponseException
      * @throws NotAuthorizedException
      */
     public function getTree(GetTreeRequest $request): GetTreeResponse
@@ -59,20 +85,48 @@ class LibraryTree extends AbstractEndpoint
         $uri = $this->buildRequestUrl('tree', $request);
         $httpRequest = new Request('GET', $uri);
 
-        $response = $this->sendRequest($httpRequest);
-
-        if ($response->getStatusCode() !== 200) {
+        try {
+            $response = $this->sendRequest($httpRequest);
+        } catch (GuzzleException $e) {
             throw new InvalidResponseException(
                 sprintf(
                     'Invalid http status code received. Expected 200, got %s.',
-                    $response->getStatusCode()
+                    $e->getCode()
                 ),
                 1626717610,
-                null,
-                $response
+                $e
             );
         }
 
         return new GetTreeResponse($response);
+    }
+
+    /**
+     * @throws InvalidResponseException
+     * @throws NotAuthorizedException
+     */
+    public function getDetails(GetDetailsRequest $request): GetDetailsResponse
+    {
+        if ($request->getType() === GetDetailsRequest::TYPE_FOLDER) {
+            $uri = $this->buildRequestUrl('info/folder', $request);
+        } else {
+            $uri = $this->buildRequestUrl('info/album', $request);
+        }
+        $httpRequest = new Request('GET', $uri);
+
+        try {
+            $response = $this->sendRequest($httpRequest);
+        } catch (GuzzleException $e) {
+            throw new InvalidResponseException(
+                sprintf(
+                    'Invalid http status code received. Expected 200, got %s.',
+                    $e->getCode()
+                ),
+                1626717610,
+                $e
+            );
+        }
+
+        return new GetDetailsResponse($response);
     }
 }

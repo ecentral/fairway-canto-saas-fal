@@ -16,7 +16,7 @@ use Ecentral\CantoSaasApiClient\Endpoint\Authorization\OAuth2;
 use Ecentral\CantoSaasApiClient\Endpoint\LibraryTree;
 use Ecentral\CantoSaasApiClient\Http\Authorization\OAuth2Request;
 use Ecentral\CantoSaasApiClient\Http\Authorization\OAuth2Response;
-use Psr\Http\Client\ClientInterface;
+use GuzzleHttp\ClientInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 

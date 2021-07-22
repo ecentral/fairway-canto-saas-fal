@@ -15,9 +15,9 @@ use Ecentral\CantoSaasApiClient\Endpoint\AbstractEndpoint;
 use Ecentral\CantoSaasApiClient\Http\Authorization\OAuth2Request;
 use Ecentral\CantoSaasApiClient\Http\Authorization\OAuth2Response;
 use Ecentral\CantoSaasApiClient\Http\RequestInterface;
+use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Uri;
-use Psr\Http\Client\ClientExceptionInterface;
 
 final class OAuth2 extends AbstractEndpoint
 {
@@ -34,23 +34,11 @@ final class OAuth2 extends AbstractEndpoint
 
         try {
             $response = $this->sendRequest($httpRequest);
-        } catch (ClientExceptionInterface $e) {
+        } catch (GuzzleException $e) {
             throw new AuthorizationFailedException(
                 $e->getMessage(),
                 1626447895,
                 $e
-            );
-        }
-
-        if ($response->getStatusCode() !== 200) {
-            $response->getBody()->rewind();
-            throw new AuthorizationFailedException(
-                sprintf(
-                    'Could not authenticate with given config. Response status code: %s. Response text: %s',
-                    $response->getStatusCode(),
-                    $response->getBody()->getContents()
-                ),
-                1626437133
             );
         }
 
@@ -60,7 +48,7 @@ final class OAuth2 extends AbstractEndpoint
     protected function buildRequestUrl(string $path, RequestInterface $request): Uri
     {
         $url = sprintf(
-            'https://auth.%s/oauth/api/oauth2/%s',
+            'https://oauth.%s/oauth/api/oauth2/%s',
             $this->getClient()->getOptions()->getCantoDomain(),
             urlencode(trim($path, '/'))
         );
