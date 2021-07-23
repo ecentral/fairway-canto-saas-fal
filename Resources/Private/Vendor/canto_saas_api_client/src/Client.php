@@ -11,7 +11,9 @@ declare(strict_types=1);
 
 namespace Ecentral\CantoSaasApiClient;
 
+use Ecentral\CantoSaasApiClient\Endpoint\Asset;
 use Ecentral\CantoSaasApiClient\Endpoint\Authorization\OAuth2;
+use Ecentral\CantoSaasApiClient\Endpoint\LibraryTree;
 use Ecentral\CantoSaasApiClient\Http\Authorization\OAuth2Request;
 use Ecentral\CantoSaasApiClient\Http\Authorization\OAuth2Response;
 use Psr\Http\Client\ClientInterface;
@@ -78,6 +80,16 @@ class Client
         $this->setAccessToken($response->getAccessToken());
 
         return $response;
+    }
+
+    public function asset(): Asset
+    {
+        return new Asset($this);
+    }
+
+    public function libraryTree(): LibraryTree
+    {
+        return new LibraryTree($this);
     }
 
     protected function buildHttpClient(): ClientInterface

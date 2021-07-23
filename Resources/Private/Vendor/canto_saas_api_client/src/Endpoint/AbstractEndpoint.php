@@ -12,6 +12,7 @@ declare(strict_types=1);
 namespace Ecentral\CantoSaasApiClient\Endpoint;
 
 use Ecentral\CantoSaasApiClient\Client;
+use Ecentral\CantoSaasApiClient\Endpoint\Authorization\NotAuthorizedException;
 use GuzzleHttp\Psr7\Uri;
 use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Http\Message\RequestInterface;
@@ -45,7 +46,7 @@ abstract class AbstractEndpoint
         if (is_array($pathVariables) === true) {
             $url .= '/' . urlencode(implode($pathVariables));
         }
-        if (count($queryParams) > 0) {
+        if (is_array($queryParams) && count($queryParams) > 0) {
             $url .= '?' . http_build_query($queryParams);
         }
 
@@ -54,6 +55,7 @@ abstract class AbstractEndpoint
 
     /**
      * @throws ClientExceptionInterface
+     * @throws NotAuthorizedException
      */
     protected function sendRequest(RequestInterface $request): ResponseInterface
     {
@@ -65,6 +67,16 @@ abstract class AbstractEndpoint
             );
         }
 
-        return $this->client->getHttpClient()->sendRequest($request);
+        $response = $this->client->getHttpClient()->sendRequest($request);
+        if ($response->getStatusCode() === 401) {
+            throw new NotAuthorizedException(
+                'Not authorized',
+                1626717511,
+                null,
+                $response
+            );
+        }
+
+        return $response;
     }
 }

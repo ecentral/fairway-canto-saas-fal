@@ -26,7 +26,9 @@ abstract class Response implements \Ecentral\CantoSaasApiClient\Http\ResponseInt
         if (strlen($content) === 0) {
             throw new InvalidResponseException(
                 'Empty response received',
-                1626434956
+                1626434956,
+                null,
+                $response
             );
         }
 
@@ -36,7 +38,8 @@ abstract class Response implements \Ecentral\CantoSaasApiClient\Http\ResponseInt
             throw new InvalidResponseException(
                 'Invalid json response received',
                 1626434988,
-                $e
+                $e,
+                $response
             );
         }
 
