@@ -16,8 +16,10 @@ use Ecentral\CantoSaasApiClient\ClientOptions;
 use Ecentral\CantoSaasApiClient\Endpoint\Asset;
 use Ecentral\CantoSaasApiClient\Http\Asset\BatchUpdatePropertiesRequest;
 use GuzzleHttp\Client as HttpClient;
+use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -46,7 +48,13 @@ class AssetTest extends TestCase
     {
         self::expectExceptionCode(1626717511);
 
-        $mockHandler = new MockHandler([new Response(401, [], 'success')]);
+        $mockHandler = new MockHandler([
+            new RequestException(
+                'Error Communicating with Server',
+                new Request('PUT', 'test'),
+                new Response(401)
+            )
+        ]);
         $clientMock = $this->buildClientMock($mockHandler);
 
         $assetEndpoint = new Asset($clientMock);
@@ -60,7 +68,13 @@ class AssetTest extends TestCase
     {
         self::expectExceptionCode(1626717610);
 
-        $mockHandler = new MockHandler([new Response(400, [], 'success')]);
+        $mockHandler = new MockHandler([
+            new RequestException(
+                'Error Communicating with Server',
+                new Request('PUT', 'test'),
+                new Response(400, [], 'success')
+            )
+        ]);
         $clientMock = $this->buildClientMock($mockHandler);
 
         $assetEndpoint = new Asset($clientMock);

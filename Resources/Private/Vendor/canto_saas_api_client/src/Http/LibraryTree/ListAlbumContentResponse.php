@@ -15,7 +15,7 @@ use Ecentral\CantoSaasApiClient\Http\InvalidResponseException;
 use Ecentral\CantoSaasApiClient\Http\Response;
 use Psr\Http\Message\ResponseInterface;
 
-class ListContentResponse extends Response
+class ListAlbumContentResponse extends Response
 {
     protected array $facets;
 
@@ -39,9 +39,9 @@ class ListContentResponse extends Response
         $responseData = $this->parseResponse($response);
 
         $this->facets = $responseData['facets'];
-        $this->results = $responseData['results'];
+        $this->results = $responseData['results'] ?? [];
         $this->limit = $responseData['limit'];
-        $this->found = $responseData['found'];
+        $this->found = $responseData['found'] ?? 0;
         $this->sortBy = $responseData['sortBy'];
         $this->sortDirection = $responseData['sortDirection'];
         $this->matchExpr = $responseData['matchExpr'];

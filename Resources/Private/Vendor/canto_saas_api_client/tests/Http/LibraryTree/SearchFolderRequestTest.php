@@ -11,17 +11,17 @@ declare(strict_types=1);
 
 namespace Ecentral\CantoSaasApiClient\Tests\Http\LibraryTree;
 
-use Ecentral\CantoSaasApiClient\Http\LibraryTree\ListContentRequest;
+use Ecentral\CantoSaasApiClient\Http\LibraryTree\SearchFolderRequest;
 use PHPUnit\Framework\TestCase;
 
-class ListContentRequestTest extends TestCase
+class SearchFolderRequestTest extends TestCase
 {
     /**
      * @test
      */
     public function createRequestWithDefaultConfig(): void
     {
-        $request = new ListContentRequest('test');
+        $request = new SearchFolderRequest('test');
         $expected = [
             'keyword' => '',
             'scheme' => '',
@@ -57,7 +57,7 @@ class ListContentRequestTest extends TestCase
     {
         self::expectErrorMessageMatches('/^Too few arguments/');
 
-        new ListContentRequest();
+        new SearchFolderRequest();
     }
 
     /**
@@ -65,7 +65,7 @@ class ListContentRequestTest extends TestCase
      */
     public function setKeyword(): void
     {
-        $request = new ListContentRequest('test');
+        $request = new SearchFolderRequest('test');
         $request->setKeyword('photo');
 
         self::assertSame('photo', $request->getQueryParams()['keyword']);
@@ -76,7 +76,7 @@ class ListContentRequestTest extends TestCase
      */
     public function setScheme(): void
     {
-        $request = new ListContentRequest('test');
+        $request = new SearchFolderRequest('test');
         $request->setScheme('image|video');
 
         self::assertSame('image|video', $request->getQueryParams()['scheme']);
@@ -87,7 +87,7 @@ class ListContentRequestTest extends TestCase
      */
     public function setTags(): void
     {
-        $request = new ListContentRequest('test');
+        $request = new SearchFolderRequest('test');
         $request->setTags('tag1|tag2+tag3');
 
         self::assertSame('tag1|tag2+tag3', $request->getQueryParams()['tags']);
@@ -98,7 +98,7 @@ class ListContentRequestTest extends TestCase
      */
     public function setKeywords(): void
     {
-        $request = new ListContentRequest('test');
+        $request = new SearchFolderRequest('test');
         $request->setKeywords('k1|k2+k3');
 
         self::assertSame('k1|k2+k3', $request->getQueryParams()['keywords']);
@@ -109,7 +109,7 @@ class ListContentRequestTest extends TestCase
      */
     public function setApproval(): void
     {
-        $request = new ListContentRequest('test');
+        $request = new SearchFolderRequest('test');
         $request->setApproval('approved|pending');
 
         self::assertSame('approved|pending', $request->getQueryParams()['approval']);
@@ -120,7 +120,7 @@ class ListContentRequestTest extends TestCase
      */
     public function setOwner(): void
     {
-        $request = new ListContentRequest('test');
+        $request = new SearchFolderRequest('test');
         $request->setOwner('test@example.tld');
 
         self::assertSame('test@example.tld', $request->getQueryParams()['owner']);
@@ -131,7 +131,7 @@ class ListContentRequestTest extends TestCase
      */
     public function setFileSize(): void
     {
-        $request = new ListContentRequest('test');
+        $request = new SearchFolderRequest('test');
         $request->setFileSize(10, 10000);
 
         self::assertSame('10..10000', $request->getQueryParams()['fileSize']);
@@ -142,7 +142,7 @@ class ListContentRequestTest extends TestCase
      */
     public function setCreated(): void
     {
-        $request = new ListContentRequest('test');
+        $request = new SearchFolderRequest('test');
         $request->setCreated(1626672536, 1626772536);
 
         self::assertSame('1626672536..1626772536', $request->getQueryParams()['created']);
@@ -153,7 +153,7 @@ class ListContentRequestTest extends TestCase
      */
     public function setCreatedTime(): void
     {
-        $request = new ListContentRequest('test');
+        $request = new SearchFolderRequest('test');
         $request->setCreatedTime(1626672536, 1626772536);
 
         self::assertSame('1626672536..1626772536', $request->getQueryParams()['createdTime']);
@@ -164,7 +164,7 @@ class ListContentRequestTest extends TestCase
      */
     public function setUploadedTime(): void
     {
-        $request = new ListContentRequest('test');
+        $request = new SearchFolderRequest('test');
         $request->setUploadedTime(1626672536, 1626772536);
 
         self::assertSame('1626672536..1626772536', $request->getQueryParams()['uploadedTime']);
@@ -175,7 +175,7 @@ class ListContentRequestTest extends TestCase
      */
     public function setLastModified(): void
     {
-        $request = new ListContentRequest('test');
+        $request = new SearchFolderRequest('test');
         $request->setLastModified(1626672536, 1626772536);
 
         self::assertSame('1626672536..1626772536', $request->getQueryParams()['lastModified']);
@@ -186,7 +186,7 @@ class ListContentRequestTest extends TestCase
      */
     public function setDimension(): void
     {
-        $request = new ListContentRequest('test');
+        $request = new SearchFolderRequest('test');
         $request->setDimension(300, 2000);
 
         self::assertSame('300..2000', $request->getQueryParams()['dimension']);
@@ -197,7 +197,7 @@ class ListContentRequestTest extends TestCase
      */
     public function setResolution(): void
     {
-        $request = new ListContentRequest('test');
+        $request = new SearchFolderRequest('test');
         $request->setResolution(72, 300);
 
         self::assertSame('72..300', $request->getQueryParams()['resolution']);
@@ -208,7 +208,7 @@ class ListContentRequestTest extends TestCase
      */
     public function setOrientation(): void
     {
-        $request = new ListContentRequest('test');
+        $request = new SearchFolderRequest('test');
         $request->setOrientation('square');
 
         self::assertSame('square', $request->getQueryParams()['orientation']);
@@ -219,7 +219,7 @@ class ListContentRequestTest extends TestCase
      */
     public function setDuration(): void
     {
-        $request = new ListContentRequest('test');
+        $request = new SearchFolderRequest('test');
         $request->setDuration(30, 600);
 
         self::assertSame('30..600', $request->getQueryParams()['duration']);
@@ -230,7 +230,7 @@ class ListContentRequestTest extends TestCase
      */
     public function setPageNumber(): void
     {
-        $request = new ListContentRequest('test');
+        $request = new SearchFolderRequest('test');
         $request->setPageNumber(1, 5);
 
         self::assertSame('1..5', $request->getQueryParams()['pageNumber']);
@@ -241,7 +241,7 @@ class ListContentRequestTest extends TestCase
      */
     public function setSortBy(): void
     {
-        $request = new ListContentRequest('test');
+        $request = new SearchFolderRequest('test');
         $request->setSortBy('name');
 
         self::assertSame('name', $request->getQueryParams()['sortBy']);
@@ -252,7 +252,7 @@ class ListContentRequestTest extends TestCase
      */
     public function setSortDirection(): void
     {
-        $request = new ListContentRequest('test');
+        $request = new SearchFolderRequest('test');
         $request->setSortDirection('ascending');
 
         self::assertSame('ascending', $request->getQueryParams()['sortDirection']);
@@ -263,7 +263,7 @@ class ListContentRequestTest extends TestCase
      */
     public function setLimit(): void
     {
-        $request = new ListContentRequest('test');
+        $request = new SearchFolderRequest('test');
         $request->setLimit(50);
 
         self::assertSame(50, $request->getQueryParams()['limit']);
@@ -274,7 +274,7 @@ class ListContentRequestTest extends TestCase
      */
     public function setStart(): void
     {
-        $request = new ListContentRequest('test');
+        $request = new SearchFolderRequest('test');
         $request->setStart(5);
 
         self::assertSame(5, $request->getQueryParams()['start']);
@@ -285,7 +285,7 @@ class ListContentRequestTest extends TestCase
      */
     public function setExactMatch(): void
     {
-        $request = new ListContentRequest('test');
+        $request = new SearchFolderRequest('test');
         $request->setExactMatch(true);
 
         self::assertSame('true', $request->getQueryParams()['exactMatch']);

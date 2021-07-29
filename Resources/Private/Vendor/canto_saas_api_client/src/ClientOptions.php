@@ -11,8 +11,8 @@ declare(strict_types=1);
 
 namespace Ecentral\CantoSaasApiClient;
 
+use GuzzleHttp\ClientInterface;
 use JetBrains\PhpStorm\ArrayShape;
-use Psr\Http\Client\ClientInterface;
 use Psr\Log\LoggerInterface;
 
 class ClientOptions

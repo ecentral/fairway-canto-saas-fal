@@ -55,26 +55,14 @@ class OAuth2Test extends TestCase
      */
     public function obtainAccessTokenWithInvalidHttpResponseStatusCode(): void
     {
-        self::expectExceptionCode(1626437133);
-
-        $mockHandler = new MockHandler([
-            new Response(400)
-        ]);
-        $clientMock = $this->buildClientMock($mockHandler);
-
-        $oAuth2 = new OAuth2($clientMock);
-        $oAuth2->obtainAccessToken($this->buildRequestMock());
-    }
-
-    /**
-     * @test
-     */
-    public function obtainAccessTokenWithFailedRequest(): void
-    {
         self::expectExceptionCode(1626447895);
 
         $mockHandler = new MockHandler([
-            new RequestException('Error Communicating with Server', new Request('GET', 'test'))
+            new RequestException(
+                'Error Communicating with Server',
+                new Request('POST', 'test'),
+                new Response(400)
+            )
         ]);
         $clientMock = $this->buildClientMock($mockHandler);
 
