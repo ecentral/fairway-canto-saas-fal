@@ -23,7 +23,7 @@ class CantoUtility
 
     public static function buildCombinedIdentifier(string $scheme, string $id): string
     {
-        return sprintf('%s|%s', $scheme, $id);
+        return sprintf('%s#%s', $scheme, $id);
     }
 
     /**
@@ -31,7 +31,7 @@ class CantoUtility
      */
     public static function getSchemeFromCombinedIdentifier(string $combinedIdentifier): string
     {
-        $identifierParts = explode('|', $combinedIdentifier);
+        $identifierParts = explode('#', $combinedIdentifier);
         if (count($identifierParts) !== 2) {
             throw new \InvalidArgumentException(
                 'Invalid combined identifier given.',
@@ -46,7 +46,7 @@ class CantoUtility
      */
     public static function getIdFromCombinedIdentifier(string $combinedIdentifier): string
     {
-        $identifierParts = explode('|', $combinedIdentifier);
+        $identifierParts = explode('#', $combinedIdentifier);
         if (count($identifierParts) !== 2) {
             throw new \InvalidArgumentException(
                 'Invalid combined identifier given.',
