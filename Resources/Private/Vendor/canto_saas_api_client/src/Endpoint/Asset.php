@@ -15,6 +15,8 @@ use Ecentral\CantoSaasApiClient\Http\Asset\BatchUpdatePropertiesRequest;
 use Ecentral\CantoSaasApiClient\Http\Asset\BatchUpdatePropertiesResponse;
 use Ecentral\CantoSaasApiClient\Http\Asset\GetContentDetailsRequest;
 use Ecentral\CantoSaasApiClient\Http\Asset\GetContentDetailsResponse;
+use Ecentral\CantoSaasApiClient\Http\Asset\SearchRequest;
+use Ecentral\CantoSaasApiClient\Http\Asset\SearchResponse;
 use Ecentral\CantoSaasApiClient\Http\InvalidRequestException;
 use Ecentral\CantoSaasApiClient\Http\InvalidResponseException;
 use GuzzleHttp\Exception\GuzzleException;
@@ -23,6 +25,31 @@ use Psr\Http\Message\ResponseInterface;
 
 class Asset extends AbstractEndpoint
 {
+    /**
+     * @throws InvalidResponseException
+     * @throws Authorization\NotAuthorizedException
+     */
+    public function search(SearchRequest $request): SearchResponse
+    {
+        $uri = $this->buildRequestUrl('search', $request);
+        $httpRequest = new Request('GET', $uri);
+
+        try {
+            $response = $this->sendRequest($httpRequest);
+        } catch (GuzzleException $e) {
+            throw new InvalidResponseException(
+                sprintf(
+                    'Invalid http status code received. Expected 200, got %s.',
+                    $e->getCode()
+                ),
+                1627649307,
+                $e
+            );
+        }
+
+        return new SearchResponse($response);
+    }
+
     /**
      * @throws InvalidResponseException
      * @throws Authorization\NotAuthorizedException
