@@ -19,6 +19,7 @@ use Ecentral\CantoSaasApiClient\Http\InvalidRequestException;
 use Ecentral\CantoSaasApiClient\Http\InvalidResponseException;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Psr7\Request;
+use Psr\Http\Message\ResponseInterface;
 
 class Asset extends AbstractEndpoint
 {
@@ -71,5 +72,26 @@ class Asset extends AbstractEndpoint
         }
 
         return new GetContentDetailsResponse($response);
+    }
+
+    /**
+     * @throws InvalidResponseException
+     * @throws Authorization\NotAuthorizedException
+     */
+    public function getAuthorizedUrlContent(string $uri): ResponseInterface
+    {
+        $httpRequest = new Request('GET', $uri);
+        try {
+            return $this->sendRequest($httpRequest);
+        } catch (GuzzleException $e) {
+            throw new InvalidResponseException(
+                sprintf(
+                    'Invalid http status code received. Expected 200, got %s.',
+                    $e->getCode()
+                ),
+                1627544102,
+                $e
+            );
+        }
     }
 }

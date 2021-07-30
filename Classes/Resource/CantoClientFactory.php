@@ -9,15 +9,16 @@ declare(strict_types=1);
  * LICENSE file that was distributed with this source code.
  */
 
-namespace Ecentral\CantoSaasFal\Resource\Driver;
+namespace Ecentral\CantoSaasFal\Resource;
 
 use Ecentral\CantoSaasApiClient\Client;
 use Ecentral\CantoSaasApiClient\ClientOptions;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 use TYPO3\CMS\Core\Http\Client\GuzzleClientFactory;
+use TYPO3\CMS\Core\SingletonInterface;
 
-class CantoClientFactory implements LoggerAwareInterface
+class CantoClientFactory implements LoggerAwareInterface, SingletonInterface
 {
     use LoggerAwareTrait;
 
