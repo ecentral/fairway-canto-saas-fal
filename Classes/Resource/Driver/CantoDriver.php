@@ -20,6 +20,7 @@ use Ecentral\CantoSaasFal\Utility\CantoUtility;
 use TYPO3\CMS\Core\Resource\Exception\FolderDoesNotExistException;
 use TYPO3\CMS\Core\Resource\ResourceStorage;
 use TYPO3\CMS\Core\Utility\ArrayUtility;
+use TYPO3\CMS\Core\Utility\Exception\MissingArrayPathException;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\PathUtility;
 
@@ -463,7 +464,10 @@ class CantoDriver extends AbstractReadOnlyDriver
                 CantoUtility::SCHEME_FOLDER
             );
             $idPath = implode('/', $idPathSegments);
-            $folderTree = ArrayUtility::getValueByPath($folderTree, $idPath);
+            try {
+                $folderTree = ArrayUtility::getValueByPath($folderTree, $idPath);
+            } catch (MissingArrayPathException $e) {
+            }
         }
         if ($recursive) {
             $iterator = new \RecursiveIteratorIterator(new \RecursiveArrayIterator($folderTree), \RecursiveIteratorIterator::SELF_FIRST);
