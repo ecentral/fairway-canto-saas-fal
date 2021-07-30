@@ -205,8 +205,21 @@ class CantoDriver extends AbstractReadOnlyDriver
      */
     public function folderExistsInFolder($folderName, $folderIdentifier): bool
     {
-        // TODO: Implement folderExistsInFolder() method.
-        return true;
+        if ($folderName === $folderIdentifier) {
+            return true;
+        }
+        $scheme = CantoUtility::getSchemeFromCombinedIdentifier($folderIdentifier);
+        $explicitFolderIdentifier = CantoUtility::getIdFromCombinedIdentifier($folderIdentifier);
+        try {
+            $folderData = $this->cantoRepository->getFolderDetails($scheme, $explicitFolderIdentifier);
+        } catch (FolderDoesNotExistException $e) {
+            return false;
+        }
+        $subFolders = str_getcsv($folderData['idPath'], '/');
+        return in_array(
+            CantoUtility::getIdFromCombinedIdentifier($folderName),
+            $subFolders
+        );
     }
 
     /**
@@ -451,6 +464,10 @@ class CantoDriver extends AbstractReadOnlyDriver
             );
             $idPath = implode('/', $idPathSegments);
             $folderTree = ArrayUtility::getValueByPath($folderTree, $idPath);
+        }
+        if ($recursive) {
+            $iterator = new \RecursiveIteratorIterator(new \RecursiveArrayIterator($folderTree), \RecursiveIteratorIterator::SELF_FIRST);
+            $folderTree = iterator_to_array($iterator, true);
         }
 
         // $c is the counter for how many items we still have to fetch (-1 is unlimited)
