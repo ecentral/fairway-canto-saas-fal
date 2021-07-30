@@ -28,8 +28,8 @@ class DataHandlerHooks
     public function __construct(
         Registry $registry,
         FrontendInterface $cantoFolderCache,
-        FrontendInterface $cantoFileCache)
-    {
+        FrontendInterface $cantoFileCache
+    ) {
         $this->registry = $registry;
         $this->cantoFolderCache = $cantoFolderCache;
         $this->cantoFileCache = $cantoFileCache;

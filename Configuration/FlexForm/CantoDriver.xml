@@ -92,6 +92,38 @@
                     </config>
                 </TCEforms>
             </scope>
+            <rootFolderScheme>
+                <TCEforms>
+                    <label>LLL:EXT:canto_saas_fal/Resources/Private/Language/locallang_be.xlf:sys_file_storage.cantoDriverFlexform_rootFolderScheme</label>
+                    <config>
+                        <type>select</type>
+                        <renderType>selectSingle</renderType>
+                        <items type="array">
+                            <numIndex index="0" type="array">
+                                <numIndex index="0">Folder</numIndex>
+                                <numIndex index="1">folder</numIndex>
+                            </numIndex>
+                            <numIndex index="1" type="array">
+                                <numIndex index="0">Album</numIndex>
+                                <numIndex index="1">album</numIndex>
+                            </numIndex>
+                        </items>
+                        <default>folder</default>
+                    </config>
+                </TCEforms>
+            </rootFolderScheme>
+            <rootFolder>
+                <TCEforms>
+                    <label>LLL:EXT:canto_saas_fal/Resources/Private/Language/locallang_be.xlf:sys_file_storage.cantoDriverFlexform_rootFolder</label>
+                    <description>LLL:EXT:canto_saas_fal/Resources/Private/Language/locallang_be.xlf:sys_file_storage.cantoDriverFlexform_rootFolder.description</description>
+                    <config>
+                        <type>input</type>
+                        <size>6</size>
+                        <eval>alphanum,upper,trim</eval>
+                        <placeholder>VPA4H</placeholder>
+                    </config>
+                </TCEforms>
+            </rootFolder>
         </el>
     </ROOT>
 </T3DataStructure>

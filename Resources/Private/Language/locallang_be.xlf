@@ -21,6 +21,15 @@
 			<trans-unit id="sys_file_storage.cantoDriverFlexform_scope" resname="sys_file_storage.cantoDriverFlexform_scope">
 				<source>Scope</source>
 			</trans-unit>
+			<trans-unit id="sys_file_storage.cantoDriverFlexform_rootFolderScheme" resname="sys_file_storage.cantoDriverFlexform_rootFolderScheme">
+				<source>Root folder scheme</source>
+			</trans-unit>
+			<trans-unit id="sys_file_storage.cantoDriverFlexform_rootFolder" resname="sys_file_storage.cantoDriverFlexform_rootFolder">
+				<source>Root folder</source>
+			</trans-unit>
+			<trans-unit id="sys_file_storage.cantoDriverFlexform_rootFolder.description" resname="sys_file_storage.cantoDriverFlexform_rootFolder.description">
+				<source>Value must be folder identifier (not album, e.g. VPA4H. Default is Canto root directory</source>
+			</trans-unit>
 		</body>
 	</file>
 </xliff>

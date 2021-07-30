@@ -37,10 +37,7 @@ class CantoDriver extends AbstractReadOnlyDriver
     {
         parent::__construct($configuration);
         $this->capabilities = ResourceStorage::CAPABILITY_BROWSABLE;
-        $this->rootFolderIdentifier = CantoUtility::buildCombinedIdentifier(
-            CantoUtility::SCHEME_FOLDER,
-            self::ROOT_FOLDER
-        );
+        $this->rootFolderIdentifier = $this->buildRootFolderIdentifier();
     }
 
     /**
@@ -530,6 +527,22 @@ class CantoDriver extends AbstractReadOnlyDriver
                 return SearchFolderRequest::SORT_BY_SIZE;
         }
         return SearchFolderRequest::SORT_BY_TIME;
+    }
+
+    protected function buildRootFolderIdentifier(): string
+    {
+        $rootFolderScheme = $this->configuration['rootFolderScheme'];
+        $rootFolder = $this->configuration['rootFolder'];
+        if (CantoUtility::isFolder($rootFolderScheme) && $rootFolder !== '') {
+            return CantoUtility::buildCombinedIdentifier(
+                $rootFolderScheme,
+                $rootFolder
+            );
+        }
+        return CantoUtility::buildCombinedIdentifier(
+            CantoUtility::SCHEME_FOLDER,
+            self::ROOT_FOLDER
+        );
     }
 
     /**
