@@ -31,6 +31,7 @@ use TYPO3\CMS\Core\Utility\PathUtility;
 class CantoRepository
 {
     const REGISTRY_NAMESPACE = 'cantoSaasFal';
+    const CANTO_CACHE_TAG_BLUEPRINT = 'canto_storage_%s';
 
     /**
      * The session token is valid for 30 days.
@@ -51,6 +52,8 @@ class CantoRepository
 
     protected int $storageUid;
 
+    protected string $cantoCacheTag;
+
     public function __construct(
         Registry $registry,
         FrontendInterface $cantoFolderCache,
@@ -68,8 +71,14 @@ class CantoRepository
     {
         $this->driverConfiguration = $driverConfiguration;
         $this->storageUid = $storageUid;
+        $this->cantoCacheTag = sprintf(self::CANTO_CACHE_TAG_BLUEPRINT, $this->storageUid);
         $this->client = $this->buildCantoClient();
         $this->authenticateAgainstCanto();
+    }
+
+    public function getCantoCacheTag(): string
+    {
+        return $this->cantoCacheTag;
     }
 
     public function setSessionTokenValid(int $sessionTokenValid): void
@@ -110,9 +119,7 @@ class CantoRepository
             $this->cantoFolderCache->set(
                 $cacheIdentifier,
                 $result,
-                [
-                    sprintf('canto_storage_%s', $this->storageUid),
-                ]
+                [$this->cantoCacheTag]
             );
         }
     }
@@ -144,9 +151,7 @@ class CantoRepository
             $this->cantoFileCache->set(
                 $cacheIdentifier,
                 $result,
-                [
-                    sprintf('canto_storage_%s', $this->storageUid),
-                ]
+                [$this->cantoCacheTag]
             );
         }
     }
@@ -230,18 +235,21 @@ class CantoRepository
         $cacheIdentifier = sprintf('fulltree_%s', $treeIdentifier);
         if (!$this->cantoFolderCache->has($cacheIdentifier)) {
             try {
-                $response = $this->client->libraryTree()->getTree(new GetTreeRequest());
+                $folderIdentifier = '';
+                if ($this->driverConfiguration['rootFolderScheme'] === CantoUtility::SCHEME_FOLDER
+                    && $this->driverConfiguration['rootFolder'] !== '') {
+                    $folderIdentifier = $this->driverConfiguration['rootFolder'];
+                }
+                $response = $this->client->libraryTree()->getTree(new GetTreeRequest($folderIdentifier));
+                $folderTree = $this->buildFolderTree($response->getResults());
+                $this->cantoFolderCache->set(
+                    $cacheIdentifier,
+                    $folderTree,
+                    [$this->cantoCacheTag]
+                );
             } catch (NotAuthorizedException | InvalidResponseException $e) {
                 return [];
             }
-            $folderTree = $this->buildFolderTree($response->getResults());
-            $this->cantoFolderCache->set(
-                $cacheIdentifier,
-                $folderTree,
-                [
-                    sprintf('canto_storage_%s', $this->storageUid),
-                ]
-            );
         }
         return $this->cantoFolderCache->get($cacheIdentifier);
     }

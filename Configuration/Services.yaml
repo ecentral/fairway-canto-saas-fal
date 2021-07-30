@@ -32,6 +32,14 @@ services:
       - 'sys_file_canto_album'
       - '@TYPO3\CMS\Core\Database\ConnectionPool'
 
+  Ecentral\CantoSaasFal\Command\WarmupCantoCache:
+    calls:
+      - injectStorageRepository: ['@TYPO3\CMS\Core\Resource\StorageRepository']
+      - injectCantoFolderCache: ['@cache.canto_folder']
+    tags:
+      - name: 'console.command'
+        command: 'canto:warmupcache'
+
   Ecentral\CantoSaasFal\Resource\EventListener\HandleMultipleFolders:
     tags:
       - name: event.listener
