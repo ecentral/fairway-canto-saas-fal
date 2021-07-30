@@ -7,11 +7,7 @@ services:
   Ecentral\CantoSaasFal\:
     resource: '../Classes/*'
 
-  Ecentral\CantoSaasFal\Resource\Canto\CantoProxyClient:
-    autowire: false
-
   Ecentral\CantoSaasFal\Hooks\DataHandlerHooks:
-    autowire: false
     public: true
     arguments:
       - '@TYPO3\CMS\Core\Registry'
@@ -19,7 +15,6 @@ services:
       - '@cache.canto_file'
 
   Ecentral\CantoSaasFal\Resource\Repository\CantoRepository:
-    autowire: false
     public: true
     arguments:
       - '@TYPO3\CMS\Core\Registry'
@@ -33,7 +28,6 @@ services:
     public: true
 
   Ecentral\CantoSaasFal\Resource\Repository\CantoAlbumRepository:
-    autowire: false
     arguments:
       - 'sys_file_canto_album'
       - '@TYPO3\CMS\Core\Database\ConnectionPool'

@@ -48,13 +48,15 @@ class CantoDriver extends AbstractReadOnlyDriver
     }
 
     /**
-     * Needs to sty because of interface.
      * @throws AuthorizationFailedException
      */
     public function initialize()
     {
-        $this->cantoRepository = GeneralUtility::makeInstance(CantoRepository::class);
-        $this->cantoRepository->initialize($this->storageUid, $this->configuration);
+        // The check is necessary to prevent an error thrown in Maintenance Admin Tool -> Remove Temporary Assets
+        if (GeneralUtility::getContainer()->has(CantoRepository::class)) {
+            $this->cantoRepository = GeneralUtility::makeInstance(CantoRepository::class);
+            $this->cantoRepository->initialize($this->storageUid, $this->configuration);
+        }
     }
 
     /**
