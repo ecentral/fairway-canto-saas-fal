@@ -18,6 +18,9 @@
 			<trans-unit id="sys_file_storage.cantoDriverFlexform_userId" resname="sys_file_storage.cantoDriverFlexform_userId">
 				<source>User id (email)</source>
 			</trans-unit>
+			<trans-unit id="sys_file_storage.cantoDriverFlexform_scope" resname="sys_file_storage.cantoDriverFlexform_scope">
+				<source>Scope</source>
+			</trans-unit>
 		</body>
 	</file>
 </xliff>

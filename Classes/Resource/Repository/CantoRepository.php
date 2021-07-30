@@ -15,6 +15,7 @@ use Ecentral\CantoSaasApiClient\Client;
 use Ecentral\CantoSaasApiClient\Endpoint\Authorization\AuthorizationFailedException;
 use Ecentral\CantoSaasApiClient\Endpoint\Authorization\NotAuthorizedException;
 use Ecentral\CantoSaasApiClient\Http\Asset\GetContentDetailsRequest;
+use Ecentral\CantoSaasApiClient\Http\Authorization\OAuth2Request;
 use Ecentral\CantoSaasApiClient\Http\InvalidResponseException;
 use Ecentral\CantoSaasApiClient\Http\LibraryTree\GetDetailsRequest;
 use Ecentral\CantoSaasApiClient\Http\LibraryTree\GetTreeRequest;
@@ -29,6 +30,8 @@ use TYPO3\CMS\Core\Utility\PathUtility;
 
 class CantoRepository
 {
+    const REGISTRY_NAMESPACE = 'cantoSaasFal';
+
     /**
      * The session token is valid for 30 days.
      * This property contains the time in seconds, until the token should be renewed.
@@ -264,18 +267,23 @@ class CantoRepository
      */
     protected function authenticateAgainstCanto(): void
     {
-        $accessTokenValid = $this->registry->get('cantoSaasFal', 'accessTokenValidUntil', 0);
-        $accessToken = $this->registry->get('cantoSaasFal', 'accessToken');
+        $accessTokenValidKey = sprintf('accessTokenForStorage%sValidUntil', $this->storageUid);
+        $accessTokenKey = sprintf('accessTokenForStorage%s', $this->storageUid);
+        $accessTokenValid = $this->registry->get(self::REGISTRY_NAMESPACE, $accessTokenValidKey, 0);
+        $accessToken = $this->registry->get(self::REGISTRY_NAMESPACE, $accessTokenKey);
         $now = (new \DateTime())->getTimestamp();
 
         if ($accessToken === null || $accessTokenValid < $now) {
             $accessToken = $this->client
-                ->authorizeWithClientCredentials($this->driverConfiguration['userId'] ?? '')
+                ->authorizeWithClientCredentials(
+                    $this->driverConfiguration['userId'] ?? '',
+                    $this->driverConfiguration['scope'] ?? OAuth2Request::SCOPE_ADMIN
+                )
                 ->getAccessToken();
-            $this->registry->set('cantoSaasFal', 'accessToken', $accessToken);
+            $this->registry->set(self::REGISTRY_NAMESPACE, $accessTokenKey, $accessToken);
             $this->registry->set(
-                'cantoSaasFal',
-                'accessTokenValidUntil',
+                self::REGISTRY_NAMESPACE,
+                $accessTokenValidKey,
                 $now + $this->sessionTokenValid
             );
         }

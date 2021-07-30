@@ -67,12 +67,13 @@ class Client
     /**
      * @throws Endpoint\Authorization\AuthorizationFailedException
      */
-    public function authorizeWithClientCredentials(string $userId = ''): OAuth2Response
+    public function authorizeWithClientCredentials(string $userId = '', string $scope = OAuth2Request::SCOPE_ADMIN): OAuth2Response
     {
         $request = new OAuth2Request();
         $request->setAppId($this->options->getAppId())
             ->setAppSecret($this->options->getAppSecret())
-            ->setRedirectUri($this->options->getRedirectUri());
+            ->setRedirectUri($this->options->getRedirectUri())
+            ->setScope($scope);
         if ($userId !== '') {
             $request->setUserId($userId);
         }

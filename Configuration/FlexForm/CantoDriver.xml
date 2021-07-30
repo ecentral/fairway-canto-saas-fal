@@ -68,6 +68,30 @@
                     </config>
                 </TCEforms>
             </userId>
+            <scope>
+                <TCEforms>
+                    <label>LLL:EXT:canto_saas_fal/Resources/Private/Language/locallang_be.xlf:sys_file_storage.cantoDriverFlexform_scope</label>
+                    <config>
+                        <type>select</type>
+                        <renderType>selectSingle</renderType>
+                        <items type="array">
+                            <numIndex index="0" type="array">
+                                <numIndex index="0">Admin</numIndex>
+                                <numIndex index="1">admin</numIndex>
+                            </numIndex>
+                            <numIndex index="1" type="array">
+                                <numIndex index="0">Contributor</numIndex>
+                                <numIndex index="1">contributor</numIndex>
+                            </numIndex>
+                            <numIndex index="2" type="array">
+                                <numIndex index="0">Consumer</numIndex>
+                                <numIndex index="1">consumer</numIndex>
+                            </numIndex>
+                        </items>
+                        <default>admin</default>
+                    </config>
+                </TCEforms>
+            </scope>
         </el>
     </ROOT>
 </T3DataStructure>

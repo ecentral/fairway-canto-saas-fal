@@ -14,6 +14,7 @@ services:
     autowire: false
     public: true
     arguments:
+      - '@TYPO3\CMS\Core\Registry'
       - '@cache.canto_folder'
       - '@cache.canto_file'
 
