@@ -376,7 +376,7 @@ class CantoDriver extends AbstractReadOnlyDriver
         $sortBy = $this->mapSortBy($sort);
         $sortDirection = $sortRev ? ListAlbumContentRequest::SORT_DIRECTION_DESC
             : ListAlbumContentRequest::SORT_DIRECTION_ASC;
-        $limit = $numberOfItems > 0 ? $numberOfItems : 100;
+        $limit = $numberOfItems > 0 ? $numberOfItems : 99999;
         $results = $this->cantoRepository->getFilesInFolder(
             $explicitFolderIdentifier,
             $start,
