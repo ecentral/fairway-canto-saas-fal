@@ -7,18 +7,14 @@ services:
   Ecentral\CantoSaasFal\:
     resource: '../Classes/*'
 
-  Ecentral\CantoSaasFal\Resource\Canto\CantoProxyClient:
-    autowire: false
-
   Ecentral\CantoSaasFal\Hooks\DataHandlerHooks:
-    autowire: false
     public: true
     arguments:
+      - '@TYPO3\CMS\Core\Registry'
       - '@cache.canto_folder'
       - '@cache.canto_file'
 
   Ecentral\CantoSaasFal\Resource\Repository\CantoRepository:
-    autowire: false
     public: true
     arguments:
       - '@TYPO3\CMS\Core\Registry'
@@ -32,10 +28,17 @@ services:
     public: true
 
   Ecentral\CantoSaasFal\Resource\Repository\CantoAlbumRepository:
-    autowire: false
     arguments:
       - 'sys_file_canto_album'
       - '@TYPO3\CMS\Core\Database\ConnectionPool'
+
+  Ecentral\CantoSaasFal\Command\WarmupCantoCache:
+    calls:
+      - injectStorageRepository: ['@TYPO3\CMS\Core\Resource\StorageRepository']
+      - injectCantoFolderCache: ['@cache.canto_folder']
+    tags:
+      - name: 'console.command'
+        command: 'canto:warmupcache'
 
   Ecentral\CantoSaasFal\Resource\EventListener\HandleMultipleFolders:
     tags:

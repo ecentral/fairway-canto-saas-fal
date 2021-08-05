@@ -15,6 +15,7 @@ $EM_CONF['canto_saas_fal'] = [
     'constraints' => [
         'depends' => [
             'typo3' => '10.4.0-11.3.99',
+            'filemetadata' => '10.4.0-11.3.99',
         ],
     ],
     'state' => 'beta',

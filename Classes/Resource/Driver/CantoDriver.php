@@ -20,6 +20,7 @@ use Ecentral\CantoSaasFal\Utility\CantoUtility;
 use TYPO3\CMS\Core\Resource\Exception\FolderDoesNotExistException;
 use TYPO3\CMS\Core\Resource\ResourceStorage;
 use TYPO3\CMS\Core\Utility\ArrayUtility;
+use TYPO3\CMS\Core\Utility\Exception\MissingArrayPathException;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\PathUtility;
 
@@ -33,31 +34,36 @@ class CantoDriver extends AbstractReadOnlyDriver
 
     protected string $rootFolderIdentifier;
 
+    protected bool $validCantoConfiguration;
+
     public function __construct(array $configuration = [])
     {
         parent::__construct($configuration);
         $this->capabilities = ResourceStorage::CAPABILITY_BROWSABLE;
-        $this->rootFolderIdentifier = CantoUtility::buildCombinedIdentifier(
-            CantoUtility::SCHEME_FOLDER,
-            self::ROOT_FOLDER
-        );
+        $this->rootFolderIdentifier = $this->buildRootFolderIdentifier();
     }
 
-    /**
-     * Needs to sty because of interface.
-     */
     public function processConfiguration()
     {
+        $this->validCantoConfiguration = is_int($this->storageUid)
+            && $this->storageUid > 0
+            && strlen($this->configuration['cantoName'] ?? '') > 0
+            && strlen($this->configuration['cantoDomain'] ?? '') > 0
+            && strlen($this->configuration['appId'] ?? '') > 0
+            && strlen($this->configuration['appSecret'] ?? '') > 0;
     }
 
-    /**
-     * Needs to sty because of interface.
-     * @throws AuthorizationFailedException
-     */
     public function initialize()
     {
-        $this->cantoRepository = GeneralUtility::makeInstance(CantoRepository::class);
-        $this->cantoRepository->initialize($this->storageUid, $this->configuration);
+        // The check is necessary to prevent an error thrown in Maintenance Admin Tool -> Remove Temporary Assets
+        if ($this->validCantoConfiguration && GeneralUtility::getContainer()->has(CantoRepository::class)) {
+            $this->cantoRepository = GeneralUtility::makeInstance(CantoRepository::class);
+            try {
+                $this->cantoRepository->initialize($this->storageUid, $this->configuration);
+            } catch (AuthorizationFailedException $e) {
+                // TODO Show error message in TYPO3 Backend.
+            }
+        }
     }
 
     /**
@@ -206,8 +212,21 @@ class CantoDriver extends AbstractReadOnlyDriver
      */
     public function folderExistsInFolder($folderName, $folderIdentifier): bool
     {
-        // TODO: Implement folderExistsInFolder() method.
-        return true;
+        if ($folderName === $folderIdentifier) {
+            return true;
+        }
+        $scheme = CantoUtility::getSchemeFromCombinedIdentifier($folderIdentifier);
+        $explicitFolderIdentifier = CantoUtility::getIdFromCombinedIdentifier($folderIdentifier);
+        try {
+            $folderData = $this->cantoRepository->getFolderDetails($scheme, $explicitFolderIdentifier);
+        } catch (FolderDoesNotExistException $e) {
+            return false;
+        }
+        $subFolders = str_getcsv($folderData['idPath'], '/');
+        return in_array(
+            CantoUtility::getIdFromCombinedIdentifier($folderName),
+            $subFolders
+        );
     }
 
     /**
@@ -377,7 +396,8 @@ class CantoDriver extends AbstractReadOnlyDriver
         $sortBy = $this->mapSortBy($sort);
         $sortDirection = $sortRev ? ListAlbumContentRequest::SORT_DIRECTION_DESC
             : ListAlbumContentRequest::SORT_DIRECTION_ASC;
-        $limit = $numberOfItems > 0 ? $numberOfItems : 100;
+        $limit = $numberOfItems > 0 ? min($numberOfItems, 1000) : 1000;
+        // TODO Check if there are more that 1000 files and make multiple requests if needed.
         $results = $this->cantoRepository->getFilesInFolder(
             $explicitFolderIdentifier,
             $start,
@@ -451,7 +471,14 @@ class CantoDriver extends AbstractReadOnlyDriver
                 CantoUtility::SCHEME_FOLDER
             );
             $idPath = implode('/', $idPathSegments);
-            $folderTree = ArrayUtility::getValueByPath($folderTree, $idPath);
+            try {
+                $folderTree = ArrayUtility::getValueByPath($folderTree, $idPath);
+            } catch (MissingArrayPathException $e) {
+            }
+        }
+        if ($recursive) {
+            $iterator = new \RecursiveIteratorIterator(new \RecursiveArrayIterator($folderTree), \RecursiveIteratorIterator::SELF_FIRST);
+            $folderTree = iterator_to_array($iterator, true);
         }
 
         // $c is the counter for how many items we still have to fetch (-1 is unlimited)
@@ -530,6 +557,22 @@ class CantoDriver extends AbstractReadOnlyDriver
                 return SearchFolderRequest::SORT_BY_SIZE;
         }
         return SearchFolderRequest::SORT_BY_TIME;
+    }
+
+    protected function buildRootFolderIdentifier(): string
+    {
+        $rootFolderScheme = $this->configuration['rootFolderScheme'] ?? CantoUtility::SCHEME_FOLDER;
+        $rootFolder = $this->configuration['rootFolder'] ?? self::ROOT_FOLDER;
+        if (CantoUtility::isFolder($rootFolderScheme) && $rootFolder !== '') {
+            return CantoUtility::buildCombinedIdentifier(
+                $rootFolderScheme,
+                $rootFolder
+            );
+        }
+        return CantoUtility::buildCombinedIdentifier(
+            CantoUtility::SCHEME_FOLDER,
+            self::ROOT_FOLDER
+        );
     }
 
     /**

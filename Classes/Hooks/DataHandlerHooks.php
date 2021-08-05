@@ -12,17 +12,25 @@ declare(strict_types=1);
 namespace Ecentral\CantoSaasFal\Hooks;
 
 use Ecentral\CantoSaasFal\Resource\Driver\CantoDriver;
+use Ecentral\CantoSaasFal\Resource\Repository\CantoRepository;
 use TYPO3\CMS\Core\Cache\Frontend\FrontendInterface;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
+use TYPO3\CMS\Core\Registry;
 
 class DataHandlerHooks
 {
+    protected Registry $registry;
+
     protected FrontendInterface $cantoFolderCache;
 
     protected FrontendInterface $cantoFileCache;
 
-    public function __construct(FrontendInterface $cantoFolderCache, FrontendInterface $cantoFileCache)
-    {
+    public function __construct(
+        Registry $registry,
+        FrontendInterface $cantoFolderCache,
+        FrontendInterface $cantoFileCache
+    ) {
+        $this->registry = $registry;
         $this->cantoFolderCache = $cantoFolderCache;
         $this->cantoFileCache = $cantoFileCache;
     }
@@ -41,6 +49,7 @@ class DataHandlerHooks
                         $tag = sprintf('canto_storage_%s', $uid);
                         $this->cantoFileCache->flushByTag($tag);
                         $this->cantoFolderCache->flushByTag($tag);
+                        $this->registry->removeAllByNamespace(CantoRepository::REGISTRY_NAMESPACE);
                     }
                 }
             }
