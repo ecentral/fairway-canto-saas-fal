@@ -8,7 +8,7 @@
                     <label>LLL:EXT:canto_saas_fal/Resources/Private/Language/locallang_be.xlf:sys_file_storage.cantoDriverFlexform_appId</label>
                     <config>
                         <type>input</type>
-                        <eval>required</eval>
+                        <eval>required,trim</eval>
                         <size>30</size>
                     </config>
                 </TCEforms>
@@ -18,7 +18,7 @@
                     <label>LLL:EXT:canto_saas_fal/Resources/Private/Language/locallang_be.xlf:sys_file_storage.cantoDriverFlexform_appSecret</label>
                     <config>
                         <type>input</type>
-                        <eval>required</eval>
+                        <eval>required,trim</eval>
                         <size>30</size>
                         <eval>password</eval>
                     </config>
@@ -29,7 +29,7 @@
                     <label>LLL:EXT:canto_saas_fal/Resources/Private/Language/locallang_be.xlf:sys_file_storage.cantoDriverFlexform_cantoName</label>
                     <config>
                         <type>input</type>
-                        <eval>required</eval>
+                        <eval>required,trim</eval>
                         <size>30</size>
                     </config>
                 </TCEforms>
@@ -63,7 +63,7 @@
                     <label>LLL:EXT:canto_saas_fal/Resources/Private/Language/locallang_be.xlf:sys_file_storage.cantoDriverFlexform_userId</label>
                     <config>
                         <type>input</type>
-                        <eval>required</eval>
+                        <eval>trim</eval>
                         <size>30</size>
                     </config>
                 </TCEforms>

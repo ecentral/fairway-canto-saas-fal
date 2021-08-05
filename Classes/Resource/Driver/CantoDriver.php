@@ -34,6 +34,8 @@ class CantoDriver extends AbstractReadOnlyDriver
 
     protected string $rootFolderIdentifier;
 
+    protected bool $validCantoConfiguration;
+
     public function __construct(array $configuration = [])
     {
         parent::__construct($configuration);
@@ -41,22 +43,26 @@ class CantoDriver extends AbstractReadOnlyDriver
         $this->rootFolderIdentifier = $this->buildRootFolderIdentifier();
     }
 
-    /**
-     * Needs to sty because of interface.
-     */
     public function processConfiguration()
     {
+        $this->validCantoConfiguration = is_int($this->storageUid)
+            && $this->storageUid > 0
+            && strlen($this->configuration['cantoName'] ?? '') > 0
+            && strlen($this->configuration['cantoDomain'] ?? '') > 0
+            && strlen($this->configuration['appId'] ?? '') > 0
+            && strlen($this->configuration['appSecret'] ?? '') > 0;
     }
 
-    /**
-     * @throws AuthorizationFailedException
-     */
     public function initialize()
     {
         // The check is necessary to prevent an error thrown in Maintenance Admin Tool -> Remove Temporary Assets
-        if (GeneralUtility::getContainer()->has(CantoRepository::class)) {
+        if ($this->validCantoConfiguration && GeneralUtility::getContainer()->has(CantoRepository::class)) {
             $this->cantoRepository = GeneralUtility::makeInstance(CantoRepository::class);
-            $this->cantoRepository->initialize($this->storageUid, $this->configuration);
+            try {
+                $this->cantoRepository->initialize($this->storageUid, $this->configuration);
+            } catch (AuthorizationFailedException $e) {
+                // TODO Show error message in TYPO3 Backend.
+            }
         }
     }
 
@@ -554,8 +560,8 @@ class CantoDriver extends AbstractReadOnlyDriver
 
     protected function buildRootFolderIdentifier(): string
     {
-        $rootFolderScheme = $this->configuration['rootFolderScheme'];
-        $rootFolder = $this->configuration['rootFolder'];
+        $rootFolderScheme = $this->configuration['rootFolderScheme'] ?? CantoUtility::SCHEME_FOLDER;
+        $rootFolder = $this->configuration['rootFolder'] ?? self::ROOT_FOLDER;
         if (CantoUtility::isFolder($rootFolderScheme) && $rootFolder !== '') {
             return CantoUtility::buildCombinedIdentifier(
                 $rootFolderScheme,
