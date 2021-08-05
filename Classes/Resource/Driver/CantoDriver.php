@@ -396,7 +396,8 @@ class CantoDriver extends AbstractReadOnlyDriver
         $sortBy = $this->mapSortBy($sort);
         $sortDirection = $sortRev ? ListAlbumContentRequest::SORT_DIRECTION_DESC
             : ListAlbumContentRequest::SORT_DIRECTION_ASC;
-        $limit = $numberOfItems > 0 ? $numberOfItems : 99999;
+        $limit = $numberOfItems > 0 ? min($numberOfItems, 1000) : 1000;
+        // TODO Check if there are more that 1000 files and make multiple requests if needed.
         $results = $this->cantoRepository->getFilesInFolder(
             $explicitFolderIdentifier,
             $start,
