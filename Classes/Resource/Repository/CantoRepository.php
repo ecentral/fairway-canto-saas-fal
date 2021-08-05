@@ -33,7 +33,6 @@ use TYPO3\CMS\Core\Utility\PathUtility;
 
 class CantoRepository
 {
-
     const REGISTRY_NAMESPACE = 'cantoSaasFal';
     const CANTO_CACHE_TAG_BLUEPRINT = 'canto_storage_%s';
 
