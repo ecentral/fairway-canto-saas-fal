@@ -51,6 +51,9 @@ class CantoAssetBrowserController
 
         $search = GeneralUtility::makeInstance(AssetSearch::class);
         $search->setKeyword($request->getQueryParams()['search']['query'] ?? '');
+        if (($request->getQueryParams()['search']['searchInField'] ?? 'all') !== 'all') {
+            $search->setSearchInField($request->getQueryParams()['search']['searchInField']);
+        }
         $paginator = new SearchResultPaginator($search, $cantoRepository, $page);
 
         $view = $this->initializeView();

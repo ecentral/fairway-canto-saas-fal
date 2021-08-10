@@ -3,7 +3,7 @@ define([
   "TYPO3/CMS/Core/Event/RegularEvent",
   "TYPO3/CMS/Core/Ajax/AjaxRequest",
   "TYPO3/CMS/Core/DocumentService",
-  "TYPO3/CMS/Backend/Storage/Client",
+  "./Storage/BrowserSession",
 ], function(ElementBrowser, RegularEvent, AjaxRequest, DocumentService, ClientStorage) {
   "use strict";
 
@@ -20,7 +20,15 @@ define([
   (function(StorageKeys) {
     StorageKeys['currentPage'] = 'cantoAssetPickerCurrentPage';
     StorageKeys['searchWord'] = 'cantoAssetPickerSearchWord';
+    StorageKeys['searchInField'] = 'cantoAssetPickerSearchInField';
   })(StorageKeys || (StorageKeys = {}));
+
+  var defaultValues;
+  (function(defaultValues) {
+    defaultValues['currentPage'] = 1;
+    defaultValues['searchWord'] = '';
+    defaultValues['searchInField'] = 'all';
+  })(defaultValues || (defaultValues = {}));
 
   class BrowseCantoAssets {
     constructor(storageUid) {
@@ -55,14 +63,18 @@ define([
     }
 
     initializeResults() {
-      const pageNumber = ClientStorage.isset(StorageKeys.currentPage) ? ClientStorage.get(StorageKeys.currentPage) : 1;
-      const searchWord = ClientStorage.isset(StorageKeys.searchWord) ? ClientStorage.get(StorageKeys.searchWord) : '';
+      const pageNumber = ClientStorage.isset(StorageKeys.currentPage) ? ClientStorage.get(StorageKeys.currentPage) : defaultValues.currentPage;
+      const searchWord = ClientStorage.isset(StorageKeys.searchWord) ? ClientStorage.get(StorageKeys.searchWord) : defaultValues.searchWord;
+      const searchInField = ClientStorage.isset(StorageKeys.searchInField) ? ClientStorage.get(StorageKeys.searchInField) : defaultValues.searchInField;
       const filterFormFields = this.searchForm.querySelectorAll(Selectors.formFilterFields);
       for (let i = 0; i < filterFormFields.length; i++) {
         let key = filterFormFields[i].dataset.cantoSearch;
         switch (key) {
           case 'query':
             filterFormFields[i].value = searchWord;
+            break;
+          case 'searchInField':
+            filterFormFields[i].checked = filterFormFields[i].value === searchInField;
             break;
         }
       }
@@ -82,8 +94,9 @@ define([
         storageUid: storageUid,
         search: BrowseCantoAssets.collectFilterData(filterForm)
       };
-      ClientStorage.set(StorageKeys.currentPage, queryParams['page'] ?? 1);
-      ClientStorage.set(StorageKeys.searchWord, queryParams['search']['query'] ?? '');
+      ClientStorage.set(StorageKeys.currentPage, queryParams['page'] ?? defaultValues.currentPage);
+      ClientStorage.set(StorageKeys.searchWord, queryParams['search']['query'] ?? defaultValues.searchWord);
+      ClientStorage.set(StorageKeys.searchInField, queryParams['search']['searchInField'] ?? defaultValues.searchInField);
       return (new AjaxRequest(TYPO3.settings.ajaxUrls.search_canto_file))
         .withQueryArguments(queryParams)
         .get()
@@ -100,6 +113,11 @@ define([
         switch (key) {
           case 'query':
             searchParams[key] = filterFormFields[i].value;
+            break;
+          case 'searchInField':
+            if (filterFormFields[i].checked === true) {
+              searchParams[key] = filterFormFields[i].value;
+            }
             break;
         }
       }

@@ -17,6 +17,8 @@ class AssetSearch
 {
     protected string $keyword = '';
 
+    protected string $searchInField = '';
+
     protected int $start = 0;
 
     protected int $limit = 30;
@@ -34,6 +36,17 @@ class AssetSearch
     public function setKeyword(string $keyword): AssetSearch
     {
         $this->keyword = $keyword;
+        return $this;
+    }
+
+    public function getSearchInField(): string
+    {
+        return $this->searchInField;
+    }
+
+    public function setSearchInField(string $searchInField): AssetSearch
+    {
+        $this->searchInField = $searchInField;
         return $this;
     }
 
