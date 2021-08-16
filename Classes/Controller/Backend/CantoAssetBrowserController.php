@@ -17,6 +17,7 @@ use Ecentral\CantoSaasFal\Pagination\SearchResultPaginator;
 use Ecentral\CantoSaasFal\Resource\Driver\CantoDriver;
 use Ecentral\CantoSaasFal\Resource\NoCantoStorageException;
 use Ecentral\CantoSaasFal\Resource\Repository\CantoRepository;
+use Ecentral\CantoSaasFal\Resource\Repository\InvalidSearchTypeException;
 use Ecentral\CantoSaasFal\Utility\CantoUtility;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -41,6 +42,7 @@ class CantoAssetBrowserController
     /**
      * @throws NoCantoStorageException
      * @throws AuthorizationFailedException
+     * @throws InvalidSearchTypeException
      */
     public function search(ServerRequestInterface $request): ResponseInterface
     {
@@ -48,12 +50,7 @@ class CantoAssetBrowserController
         $page = max((int)$request->getQueryParams()['page'], 1);
         $storage = $this->getCantoStorageByUid($storageUid);
         $cantoRepository = $this->getCantoRepository($storage);
-
-        $search = GeneralUtility::makeInstance(AssetSearch::class);
-        $search->setKeyword($request->getQueryParams()['search']['query'] ?? '');
-        if (($request->getQueryParams()['search']['searchInField'] ?? 'all') !== 'all') {
-            $search->setSearchInField($request->getQueryParams()['search']['searchInField']);
-        }
+        $search = $this->buildAssetSearchObject($request);
         $paginator = new SearchResultPaginator($search, $cantoRepository, $page);
 
         $view = $this->initializeView();
@@ -90,6 +87,41 @@ class CantoAssetBrowserController
         }
         // Todo Add error message what went wrong.
         return new Response(null, 400);
+    }
+
+    /**
+     * @throws InvalidSearchTypeException
+     */
+    protected function buildAssetSearchObject(ServerRequestInterface $request): AssetSearch
+    {
+        $search = GeneralUtility::makeInstance(AssetSearch::class);
+        $searchQuery = $request->getQueryParams()['search']['query'] ?? '';
+        $allowedFileExtensions = array_map(
+            function (string $fileExtension) {
+                return '.' . trim($fileExtension);
+            },
+            explode(',', $request->getQueryParams()['allowedFileExtensions'] ?? '')
+        );
+        $searchType = $request->getQueryParams()['search']['type'] ?? '';
+
+        // TODO We cannot use keyword search and file extension filter because of missing support for logical grouping.
+        switch ($searchType) {
+            case 'categories':
+                $search->setCategories($searchQuery);
+                $search->setKeyword(implode('|', $allowedFileExtensions));
+                break;
+            case 'tags':
+                $search->setTags($searchQuery);
+                $search->setKeyword(implode('|', $allowedFileExtensions));
+                break;
+            default:
+                throw new InvalidSearchTypeException(
+                    sprintf('Invalid search type %s given.', $searchType),
+                    1629119913
+                );
+        }
+
+        return $search;
     }
 
     /**

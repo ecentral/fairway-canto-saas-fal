@@ -96,11 +96,11 @@ class CantoRepository
     public function search(AssetSearch $search): AssetSearchResponse
     {
         $request = new SearchRequest();
-        $request->setKeyword($search->getKeyword());
-        if ($search->getSearchInField() !== '') {
-            $request->setSearchInField($search->getSearchInField());
-        }
-        $request->setStart($search->getStart())
+        $request->setKeyword($search->getKeyword())
+            ->setTags($search->getTags())
+            ->setKeywords($search->getCategories())
+            ->setSearchInField($search->getSearchInField())
+            ->setStart($search->getStart())
             ->setLimit($search->getLimit())
             ->setApproval($search->getStatus())
             ->setScheme(implode('|', $search->getSchemes()));

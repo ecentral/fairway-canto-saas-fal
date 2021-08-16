@@ -17,16 +17,17 @@ class AssetSearch
 {
     protected string $keyword = '';
 
+    protected string $tags = '';
+
+    protected string $categories = '';
+
     protected string $searchInField = '';
 
     protected int $start = 0;
 
     protected int $limit = 30;
 
-    protected array $schemes = [
-        SearchRequest::SCHEME_IMAGE,
-        SearchRequest::SCHEME_DOCUMENT
-    ];
+    protected array $schemes = [];
 
     public function getKeyword(): string
     {
@@ -36,6 +37,28 @@ class AssetSearch
     public function setKeyword(string $keyword): AssetSearch
     {
         $this->keyword = $keyword;
+        return $this;
+    }
+
+    public function getTags(): string
+    {
+        return $this->tags;
+    }
+
+    public function setTags(string $tags): AssetSearch
+    {
+        $this->tags = $tags;
+        return $this;
+    }
+
+    public function getCategories(): string
+    {
+        return $this->categories;
+    }
+
+    public function setCategories(string $categories): AssetSearch
+    {
+        $this->categories = $categories;
         return $this;
     }
 

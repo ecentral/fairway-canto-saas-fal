@@ -7,32 +7,33 @@ define([
 ], function(ElementBrowser, RegularEvent, AjaxRequest, DocumentService, ClientStorage) {
   "use strict";
 
-  var Selectors;
+  var Selectors = {};
   (function(Selectors) {
     Selectors['close'] = '[data-close]';
     Selectors['searchForm'] = 'form.canto-asset-search-form';
     Selectors['resultContainer'] = 'div.canto-asset-search-result-container';
     Selectors['formFilterFields'] = '[data-canto-search]';
     Selectors['paginationPage'] = '[data-pagination-page]';
-  })(Selectors || (Selectors = {}));
+  })(Selectors);
 
-  var StorageKeys;
+  var StorageKeys = {};
   (function(StorageKeys) {
     StorageKeys['currentPage'] = 'cantoAssetPickerCurrentPage';
     StorageKeys['searchWord'] = 'cantoAssetPickerSearchWord';
-    StorageKeys['searchInField'] = 'cantoAssetPickerSearchInField';
-  })(StorageKeys || (StorageKeys = {}));
+    StorageKeys['type'] = 'cantoAssetPickerSearchType';
+  })(StorageKeys);
 
-  var defaultValues;
+  var defaultValues = {};
   (function(defaultValues) {
     defaultValues['currentPage'] = 1;
     defaultValues['searchWord'] = '';
-    defaultValues['searchInField'] = 'all';
-  })(defaultValues || (defaultValues = {}));
+    defaultValues['type'] = 'tags';
+  })(defaultValues);
 
   class BrowseCantoAssets {
-    constructor(storageUid) {
-      this.storageUid = storageUid;
+    constructor() {
+      this.storageUid = document.body.dataset.storageUid;
+      this.allowedFileExtensions = document.body.dataset.allowedFileExtensions;
       this.searchForm = document.querySelector(Selectors.searchForm);
       DocumentService.ready().then(() => {
         this.registerEvents();
@@ -52,20 +53,20 @@ define([
 
       new RegularEvent('submit', (event, targetEl) => {
         event.preventDefault();
-        BrowseCantoAssets.doSearch(targetEl, me.storageUid, 1);
+        BrowseCantoAssets.doSearch(targetEl, me.storageUid, 1, me.allowedFileExtensions);
       }).delegateTo(document, Selectors.searchForm);
 
       new RegularEvent('click', (event, targetEl) => {
         event.preventDefault();
         const pageNumber = targetEl.dataset.paginationPage;
-        BrowseCantoAssets.doSearch(me.searchForm, me.storageUid, pageNumber);
+        BrowseCantoAssets.doSearch(me.searchForm, me.storageUid, pageNumber, me.allowedFileExtensions);
       }).delegateTo(document, Selectors.paginationPage);
     }
 
     initializeResults() {
       const pageNumber = ClientStorage.isset(StorageKeys.currentPage) ? ClientStorage.get(StorageKeys.currentPage) : defaultValues.currentPage;
       const searchWord = ClientStorage.isset(StorageKeys.searchWord) ? ClientStorage.get(StorageKeys.searchWord) : defaultValues.searchWord;
-      const searchInField = ClientStorage.isset(StorageKeys.searchInField) ? ClientStorage.get(StorageKeys.searchInField) : defaultValues.searchInField;
+      const type = ClientStorage.isset(StorageKeys.type) ? ClientStorage.get(StorageKeys.type) : defaultValues.type;
       const filterFormFields = this.searchForm.querySelectorAll(Selectors.formFilterFields);
       for (let i = 0; i < filterFormFields.length; i++) {
         let key = filterFormFields[i].dataset.cantoSearch;
@@ -73,30 +74,31 @@ define([
           case 'query':
             filterFormFields[i].value = searchWord;
             break;
-          case 'searchInField':
-            filterFormFields[i].checked = filterFormFields[i].value === searchInField;
+          case 'type':
+            filterFormFields[i].checked = filterFormFields[i].value === type;
             break;
         }
       }
-      BrowseCantoAssets.doSearch(this.searchForm, this.storageUid, pageNumber);
+      BrowseCantoAssets.doSearch(this.searchForm, this.storageUid, pageNumber, this.allowedFileExtensions);
     }
 
-    static doSearch(filterForm, storageUid, pageNumber) {
+    static doSearch(filterForm, storageUid, pageNumber, allowedFileExtensions) {
       const resultContainer = document.querySelector(Selectors.resultContainer);
-      BrowseCantoAssets.submitSearch(filterForm, storageUid, pageNumber).then((data) => {
+      BrowseCantoAssets.submitSearch(filterForm, storageUid, pageNumber, allowedFileExtensions).then((data) => {
         resultContainer.innerHTML = data;
       });
     }
 
-    static submitSearch(filterForm, storageUid, pageNumber) {
+    static submitSearch(filterForm, storageUid, pageNumber, allowedFileExtensions) {
       const queryParams = {
         page: pageNumber,
         storageUid: storageUid,
-        search: BrowseCantoAssets.collectFilterData(filterForm)
+        search: BrowseCantoAssets.collectFilterData(filterForm),
+        allowedFileExtensions: allowedFileExtensions
       };
       ClientStorage.set(StorageKeys.currentPage, queryParams['page'] ?? defaultValues.currentPage);
       ClientStorage.set(StorageKeys.searchWord, queryParams['search']['query'] ?? defaultValues.searchWord);
-      ClientStorage.set(StorageKeys.searchInField, queryParams['search']['searchInField'] ?? defaultValues.searchInField);
+      ClientStorage.set(StorageKeys.type, queryParams['search']['type'] ?? defaultValues.type);
       return (new AjaxRequest(TYPO3.settings.ajaxUrls.search_canto_file))
         .withQueryArguments(queryParams)
         .get()
@@ -114,7 +116,7 @@ define([
           case 'query':
             searchParams[key] = filterFormFields[i].value;
             break;
-          case 'searchInField':
+          case 'type':
             if (filterFormFields[i].checked === true) {
               searchParams[key] = filterFormFields[i].value;
             }
@@ -144,5 +146,5 @@ define([
 
   }
 
-  return BrowseCantoAssets;
+  return new BrowseCantoAssets;
 });

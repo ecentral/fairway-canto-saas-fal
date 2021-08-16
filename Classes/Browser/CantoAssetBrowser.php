@@ -33,8 +33,7 @@ class CantoAssetBrowser extends AbstractElementBrowser implements ElementBrowser
         $this->initializeView();
         $this->initializeStorage();
         $this->pageRenderer->loadRequireJsModule(
-            'TYPO3/CMS/CantoSaasFal/BrowseCantoAssets',
-            'function(BrowseCantoAssets) { new BrowseCantoAssets(' . $this->storage->getUid() . '); }'
+            'TYPO3/CMS/CantoSaasFal/BrowseCantoAssets'
         );
         $this->pageRenderer->addCssFile(
             'EXT:canto_saas_fal/Resources/Public/Css/CantoAssetBrowser.css'
@@ -45,7 +44,8 @@ class CantoAssetBrowser extends AbstractElementBrowser implements ElementBrowser
     {
         return [
             'data-mode' => 'canto',
-            'storage-uid' => (string)$this->storage->getUid(),
+            'data-storage-uid' => (string)$this->storage->getUid(),
+            'data-allowed-file-extensions' => explode('|', $this->bparams)[3] ?? ''
         ];
     }
 

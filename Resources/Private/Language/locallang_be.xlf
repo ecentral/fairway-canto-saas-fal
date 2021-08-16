@@ -37,16 +37,7 @@
 			<trans-unit id="canto_asset_browser.searchForm.query.placeholder" resname="canto_asset_browser.searchForm.query.placeholder">
 				<source>Enter search term</source>
 			</trans-unit>
-			<trans-unit id="canto_asset_browser.searchForm.searchInField.all" resname="canto_asset_browser.searchForm.searchInField.all">
-				<source>Fulltext</source>
-			</trans-unit>
-			<trans-unit id="canto_asset_browser.searchForm.searchInField.filename" resname="canto_asset_browser.searchForm.searchInField.filename">
-				<source>Filename</source>
-			</trans-unit>
-			<trans-unit id="canto_asset_browser.searchForm.searchInField.description" resname="canto_asset_browser.searchForm.searchInField.description">
-				<source>Description</source>
-			</trans-unit>
-			<trans-unit id="canto_asset_browser.searchForm.searchInField.keywords" resname="canto_asset_browser.searchForm.searchInField.keywords">
+			<trans-unit id="canto_asset_browser.searchForm.searchInField.categories" resname="canto_asset_browser.searchForm.searchInField.categories">
 				<source>Categories</source>
 			</trans-unit>
 			<trans-unit id="canto_asset_browser.searchForm.searchInField.tags" resname="canto_asset_browser.searchForm.searchInField.tags">
