@@ -15,11 +15,14 @@ use Ecentral\CantoSaasApiClient\Client;
 use Ecentral\CantoSaasApiClient\Endpoint\Authorization\AuthorizationFailedException;
 use Ecentral\CantoSaasApiClient\Endpoint\Authorization\NotAuthorizedException;
 use Ecentral\CantoSaasApiClient\Http\Asset\GetContentDetailsRequest;
+use Ecentral\CantoSaasApiClient\Http\Asset\SearchRequest;
 use Ecentral\CantoSaasApiClient\Http\Authorization\OAuth2Request;
 use Ecentral\CantoSaasApiClient\Http\InvalidResponseException;
 use Ecentral\CantoSaasApiClient\Http\LibraryTree\GetDetailsRequest;
 use Ecentral\CantoSaasApiClient\Http\LibraryTree\GetTreeRequest;
 use Ecentral\CantoSaasApiClient\Http\LibraryTree\ListAlbumContentRequest;
+use Ecentral\CantoSaasFal\Domain\Model\Dto\AssetSearch;
+use Ecentral\CantoSaasFal\Domain\Model\Dto\AssetSearchResponse;
 use Ecentral\CantoSaasFal\Resource\CantoClientFactory;
 use Ecentral\CantoSaasFal\Utility\CantoUtility;
 use TYPO3\CMS\Core\Cache\Frontend\FrontendInterface;
@@ -84,6 +87,26 @@ class CantoRepository
     public function setSessionTokenValid(int $sessionTokenValid): void
     {
         $this->sessionTokenValid = $sessionTokenValid;
+    }
+
+    /**
+     * @throws InvalidResponseException
+     * @throws NotAuthorizedException
+     */
+    public function search(AssetSearch $search): AssetSearchResponse
+    {
+        $request = new SearchRequest();
+        $request->setKeyword($search->getKeyword())
+            ->setStart($search->getStart())
+            ->setLimit($search->getLimit())
+            ->setApproval($search->getStatus())
+            ->setScheme(implode('|', $search->getSchemes()));
+        $response = $this->client->asset()->search($request);
+        $assetSearchResponse = new AssetSearchResponse();
+
+        return $assetSearchResponse
+            ->setFound($response->getFound())
+            ->setResults($response->getResults());
     }
 
     /**

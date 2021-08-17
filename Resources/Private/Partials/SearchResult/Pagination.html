@@ -1,0 +1,38 @@
+<html data-namespace-typo3-fluid="true"
+      xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers">
+
+<nav aria-label="Search result navigation" class="text-center">
+    <ul class="pagination pagination-lg">
+        <li class="{f:if(condition: pagination.previousPageNumber, else: 'disabled')}">
+            <a href="#" aria-label="Previous" data-pagination-page="{pagination.previousPageNumber}">
+                <span aria-hidden="true">&laquo;</span>
+            </a>
+        </li>
+        <f:if condition="{pagination.previousPageNumber} > 1">
+            <li>
+                <a href="#" aria-label="Previous" data-pagination-page="{pagination.previousPageNumber}">
+                    {pagination.previousPageNumber}
+                </a>
+            </li>
+        </f:if>
+        <li class="active">
+            <a href="#" data-pagination-page="{results.currentPageNumber}">
+                {results.currentPageNumber}
+            </a>
+        </li>
+        <f:if condition="{pagination.nextPageNumber} > 1">
+            <li>
+                <a href="#" aria-label="Previous" data-pagination-page="{pagination.nextPageNumber}">
+                    {pagination.nextPageNumber}
+                </a>
+            </li>
+        </f:if>
+        <li class="{f:if(condition: '{pagination.nextPageNumber} <= 1', then: 'disabled')}">
+            <a href="#" aria-label="Next" data-pagination-page="{pagination.nextPageNumber}">
+                <span aria-hidden="true">&raquo;</span>
+            </a>
+        </li>
+    </ul>
+</nav>
+
+</html>

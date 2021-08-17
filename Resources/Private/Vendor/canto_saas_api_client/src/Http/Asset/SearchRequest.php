@@ -35,6 +35,12 @@ class SearchRequest implements RequestInterface
     const SEARCH_IN_FIELD_TAGS = 'tags';
     const OPERATOR_AND = 'and';
     const OPERATOR_OR = 'or';
+    const SCHEME_IMAGE = 'image';
+    const SCHEME_VIDEO = 'video';
+    const SCHEME_AUDIO = 'audio';
+    const SCHEME_DOCUMENT = 'document';
+    const SCHEME_PRESENTATION = 'presentation';
+    const SCHEME_OTHER = 'other';
 
     protected string $keyword = '';
 

@@ -1,0 +1,18 @@
+<html data-namespace-typo3-fluid="true"
+      xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers"
+      xmlns:canto="http://typo3.org/ns/Ecentral/CantoSaasFal/ViewHelpers">
+
+<a href="#"
+   title="{f:translate(id: 'LLL:EXT:canto_saas_fal/Resources/Private/Language/locallang_be.xlf:canto_asset_browser.searchResults.resultItem.title')}"
+   class="col-canto-search-result-item"
+   data-scheme="{result.scheme}"
+   data-identifier="{result.id}"
+   data-close="1"
+>
+    <img src="{result.url.directUrlPreview}" alt="{result.name}" />
+    <div class="canto-result-item-info">
+        <h5>{result.name -> canto:format.fileName()}</h5>
+    </div>
+</a>
+
+</html>

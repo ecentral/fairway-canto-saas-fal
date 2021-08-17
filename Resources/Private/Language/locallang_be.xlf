@@ -30,6 +30,22 @@
 			<trans-unit id="sys_file_storage.cantoDriverFlexform_rootFolder.description" resname="sys_file_storage.cantoDriverFlexform_rootFolder.description">
 				<source>Value must be folder identifier (not album, e.g. VPA4H. Default is Canto root directory</source>
 			</trans-unit>
+
+			<trans-unit id="canto_asset_browser.title" resname="canto_asset_browser.title">
+				<source>Search for canto file</source>
+			</trans-unit>
+			<trans-unit id="canto_asset_browser.searchForm.query.placeholder" resname="canto_asset_browser.searchForm.query.placeholder">
+				<source>Enter search term</source>
+			</trans-unit>
+			<trans-unit id="canto_asset_browser.searchForm.button.submit" resname="canto_asset_browser.searchForm.button.submit">
+				<source>Search</source>
+			</trans-unit>
+			<trans-unit id="canto_asset_browser.searchResults.numberOfResults" resname="canto_asset_browser.searchResults.numberOfResults">
+				<source>%s results found</source>
+			</trans-unit>
+			<trans-unit id="canto_asset_browser.searchResults.resultItem.title" resname="canto_asset_browser.searchResults.resultItem.title">
+				<source>Add file</source>
+			</trans-unit>
 		</body>
 	</file>
 </xliff>
