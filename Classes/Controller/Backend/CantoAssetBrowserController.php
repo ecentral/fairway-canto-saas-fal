@@ -95,22 +95,30 @@ class CantoAssetBrowserController
     protected function buildAssetSearchObject(ServerRequestInterface $request): AssetSearch
     {
         $search = GeneralUtility::makeInstance(AssetSearch::class);
-        $searchQuery = $request->getQueryParams()['search']['query'] ?? '';
         $allowedFileExtensions = array_map(
             function (string $fileExtension) {
                 return '.' . trim($fileExtension);
             },
             explode(',', $request->getQueryParams()['allowedFileExtensions'] ?? '')
         );
-        $searchType = $request->getQueryParams()['search']['type'] ?? '';
+        $searchType = (string)$request->getQueryParams()['search']['type'] ?? '';
 
         // TODO We cannot use keyword search and file extension filter because of missing support for logical grouping.
         switch ($searchType) {
+            case 'identifier':
+                $identifier = (string)$request->getQueryParams()['search']['identifier'] ?? '';
+                $scheme = (string)$request->getQueryParams()['search']['scheme'] ?? '';
+                $search->setIdentifier($identifier);
+                $search->setScheme($scheme);
+                $search->setKeyword(implode('|', $allowedFileExtensions));
+                break;
             case 'categories':
+                $searchQuery = (string)$request->getQueryParams()['search']['query'] ?? '';
                 $search->setCategories($searchQuery);
                 $search->setKeyword(implode('|', $allowedFileExtensions));
                 break;
             case 'tags':
+                $searchQuery = (string)$request->getQueryParams()['search']['query'] ?? '';
                 $search->setTags($searchQuery);
                 $search->setKeyword(implode('|', $allowedFileExtensions));
                 break;

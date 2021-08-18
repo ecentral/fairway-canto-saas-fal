@@ -37,11 +37,35 @@
 			<trans-unit id="canto_asset_browser.searchForm.query.placeholder" resname="canto_asset_browser.searchForm.query.placeholder">
 				<source>Enter search term</source>
 			</trans-unit>
+			<trans-unit id="canto_asset_browser.searchForm.identifier.placeholder" resname="canto_asset_browser.searchForm.identifier.placeholder">
+				<source>Identifier</source>
+			</trans-unit>
+			<trans-unit id="canto_asset_browser.searchForm.searchInField.identifier" resname="canto_asset_browser.searchForm.searchInField.identifier">
+				<source>Identifier</source>
+			</trans-unit>
 			<trans-unit id="canto_asset_browser.searchForm.searchInField.categories" resname="canto_asset_browser.searchForm.searchInField.categories">
 				<source>Categories</source>
 			</trans-unit>
 			<trans-unit id="canto_asset_browser.searchForm.searchInField.tags" resname="canto_asset_browser.searchForm.searchInField.tags">
 				<source>Tags</source>
+			</trans-unit>
+			<trans-unit id="canto_asset_browser.searchForm.scheme.image" resname="canto_asset_browser.searchForm.scheme.image">
+				<source>Image</source>
+			</trans-unit>
+			<trans-unit id="canto_asset_browser.searchForm.scheme.video" resname="canto_asset_browser.searchForm.scheme.video">
+				<source>Video</source>
+			</trans-unit>
+			<trans-unit id="canto_asset_browser.searchForm.scheme.audio" resname="canto_asset_browser.searchForm.scheme.audio">
+				<source>Audio</source>
+			</trans-unit>
+			<trans-unit id="canto_asset_browser.searchForm.scheme.document" resname="canto_asset_browser.searchForm.scheme.document">
+				<source>Document</source>
+			</trans-unit>
+			<trans-unit id="canto_asset_browser.searchForm.scheme.presentation" resname="canto_asset_browser.searchForm.scheme.presentation">
+				<source>Presentation</source>
+			</trans-unit>
+			<trans-unit id="canto_asset_browser.searchForm.scheme.other" resname="canto_asset_browser.searchForm.scheme.other">
+				<source>Other</source>
 			</trans-unit>
 			<trans-unit id="canto_asset_browser.searchForm.button.submit" resname="canto_asset_browser.searchForm.button.submit">
 				<source>Search</source>

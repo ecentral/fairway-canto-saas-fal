@@ -98,10 +98,6 @@ class WarmupCantoCache extends Command
         return $cantoRepository;
     }
 
-    /**
-     * @throws InvalidResponseException
-     * @throws NotAuthorizedException
-     */
     protected function warmupFolderCache(CantoRepository $cantoRepository): void
     {
         $this->cantoFolderCache->flushByTags([$cantoRepository->getCantoCacheTag()]);

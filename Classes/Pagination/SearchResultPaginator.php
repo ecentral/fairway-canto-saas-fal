@@ -54,6 +54,11 @@ final class SearchResultPaginator extends AbstractPaginator
         int $currentPageNumber = 1,
         int $itemsPerPage = 30
     ): void {
+        if ($search->getScheme() !== '' && $search->getIdentifier() !== '') {
+            $this->searchResult = $this->fetchItemByIdentifier($search, $cantoRepository);
+            return;
+        }
+
         $offset = (int)($itemsPerPage * ($currentPageNumber - 1));
         $search->setLimit($itemsPerPage)->setStart($offset);
 
@@ -64,6 +69,20 @@ final class SearchResultPaginator extends AbstractPaginator
         }
     }
 
+    protected function fetchItemByIdentifier(AssetSearch $search, CantoRepository $cantoRepository): AssetSearchResponse
+    {
+        $response = GeneralUtility::makeInstance(AssetSearchResponse::class);
+        $result = $cantoRepository->getFileDetails($search->getScheme(), $search->getIdentifier());
+        $allowedFileExtensions = explode('|.', trim($search->getKeyword(), '.'));
+        if (is_array($result)
+            && isset($result['metadata']['File Type Extension'])
+            && in_array($result['metadata']['File Type Extension'], $allowedFileExtensions)) {
+            $response->setResults([$result])
+                ->setFound(1);
+        }
+        return $response;
+    }
+
     /**
      * Results are fetched in SearchResultPaginator::fetchItems()
      */
@@ -71,17 +90,11 @@ final class SearchResultPaginator extends AbstractPaginator
     {
     }
 
-    /**
-     * @return int
-     */
     protected function getTotalAmountOfItems(): int
     {
         return $this->searchResult->getFound();
     }
 
-    /**
-     * @return int
-     */
     protected function getAmountOfItemsOnCurrentPage(): int
     {
         return count($this->searchResult->getResults());

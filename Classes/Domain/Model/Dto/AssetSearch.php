@@ -15,6 +15,10 @@ use Ecentral\CantoSaasApiClient\Http\Asset\SearchRequest;
 
 class AssetSearch
 {
+    protected string $scheme = '';
+
+    protected string $identifier = '';
+
     protected string $keyword = '';
 
     protected string $tags = '';
@@ -28,6 +32,28 @@ class AssetSearch
     protected int $limit = 30;
 
     protected array $schemes = [];
+
+    public function getScheme(): string
+    {
+        return $this->scheme;
+    }
+
+    public function setScheme(string $scheme): AssetSearch
+    {
+        $this->scheme = $scheme;
+        return $this;
+    }
+
+    public function getIdentifier(): string
+    {
+        return $this->identifier;
+    }
+
+    public function setIdentifier(string $identifier): AssetSearch
+    {
+        $this->identifier = $identifier;
+        return $this;
+    }
 
     public function getKeyword(): string
     {
