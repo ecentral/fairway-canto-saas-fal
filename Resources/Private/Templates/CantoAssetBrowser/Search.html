@@ -10,6 +10,21 @@
                     <div class="col-md-8 col-md-offset-2">
                         <form action="#" method="POST" name="canto-asset-search-form" class="canto-asset-search-form">
                             <div class="form-group">
+                                Search in:
+                                <label class="canto-radio-label">
+                                    <input type="radio" name="type" value="identifier" data-canto-search="type" />
+                                    {f:translate(id: 'LLL:EXT:canto_saas_fal/Resources/Private/Language/locallang_be.xlf:canto_asset_browser.searchForm.searchInField.identifier')}
+                                </label>
+                                <label class="canto-radio-label">
+                                    <input type="radio" name="type" value="tags" data-canto-search="type" />
+                                    {f:translate(id: 'LLL:EXT:canto_saas_fal/Resources/Private/Language/locallang_be.xlf:canto_asset_browser.searchForm.searchInField.tags')}
+                                </label>
+                                <label class="canto-radio-label">
+                                    <input type="radio" name="type" value="categories" data-canto-search="type" />
+                                    {f:translate(id: 'LLL:EXT:canto_saas_fal/Resources/Private/Language/locallang_be.xlf:canto_asset_browser.searchForm.searchInField.categories')}
+                                </label>
+                            </div>
+                            <div class="form-group hidden" data-canto-show-by-types="tags,categories">
                                 <input class="canto-input-search-query"
                                        type="text"
                                        name="query"
@@ -18,14 +33,47 @@
                                        placeholder="{f:translate(id: 'LLL:EXT:canto_saas_fal/Resources/Private/Language/locallang_be.xlf:canto_asset_browser.searchForm.query.placeholder')}"
                                 />
                             </div>
-
-                            <button type="submit" class="btn btn-default" data-canto-search-submit="1">
-                                {f:translate(id: 'LLL:EXT:canto_saas_fal/Resources/Private/Language/locallang_be.xlf:canto_asset_browser.searchForm.button.submit')}
-                            </button>
+                            <div class="form-inline form-group canto-identifier-search-container hidden" data-canto-show-by-types="identifier">
+                                <div class="form-group">
+                                    <select class="canto-input-scheme" name="scheme" data-canto-search="scheme">
+                                        <option value="image">
+                                            {f:translate(id: 'LLL:EXT:canto_saas_fal/Resources/Private/Language/locallang_be.xlf:canto_asset_browser.searchForm.scheme.image')}
+                                        </option>
+                                        <option value="video">
+                                            {f:translate(id: 'LLL:EXT:canto_saas_fal/Resources/Private/Language/locallang_be.xlf:canto_asset_browser.searchForm.scheme.video')}
+                                        </option>
+                                        <option value="audio">
+                                            {f:translate(id: 'LLL:EXT:canto_saas_fal/Resources/Private/Language/locallang_be.xlf:canto_asset_browser.searchForm.scheme.audio')}
+                                        </option>
+                                        <option value="document">
+                                            {f:translate(id: 'LLL:EXT:canto_saas_fal/Resources/Private/Language/locallang_be.xlf:canto_asset_browser.searchForm.scheme.document')}
+                                        </option>
+                                        <option value="presentation">
+                                            {f:translate(id: 'LLL:EXT:canto_saas_fal/Resources/Private/Language/locallang_be.xlf:canto_asset_browser.searchForm.scheme.presentation')}
+                                        </option>
+                                        <option value="other">
+                                            {f:translate(id: 'LLL:EXT:canto_saas_fal/Resources/Private/Language/locallang_be.xlf:canto_asset_browser.searchForm.scheme.other')}
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <input class="canto-input-search-query"
+                                           type="text"
+                                           name="identifier"
+                                           data-canto-search="identifier"
+                                           maxlength="100"
+                                           placeholder="{f:translate(id: 'LLL:EXT:canto_saas_fal/Resources/Private/Language/locallang_be.xlf:canto_asset_browser.searchForm.identifier.placeholder')}"
+                                    />
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <button type="submit" class="btn btn-default" data-canto-search-submit="1">
+                                    {f:translate(id: 'LLL:EXT:canto_saas_fal/Resources/Private/Language/locallang_be.xlf:canto_asset_browser.searchForm.button.submit')}
+                                </button>
+                            </div>
                         </form>
                     </div>
                 </div>
-
             </div>
         </div>
 

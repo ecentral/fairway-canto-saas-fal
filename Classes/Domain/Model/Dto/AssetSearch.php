@@ -15,16 +15,45 @@ use Ecentral\CantoSaasApiClient\Http\Asset\SearchRequest;
 
 class AssetSearch
 {
+    protected string $scheme = '';
+
+    protected string $identifier = '';
+
     protected string $keyword = '';
+
+    protected string $tags = '';
+
+    protected string $categories = '';
+
+    protected string $searchInField = '';
 
     protected int $start = 0;
 
     protected int $limit = 30;
 
-    protected array $schemes = [
-        SearchRequest::SCHEME_IMAGE,
-        SearchRequest::SCHEME_DOCUMENT
-    ];
+    protected array $schemes = [];
+
+    public function getScheme(): string
+    {
+        return $this->scheme;
+    }
+
+    public function setScheme(string $scheme): AssetSearch
+    {
+        $this->scheme = $scheme;
+        return $this;
+    }
+
+    public function getIdentifier(): string
+    {
+        return $this->identifier;
+    }
+
+    public function setIdentifier(string $identifier): AssetSearch
+    {
+        $this->identifier = $identifier;
+        return $this;
+    }
 
     public function getKeyword(): string
     {
@@ -34,6 +63,39 @@ class AssetSearch
     public function setKeyword(string $keyword): AssetSearch
     {
         $this->keyword = $keyword;
+        return $this;
+    }
+
+    public function getTags(): string
+    {
+        return $this->tags;
+    }
+
+    public function setTags(string $tags): AssetSearch
+    {
+        $this->tags = $tags;
+        return $this;
+    }
+
+    public function getCategories(): string
+    {
+        return $this->categories;
+    }
+
+    public function setCategories(string $categories): AssetSearch
+    {
+        $this->categories = $categories;
+        return $this;
+    }
+
+    public function getSearchInField(): string
+    {
+        return $this->searchInField;
+    }
+
+    public function setSearchInField(string $searchInField): AssetSearch
+    {
+        $this->searchInField = $searchInField;
         return $this;
     }
 

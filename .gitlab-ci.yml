@@ -14,7 +14,7 @@ lint-php:
     - find . -name \*.php ! -path "./.Build/*" -exec php -d display_errors=stderr -l {} > /dev/null \;
   parallel:
     matrix:
-      - PHP_VERSION: ['7.4', '8.0']
+      - PHP_VERSION: [ '7.4' ]
 
 php-cs-fixer:
   stage: test
@@ -39,7 +39,7 @@ phpstan:
     - composer phpstan
   parallel:
     matrix:
-      - PHP_VERSION: [ '7.4', '8.0' ]
+      - PHP_VERSION: [ '7.4' ]
   cache:
     key: composer-cache
     paths:
@@ -55,7 +55,7 @@ phpunit:canto-saas-api-client:
     - .Build/bin/phpunit --colors Resources/Private/Vendor/canto_saas_api_client/tests/
   parallel:
     matrix:
-      - PHP_VERSION: [ '7.4', '8.0' ]
+      - PHP_VERSION: [ '7.4' ]
   cache:
     key: composer-cache
     paths:

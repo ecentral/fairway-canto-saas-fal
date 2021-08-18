@@ -31,10 +31,9 @@ class CantoAssetBrowser extends AbstractElementBrowser implements ElementBrowser
     {
         parent::initialize();
         $this->initializeView();
-        $this->storage = $this->findFirstCantoStorage();
+        $this->initializeStorage();
         $this->pageRenderer->loadRequireJsModule(
-            'TYPO3/CMS/CantoSaasFal/BrowseCantoAssets',
-            'function(BrowseCantoAssets) { new BrowseCantoAssets(' . $this->storage->getUid() . '); }'
+            'TYPO3/CMS/CantoSaasFal/BrowseCantoAssets'
         );
         $this->pageRenderer->addCssFile(
             'EXT:canto_saas_fal/Resources/Public/Css/CantoAssetBrowser.css'
@@ -45,7 +44,8 @@ class CantoAssetBrowser extends AbstractElementBrowser implements ElementBrowser
     {
         return [
             'data-mode' => 'canto',
-            'storage-uid' => (string)$this->storage->getUid(),
+            'data-storage-uid' => (string)$this->storage->getUid(),
+            'data-allowed-file-extensions' => explode('|', $this->bparams)[3] ?? ''
         ];
     }
 
@@ -92,6 +92,15 @@ class CantoAssetBrowser extends AbstractElementBrowser implements ElementBrowser
         return false;
     }
 
+    /**
+     * @throws NoCantoStorageException
+     */
+    protected function initializeStorage(): void
+    {
+        $storageId = (int)explode('|', $this->bparams)[5] ?? 0;
+        $this->storage = $this->findStorageById($storageId);
+    }
+
     protected function initializeView(): void
     {
         $view = $this->moduleTemplate->getView();
@@ -109,13 +118,13 @@ class CantoAssetBrowser extends AbstractElementBrowser implements ElementBrowser
     /**
      * @throws NoCantoStorageException
      */
-    protected function findFirstCantoStorage(): ResourceStorage
+    protected function findStorageById(int $storageId): ResourceStorage
     {
-        $storages = $this->getStorageRepository()->findByStorageType(CantoDriver::DRIVER_NAME);
-        if ($storages === []) {
-            throw new NoCantoStorageException('No configured canto storage found', 1628164687);
+        $storage = $this->getStorageRepository()->findByUid($storageId);
+        if ($storage === null || $storage->getDriverType() !== CantoDriver::DRIVER_NAME) {
+            throw new NoCantoStorageException('Invalid canto storage given.', 1628164687);
         }
-        return $storages[0];
+        return $storage;
     }
 
     protected function getStorageRepository(): StorageRepository

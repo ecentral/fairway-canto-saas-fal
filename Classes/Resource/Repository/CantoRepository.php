@@ -97,6 +97,9 @@ class CantoRepository
     {
         $request = new SearchRequest();
         $request->setKeyword($search->getKeyword())
+            ->setTags($search->getTags())
+            ->setKeywords($search->getCategories())
+            ->setSearchInField($search->getSearchInField())
             ->setStart($search->getStart())
             ->setLimit($search->getLimit())
             ->setApproval($search->getStatus())
