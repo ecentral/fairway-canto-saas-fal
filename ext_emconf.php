@@ -11,11 +11,11 @@ $EM_CONF['canto_saas_fal'] = [
     'title' => 'Canto SaaS FAL',
     'description' => 'Adds Canto SaaS FAL driver.',
     'category' => 'misc',
-    'version' => '0.1.0',
+    'version' => '0.2.0',
     'constraints' => [
         'depends' => [
-            'typo3' => '10.4.0-11.3.99',
-            'filemetadata' => '10.4.0-11.3.99',
+            'typo3' => '10.4.0-10.4.99',
+            'filemetadata' => '10.4.0-10.4.99',
         ],
     ],
     'state' => 'beta',
