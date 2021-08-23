@@ -17,7 +17,7 @@ use Ecentral\CantoSaasFal\Pagination\SearchResultPaginator;
 use Ecentral\CantoSaasFal\Resource\Driver\CantoDriver;
 use Ecentral\CantoSaasFal\Resource\NoCantoStorageException;
 use Ecentral\CantoSaasFal\Resource\Repository\CantoRepository;
-use Ecentral\CantoSaasFal\Resource\Repository\InvalidSearchTypeException;
+use Ecentral\CantoSaasFal\Resource\Repository\Exception\InvalidSearchTypeException;
 use Ecentral\CantoSaasFal\Utility\CantoUtility;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;

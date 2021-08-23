@@ -9,7 +9,7 @@ declare(strict_types=1);
  * LICENSE file that was distributed with this source code.
  */
 
-namespace Ecentral\CantoSaasFal\Resource\Repository;
+namespace Ecentral\CantoSaasFal\Resource\Repository\Exception;
 
 use Ecentral\CantoSaasFal\Exception;
 
