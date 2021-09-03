@@ -47,7 +47,7 @@ class InlineControlContainer extends \TYPO3\CMS\Backend\Form\Container\InlineCon
         $storageId = 0;
         $siteConfiguration = $site->getConfiguration();
         if (($siteConfiguration['canto_enabled_asset_picker'] ?? false) === true) {
-            $storageId = $siteConfiguration['canto_asset_picker_storage'];
+            $storageId = (int)$siteConfiguration['canto_asset_picker_storage'];
             if ($storageId === 0) {
                 $storages = $this->getStorageRepository()->findByStorageType(CantoDriver::DRIVER_NAME);
                 if (isset($storages[0])) {
