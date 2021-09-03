@@ -121,7 +121,7 @@ class InlineControlContainer extends \TYPO3\CMS\Backend\Form\Container\InlineCon
     protected function getCurrentSite(): Site
     {
         $returnUrl = $this->getTypo3Request()->getQueryParams()['returnUrl'] ?? '';
-        $queryString = parse_url($returnUrl, PHP_URL_QUERY);
+        $queryString = parse_url($returnUrl, PHP_URL_QUERY) ?? '';
         parse_str($queryString, $queryParams);
         $pageId = (int)$queryParams['id'] ?? 0;
         if ($returnUrl === '' || $pageId === 0) {
