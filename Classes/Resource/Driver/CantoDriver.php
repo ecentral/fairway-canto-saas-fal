@@ -266,17 +266,20 @@ class CantoDriver extends AbstractReadOnlyDriver
      */
     public function isWithin($folderIdentifier, $identifier): bool
     {
-        try {
-            $schemeToCheck = CantoUtility::getSchemeFromCombinedIdentifier($folderIdentifier);
-        } catch (\InvalidArgumentException $e) {
-            /*
-             * This exception is catched, because the processing folder is currently handed
-             * to this method, even it is configured for another driver.
-             * See https://forge.typo3.org/issues/94645
-             */
+        /*
+         * Ensure that the given identifiers are valid. Do not throw an exception,
+         * because the processing folder is currently handed to this method, even
+         * if it is configured for another driver.
+         * See https://forge.typo3.org/issues/94645
+         */
+        if (
+            !CantoUtility::isValidCombinedIdentifier($folderIdentifier)
+            || !CantoUtility::isValidCombinedIdentifier($identifier)
+        ) {
             return false;
         }
 
+        $schemeToCheck = CantoUtility::getSchemeFromCombinedIdentifier($identifier);
         if (CantoUtility::isFolder($schemeToCheck)) {
             return $this->folderExistsInFolder($folderIdentifier, $identifier);
         }
