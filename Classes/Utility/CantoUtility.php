@@ -16,9 +16,33 @@ class CantoUtility
     const SCHEME_FOLDER = 'folder';
     const SCHEME_ALBUM = 'album';
 
+    public static function isValidCombinedIdentifier(string $combinedIdentifier): bool
+    {
+        return count(explode('#', $combinedIdentifier)) === 2;
+    }
+
     public static function isFolder(string $scheme): bool
     {
         return $scheme === self::SCHEME_FOLDER || $scheme === self::SCHEME_ALBUM;
+    }
+
+    /**
+     * Split a combined identifier into its scheme and identifier
+     *
+     * @param string $combinedIdentifier
+     * @return array associative array with scheme and identifier
+     *
+     * @throw \InvalidArgumentException
+     */
+    public static function splitCombinedIdentifier(string $combinedIdentifier): array
+    {
+        if (!self::isValidCombinedIdentifier($combinedIdentifier)) {
+            throw new \InvalidArgumentException(
+                'Invalid combined identifier given: ' . $combinedIdentifier,
+                1626954151
+            );
+        }
+        return array_combine(['scheme', 'identifier'], explode('#', $combinedIdentifier));
     }
 
     public static function buildCombinedIdentifier(string $scheme, string $id): string
@@ -31,14 +55,7 @@ class CantoUtility
      */
     public static function getSchemeFromCombinedIdentifier(string $combinedIdentifier): string
     {
-        $identifierParts = explode('#', $combinedIdentifier);
-        if (count($identifierParts) !== 2) {
-            throw new \InvalidArgumentException(
-                'Invalid combined identifier given.',
-                1626954151
-            );
-        }
-        return $identifierParts[0];
+        return self::splitCombinedIdentifier($combinedIdentifier)['scheme'];
     }
 
     /**
@@ -46,14 +63,7 @@ class CantoUtility
      */
     public static function getIdFromCombinedIdentifier(string $combinedIdentifier): string
     {
-        $identifierParts = explode('#', $combinedIdentifier);
-        if (count($identifierParts) !== 2) {
-            throw new \InvalidArgumentException(
-                'Invalid combined identifier given.',
-                1626954176
-            );
-        }
-        return $identifierParts[1];
+        return self::splitCombinedIdentifier($combinedIdentifier)['identifier'];
     }
 
     public static function buildTimestampFromCantoDate(string $cantoDate): int
