@@ -210,7 +210,7 @@ class CantoRepository
             stream_copy_to_stream($fileContentReadStream, $tempFileWriteStream);
         } catch (NotAuthorizedException | InvalidResponseException $e) {
             throw new \RuntimeException(
-                sprintf('Getting original fiule content for file %s failed.', $fileIdentifier),
+                sprintf('Getting original file content for file %s failed.', $fileIdentifier),
                 1627549128
             );
         }
