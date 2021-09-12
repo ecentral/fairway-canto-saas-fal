@@ -201,18 +201,20 @@ class CantoRepository
         }
         $temporaryPath = GeneralUtility::tempnam('canto_clone_', '.' . $fileExtension);
         try {
-            $fileContent = $this->client
+            $fileContentReadStream = $this->client
                 ->asset()
                 ->getAuthorizedUrlContent($sourcePath)
                 ->getBody()
-                ->getContents();
+                ->detach();
+            $tempFileWriteStream = fopen($temporaryPath, 'w');
+            stream_copy_to_stream($fileContentReadStream, $tempFileWriteStream);
         } catch (NotAuthorizedException | InvalidResponseException $e) {
             throw new \RuntimeException(
-                sprintf('Getting original fiule content for file %s failed.', $fileIdentifier),
+                sprintf('Getting original file content for file %s failed.', $fileIdentifier),
                 1627549128
             );
         }
-        file_put_contents($temporaryPath, $fileContent);
+
         touch($temporaryPath, CantoUtility::buildTimestampFromCantoDate($fileData['default']['Date modified']));
         if (!file_exists($temporaryPath)) {
             throw new \RuntimeException(
