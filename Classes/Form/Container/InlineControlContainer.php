@@ -102,8 +102,9 @@ class InlineControlContainer extends \TYPO3\CMS\Backend\Form\Container\InlineCon
      */
     protected function appendButton(string $origHtml, string $buttonHtml): string
     {
-        $lastButtonClosingTagPosition = strrpos($origHtml, '</button>') + 9; // 9 is the length of </button>
-        return substr_replace($origHtml, $buttonHtml, $lastButtonClosingTagPosition, 0);
+        $inlineControlsPosition = strpos($origHtml, 't3js-inline-controls');
+        $inlineControlsClosingTagPosition = strpos($origHtml, '</div>', $inlineControlsPosition);
+        return substr_replace($origHtml, $buttonHtml, $inlineControlsClosingTagPosition, 0);
     }
 
     protected function getUriBuilder(): UriBuilder
