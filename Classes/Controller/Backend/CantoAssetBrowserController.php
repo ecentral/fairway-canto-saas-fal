@@ -75,7 +75,7 @@ class CantoAssetBrowserController
         $identifier = $request->getQueryParams()['identifier'] ?? '';
         $storageUid = (int)$request->getQueryParams()['storageUid'] ?? 0;
         $storage = $this->getCantoStorageByUid($storageUid);
-        if (strlen($scheme) > 0 && strlen($identifier) > 0) {
+        if ($scheme !== '' && $identifier !== '') {
             $combinedFileIdentifier = CantoUtility::buildCombinedIdentifier($scheme, $identifier);
             $file = $storage->getFile($combinedFileIdentifier);
             if ($file instanceof File) {
@@ -94,14 +94,15 @@ class CantoAssetBrowserController
      */
     protected function buildAssetSearchObject(ServerRequestInterface $request): AssetSearch
     {
-        $search = GeneralUtility::makeInstance(AssetSearch::class);
-        $allowedFileExtensions = array_map(
-            function (string $fileExtension) {
-                return '.' . trim($fileExtension);
-            },
-            explode(',', $request->getQueryParams()['allowedFileExtensions'] ?? '')
-        );
+        $search = new AssetSearch();
         $searchType = (string)$request->getQueryParams()['search']['type'] ?? '';
+        $allowedFileExtensions = $request->getQueryParams()['allowedFileExtensions'] ?? '';
+        if ($allowedFileExtensions) {
+            $search->setKeyword(implode('|', array_map(
+                static fn (string $fileExtension) => '.' . trim($fileExtension),
+                explode(',', $allowedFileExtensions)
+            )));
+        }
 
         // TODO We cannot use keyword search and file extension filter because of missing support for logical grouping.
         switch ($searchType) {
@@ -110,17 +111,14 @@ class CantoAssetBrowserController
                 $scheme = (string)$request->getQueryParams()['search']['scheme'] ?? '';
                 $search->setIdentifier($identifier);
                 $search->setScheme($scheme);
-                $search->setKeyword(implode('|', $allowedFileExtensions));
                 break;
             case 'categories':
                 $searchQuery = (string)$request->getQueryParams()['search']['query'] ?? '';
                 $search->setCategories($searchQuery);
-                $search->setKeyword(implode('|', $allowedFileExtensions));
                 break;
             case 'tags':
                 $searchQuery = (string)$request->getQueryParams()['search']['query'] ?? '';
                 $search->setTags($searchQuery);
-                $search->setKeyword(implode('|', $allowedFileExtensions));
                 break;
             default:
                 throw new InvalidSearchTypeException(
