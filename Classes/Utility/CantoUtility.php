@@ -13,8 +13,8 @@ namespace Ecentral\CantoSaasFal\Utility;
 
 class CantoUtility
 {
-    const SCHEME_FOLDER = 'folder';
-    const SCHEME_ALBUM = 'album';
+    public const SCHEME_FOLDER = 'folder';
+    public const SCHEME_ALBUM = 'album';
 
     public static function isValidCombinedIdentifier(string $combinedIdentifier): bool
     {

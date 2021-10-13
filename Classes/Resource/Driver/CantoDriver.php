@@ -26,9 +26,9 @@ use TYPO3\CMS\Core\Utility\PathUtility;
 
 class CantoDriver extends AbstractReadOnlyDriver
 {
-    const DRIVER_NAME = 'Canto';
+    public const DRIVER_NAME = 'Canto';
 
-    const ROOT_FOLDER = 'ROOT';
+    public const ROOT_FOLDER = 'ROOT';
 
     protected CantoRepository $cantoRepository;
 

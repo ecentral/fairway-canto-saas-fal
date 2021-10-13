@@ -76,3 +76,11 @@ if (!is_array($GLOBALS['TYPO3_CONF_VARS']['SYS']['caching']['cacheConfigurations
         ],
     ];
 }
+
+if ($GLOBALS['TYPO3_CONF_VARS']['SYS']['mediafile_ext']) {
+    $GLOBALS['TYPO3_CONF_VARS']['SYS']['mediafile_ext'] .= ',eps';
+}
+
+if ($GLOBALS['TYPO3_CONF_VARS']['GFX']['imagefile_ext']) {
+    $GLOBALS['TYPO3_CONF_VARS']['GFX']['imagefile_ext'] .= ',eps';
+}
