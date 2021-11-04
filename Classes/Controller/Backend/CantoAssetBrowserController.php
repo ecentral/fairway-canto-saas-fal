@@ -66,17 +66,25 @@ class CantoAssetBrowserController
         return $response;
     }
 
-    /**
-     * @throws NoCantoStorageException
-     */
     public function importFile(ServerRequestInterface $request): ResponseInterface
     {
+        return $this->buildFileFetchingResponse($request);
+    }
+
+    public function importCdn(ServerRequestInterface $request): ResponseInterface
+    {
+        return $this->buildFileFetchingResponse($request, true);
+    }
+
+    private function buildFileFetchingResponse(ServerRequestInterface $request, bool $cdn = false): ResponseInterface
+    {
+        $storageUid = (int)($request->getQueryParams()['storageUid'] ?? 0);
         $scheme = $request->getQueryParams()['scheme'] ?? '';
         $identifier = $request->getQueryParams()['identifier'] ?? '';
-        $storageUid = (int)$request->getQueryParams()['storageUid'] ?? 0;
         $storage = $this->getCantoStorageByUid($storageUid);
-        if ($scheme !== '' && $identifier !== '') {
-            $combinedFileIdentifier = CantoUtility::buildCombinedIdentifier($scheme, $identifier);
+
+        if ($scheme && $identifier) {
+            $combinedFileIdentifier = CantoUtility::buildCombinedIdentifier($scheme, $identifier, $cdn);
             $file = $storage->getFile($combinedFileIdentifier);
             if ($file instanceof File) {
                 return new JsonResponse([

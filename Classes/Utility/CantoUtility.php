@@ -15,6 +15,7 @@ class CantoUtility
 {
     public const SCHEME_FOLDER = 'folder';
     public const SCHEME_ALBUM = 'album';
+    private const SCHEME_CDN_TOKEN = 'cdn::';
 
     public static function isValidCombinedIdentifier(string $combinedIdentifier): bool
     {
@@ -30,7 +31,7 @@ class CantoUtility
      * Split a combined identifier into its scheme and identifier
      *
      * @param string $combinedIdentifier
-     * @return array associative array with scheme and identifier
+     * @return array{identifier: string, scheme: string, mdc: bool} associative array with scheme, identifier and mcd-support-flag
      *
      * @throw \InvalidArgumentException
      */
@@ -42,12 +43,16 @@ class CantoUtility
                 1626954151
             );
         }
-        return array_combine(['scheme', 'identifier'], explode('#', $combinedIdentifier));
+        $identification = array_combine(['scheme', 'identifier'], explode('#', $combinedIdentifier));
+        $identification['mdc'] = strpos($identification['scheme'], self::SCHEME_CDN_TOKEN) === 0;
+        $identification['scheme'] = str_replace(self::SCHEME_CDN_TOKEN, '', $identification['scheme']);
+        return $identification;
     }
 
-    public static function buildCombinedIdentifier(string $scheme, string $id): string
+    public static function buildCombinedIdentifier(string $scheme, string $id, bool $withCdnPrefix = false): string
     {
-        return sprintf('%s#%s', $scheme, $id);
+        $prefix = $withCdnPrefix ? self::SCHEME_CDN_TOKEN : '';
+        return sprintf('%s%s#%s', $prefix, $scheme, $id);
     }
 
     /**
@@ -64,6 +69,14 @@ class CantoUtility
     public static function getIdFromCombinedIdentifier(string $combinedIdentifier): string
     {
         return self::splitCombinedIdentifier($combinedIdentifier)['identifier'];
+    }
+
+    /**
+     * @throw \InvalidArgumentException
+     */
+    public static function useMdcCDN(string $combinedIdentifier): bool
+    {
+        return self::splitCombinedIdentifier($combinedIdentifier)['mdc'];
     }
 
     public static function buildTimestampFromCantoDate(string $cantoDate): int

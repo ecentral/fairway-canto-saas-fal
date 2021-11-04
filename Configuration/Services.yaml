@@ -27,6 +27,9 @@ services:
   Ecentral\CantoSaasFal\Resource\Processing\CantoPreviewProcessor:
     public: true
 
+  Ecentral\CantoSaasFal\Resource\Processing\CantoMdcProcessor:
+    public: true
+
   Ecentral\CantoSaasFal\Controller\Backend\CantoAssetBrowserController:
     public: true
 
@@ -53,6 +56,12 @@ services:
         identifier: updateFoldersAfterFileUpdatedInIndexEvent
         event: TYPO3\CMS\Core\Resource\Event\AfterFileUpdatedInIndexEvent
         method: afterFileUpdatedInIndexEvent
+
+  Ecentral\CantoSaasFal\Resource\EventListener\GeneratePublicUrlForResourceEventListener:
+    tags:
+      - name: event.listener
+        identifier: generatePublicUrlForMdcFiles
+        event: TYPO3\CMS\Core\Resource\Event\GeneratePublicUrlForResourceEvent
 
   Ecentral\CantoSaasFal\Resource\EventListener\ForceJpgPreviewImage:
     tags:
