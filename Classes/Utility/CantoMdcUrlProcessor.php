@@ -2,6 +2,13 @@
 
 declare(strict_types=1);
 
+/*
+ * This file is part of the "canto_saas_fal" Extension for TYPO3 CMS.
+ *
+ * For the full copyright and license information, please read the
+ * LICENSE file that was distributed with this source code.
+ */
+
 namespace Ecentral\CantoSaasFal\Utility;
 
 use Ecentral\CantoSaasFal\Resource\Repository\CantoRepository;
@@ -39,7 +46,7 @@ final class CantoMdcUrlProcessor
     }
 
     /**
-     * @param array{width: int, height: int, size: int, x: int, y: int, format: string, crop: ?Area} $configuration
+     * @param array{width: int, height: int, size?: int, x?: int, y?: int, format?: string, crop?: ?Area} $configuration
      * @return string
      */
     public function addOperationToMdcUrl(array $configuration): string

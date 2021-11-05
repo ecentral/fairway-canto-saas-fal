@@ -1,15 +1,20 @@
 <?php
+
 declare(strict_types=1);
 
-namespace Ecentral\CantoSaasFal\Resource\Processing;
+/*
+ * This file is part of the "canto_saas_fal" Extension for TYPO3 CMS.
+ *
+ * For the full copyright and license information, please read the
+ * LICENSE file that was distributed with this source code.
+ */
 
+namespace Ecentral\CantoSaasFal\Resource\Processing;
 
 use Ecentral\CantoSaasFal\Resource\Driver\CantoDriver;
 use Ecentral\CantoSaasFal\Resource\Repository\CantoRepository;
 use Ecentral\CantoSaasFal\Utility\CantoMdcUrlProcessor;
 use Ecentral\CantoSaasFal\Utility\CantoUtility;
-use TYPO3\CMS\Core\Imaging\ImageManipulation\Area;
-use TYPO3\CMS\Core\Resource\File;
 use TYPO3\CMS\Core\Resource\Processing\ProcessorInterface;
 use TYPO3\CMS\Core\Resource\Processing\TaskInterface;
 

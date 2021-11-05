@@ -21,7 +21,6 @@ use Ecentral\CantoSaasFal\Resource\Repository\Exception\InvalidSearchTypeExcepti
 use Ecentral\CantoSaasFal\Utility\CantoUtility;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Http\JsonResponse;
 use TYPO3\CMS\Core\Http\Response;
@@ -109,7 +108,6 @@ class CantoAssetBrowserController
                     $cdn = false;
                 }
             }
-
 
             $combinedFileIdentifier = CantoUtility::buildCombinedIdentifier($scheme, $identifier, $cdn);
 

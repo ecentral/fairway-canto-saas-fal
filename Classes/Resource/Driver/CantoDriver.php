@@ -136,8 +136,8 @@ class CantoDriver extends AbstractReadOnlyDriver
             $url = $this->cantoRepository->generateMdcUrl($fileIdentifier);
             $processor = new CantoMdcUrlProcessor($this->cantoRepository);
             $url .= $processor->addOperationToMdcUrl([
-                'width' => $fileData['width'],
-                'height' => $fileData['height'],
+                'width' => (int)$fileData['width'],
+                'height' => (int)$fileData['height'],
             ]);
             return rawurldecode($url);
         }
