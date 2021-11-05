@@ -15,8 +15,8 @@ use Ecentral\CantoSaasApiClient\Endpoint\Authorization\AuthorizationFailedExcept
 use Ecentral\CantoSaasApiClient\Http\LibraryTree\GetTreeRequest;
 use Ecentral\CantoSaasApiClient\Http\LibraryTree\ListAlbumContentRequest;
 use Ecentral\CantoSaasApiClient\Http\LibraryTree\SearchFolderRequest;
-use Ecentral\CantoSaasFal\Resource\Processing\CantoMdcProcessor;
 use Ecentral\CantoSaasFal\Resource\Repository\CantoRepository;
+use Ecentral\CantoSaasFal\Utility\CantoMdcUrlProcessor;
 use Ecentral\CantoSaasFal\Utility\CantoUtility;
 use TYPO3\CMS\Core\Resource\Exception\FolderDoesNotExistException;
 use TYPO3\CMS\Core\Resource\ResourceStorage;
@@ -36,6 +36,9 @@ class CantoDriver extends AbstractReadOnlyDriver
     protected string $rootFolderIdentifier;
 
     protected bool $validCantoConfiguration;
+
+    /** @var string[] */
+    public static array $transientCachedFiles = [];
 
     public function __construct(array $configuration = [])
     {
@@ -131,10 +134,11 @@ class CantoDriver extends AbstractReadOnlyDriver
         $fileData = $this->cantoRepository->getFileDetails($scheme, $fileIdentifier, $useMdc);
         if ($useMdc) {
             $url = $this->cantoRepository->generateMdcUrl($fileIdentifier);
-            $url .= CantoMdcProcessor::addOperationToMdcUrl([
+            $processor = new CantoMdcUrlProcessor($this->cantoRepository);
+            $url .= $processor->addOperationToMdcUrl([
                 'width' => $fileData['width'],
                 'height' => $fileData['height'],
-            ], true);
+            ]);
             return rawurldecode($url);
         }
         if (!empty($fileData['url']['directUrlOriginal'])) {
@@ -626,5 +630,18 @@ class CantoDriver extends AbstractReadOnlyDriver
     protected function canonicalizeAndCheckFolderIdentifier($folderIdentifier): string
     {
         return $folderIdentifier;
+    }
+
+    /**
+     * Transient File-Cache cleanup
+     * @see https://review.typo3.org/#/c/36446/
+     */
+    public function __destruct()
+    {
+        foreach (self::$transientCachedFiles as $cachedFile) {
+            if (file_exists($cachedFile)) {
+                unlink($cachedFile);
+            }
+        }
     }
 }

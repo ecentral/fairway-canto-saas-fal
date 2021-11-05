@@ -21,6 +21,8 @@ use Ecentral\CantoSaasFal\Resource\Repository\Exception\InvalidSearchTypeExcepti
 use Ecentral\CantoSaasFal\Utility\CantoUtility;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use TYPO3\CMS\Core\Database\Connection;
+use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Http\JsonResponse;
 use TYPO3\CMS\Core\Http\Response;
 use TYPO3\CMS\Core\Pagination\SimplePagination;
@@ -59,6 +61,7 @@ class CantoAssetBrowserController
             'results' => $paginator,
             'pagination' => new SimplePagination($paginator),
             'queryParams' => $request->getQueryParams(),
+            'isMdcEnabled' => $storage->getConfiguration()['mdcEnabled'] ?? false,
         ]);
 
         $response = new Response();
@@ -84,7 +87,32 @@ class CantoAssetBrowserController
         $storage = $this->getCantoStorageByUid($storageUid);
 
         if ($scheme && $identifier) {
+            if ($cdn) {
+                $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)
+                    ->getConnectionForTable('sys_file')->createQueryBuilder();
+                $result = $queryBuilder
+                    ->select('identifier')
+                    ->from('sys_file')
+                    ->where($queryBuilder->expr()->eq(
+                        'identifier',
+                        $queryBuilder->createNamedParameter(
+                            CantoUtility::buildCombinedIdentifier($scheme, $identifier, true)
+                        )
+                    ))
+                    ->execute()
+                    ->fetchAllAssociative();
+                if (count($result) > 0) {
+                    // toggling the mdc on/off depending on whether the file already exists or not
+                    // this would be a better experience in the browser itself, disabling every button that is duplicated
+                    // but that would probably have a huge performance impact, thus we do the switch here
+                    // we only care about duplicates, when we are using mdc, as we dont have to download files impacts for cdn files
+                    $cdn = false;
+                }
+            }
+
+
             $combinedFileIdentifier = CantoUtility::buildCombinedIdentifier($scheme, $identifier, $cdn);
+
             $file = $storage->getFile($combinedFileIdentifier);
             if ($file instanceof File) {
                 return new JsonResponse([

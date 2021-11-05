@@ -11,7 +11,7 @@
         </p>
     </div>
     <f:for each="{results.paginatedItems}" as="result">
-        <f:render partial="SearchResult/ResultItem" arguments="{result: result}" />
+        <f:render partial="SearchResult/ResultItem" arguments="{result: result, isMdcEnabled: isMdcEnabled}" />
     </f:for>
 </div>
 

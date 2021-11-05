@@ -12,6 +12,7 @@ declare(strict_types=1);
 namespace Ecentral\CantoSaasFal\Resource\EventListener;
 
 use Ecentral\CantoSaasFal\Resource\Driver\CantoDriver;
+use Ecentral\CantoSaasFal\Utility\CantoUtility;
 use TYPO3\CMS\Core\Resource\Event\BeforeFileProcessingEvent;
 use TYPO3\CMS\Core\Resource\File;
 use TYPO3\CMS\Core\Resource\ProcessedFile;
@@ -24,9 +25,10 @@ class ForceJpgPreviewImage implements SingletonInterface
     public function __invoke(BeforeFileProcessingEvent $event): void
     {
         $file = $event->getFile();
-        if ($event->getTaskType() === ProcessedFile::CONTEXT_IMAGEPREVIEW
+        if ($file instanceof File
+            && $event->getTaskType() === ProcessedFile::CONTEXT_IMAGEPREVIEW
             && $event->getDriver() instanceof CantoDriver
-            && $file instanceof File
+            && !CantoUtility::useMdcCDN($file->getIdentifier())
         ) {
             $configuration = array_replace(
                 $event->getConfiguration(),

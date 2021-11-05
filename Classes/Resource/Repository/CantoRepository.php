@@ -24,8 +24,8 @@ use Ecentral\CantoSaasApiClient\Http\LibraryTree\ListAlbumContentRequest;
 use Ecentral\CantoSaasFal\Domain\Model\Dto\AssetSearch;
 use Ecentral\CantoSaasFal\Domain\Model\Dto\AssetSearchResponse;
 use Ecentral\CantoSaasFal\Resource\CantoClientFactory;
+use Ecentral\CantoSaasFal\Resource\Driver\CantoDriver;
 use Ecentral\CantoSaasFal\Utility\CantoUtility;
-use SplFileObject;
 use TYPO3\CMS\Core\Cache\Frontend\FrontendInterface;
 use TYPO3\CMS\Core\Registry;
 use TYPO3\CMS\Core\Resource\Exception\FolderDoesNotExistException;
@@ -207,11 +207,9 @@ class CantoRepository
         }
         $temporaryPath = GeneralUtility::tempnam('canto_clone_', '.' . $fileExtension);
         if ($useMdc) {
-            $temporaryPath .= '.canto';
-            $this->getMdcFileForLocalProcessing($temporaryPath, $fileData, $fileIdentifier);
-        } else {
-            $this->downloadCantoFile($temporaryPath, $sourcePath, $fileIdentifier);
+            return '';
         }
+        $this->downloadCantoFile($temporaryPath, $sourcePath, $fileIdentifier);
 
         touch($temporaryPath, CantoUtility::buildTimestampFromCantoDate($fileData['default']['Date modified']));
         if (!file_exists($temporaryPath)) {
@@ -220,14 +218,8 @@ class CantoRepository
                 1320577649
             );
         }
+        CantoDriver::$transientCachedFiles[] = $temporaryPath;
         return $temporaryPath;
-    }
-
-    private function getMdcFileForLocalProcessing(string $temporaryPath, array $fileData, string $fileIdentifier): void
-    {
-        $file = new SplFileObject($temporaryPath, 'wb');
-        $data = json_encode($fileData, JSON_THROW_ON_ERROR);
-        $file->fwrite($data);
     }
 
     private function downloadCantoFile(string $temporaryPath, ?string $sourcePath, string $fileIdentifier): void

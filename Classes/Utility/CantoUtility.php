@@ -16,6 +16,7 @@ class CantoUtility
     public const SCHEME_FOLDER = 'folder';
     public const SCHEME_ALBUM = 'album';
     private const SCHEME_CDN_TOKEN = 'cdn::';
+    private const PROCESSING_PREFIX = 'processed::';
 
     public static function isValidCombinedIdentifier(string $combinedIdentifier): bool
     {
@@ -44,7 +45,7 @@ class CantoUtility
             );
         }
         $identification = array_combine(['scheme', 'identifier'], explode('#', $combinedIdentifier));
-        $identification['mdc'] = strpos($identification['scheme'], self::SCHEME_CDN_TOKEN) === 0;
+        $identification['mdc'] = str_contains($identification['scheme'], self::SCHEME_CDN_TOKEN);
         $identification['scheme'] = str_replace(self::SCHEME_CDN_TOKEN, '', $identification['scheme']);
         return $identification;
     }
@@ -83,5 +84,13 @@ class CantoUtility
     {
         $dateTime = \DateTime::createFromFormat('YmdHisv', $cantoDate);
         return $dateTime->getTimestamp();
+    }
+
+    public static function identifierToProcessedIdentifier(string $identifier): string
+    {
+        if (str_contains($identifier, self::PROCESSING_PREFIX)) {
+            return $identifier;
+        }
+        return self::PROCESSING_PREFIX . $identifier;
     }
 }

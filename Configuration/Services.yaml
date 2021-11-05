@@ -69,6 +69,15 @@ services:
         identifier: forceCantoJpegPreview
         event: TYPO3\CMS\Core\Resource\Event\BeforeFileProcessingEvent
 
+  Ecentral\CantoSaasFal\Resource\EventListener\BeforeFileProcessingEventListener:
+    arguments:
+      - "@Ecentral\\CantoSaasFal\\Resource\\Repository\\CantoRepository"
+      - "@TYPO3\\CMS\\Core\\Resource\\ProcessedFileRepository"
+    tags:
+      - name: event.listener
+        identifier: cantoMdcProcessingFileEnricher
+        event: TYPO3\CMS\Core\Resource\Event\BeforeFileProcessingEvent
+
   cache.canto_folder:
     class: TYPO3\CMS\Core\Cache\Frontend\FrontendInterface
     public: true
