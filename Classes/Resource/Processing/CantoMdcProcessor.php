@@ -12,19 +12,21 @@ declare(strict_types=1);
 namespace Ecentral\CantoSaasFal\Resource\Processing;
 
 use Ecentral\CantoSaasFal\Resource\Driver\CantoDriver;
+use Ecentral\CantoSaasFal\Resource\MdcUrlGenerator;
 use Ecentral\CantoSaasFal\Resource\Repository\CantoRepository;
-use Ecentral\CantoSaasFal\Utility\CantoMdcUrlProcessor;
 use Ecentral\CantoSaasFal\Utility\CantoUtility;
 use TYPO3\CMS\Core\Resource\Processing\ProcessorInterface;
 use TYPO3\CMS\Core\Resource\Processing\TaskInterface;
 
 final class CantoMdcProcessor implements ProcessorInterface
 {
-    protected CantoRepository $cantoRepository;
+    private CantoRepository $cantoRepository;
+    private MdcUrlGenerator $mdcUrlGenerator;
 
-    public function __construct(CantoRepository $cantoRepository)
+    public function __construct(CantoRepository $cantoRepository, MdcUrlGenerator $mdcUrlGenerator)
     {
         $this->cantoRepository = $cantoRepository;
+        $this->mdcUrlGenerator = $mdcUrlGenerator;
     }
 
     /**
@@ -35,7 +37,7 @@ final class CantoMdcProcessor implements ProcessorInterface
     {
         if ($task->getSourceFile()->getStorage()->getDriverType() === CantoDriver::DRIVER_NAME) {
             $identifier = $task->getTargetFile()->getIdentifier();
-            if (CantoUtility::useMdcCDN($identifier)) {
+            if (CantoUtility::isMdcActivated($identifier)) {
                 return true;
             }
         }
@@ -49,11 +51,10 @@ final class CantoMdcProcessor implements ProcessorInterface
             $task->getSourceFile()->getStorage()->getConfiguration()
         );
         $fullFileIdentifier = $task->getTargetFile()->getIdentifier();
-        $processor = new CantoMdcUrlProcessor($this->cantoRepository);
-        $url = $processor->getCantoMdcUrl($task->getSourceFile(), $task->getConfiguration());
+        $url = $this->mdcUrlGenerator->generateMdcUrl($task->getSourceFile(), $task->getConfiguration());
         $task->getTargetFile()->updateProcessingUrl($url);
         $properties = $task->getTargetFile()->getProperties();
-        $properties = array_merge($properties, $processor->getImageWidthHeight(
+        $properties = array_merge($properties, $this->mdcUrlGenerator->resolveImageWidthHeight(
             $task->getSourceFile(),
             $task->getConfiguration(),
         ));

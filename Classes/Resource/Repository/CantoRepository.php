@@ -71,7 +71,7 @@ class CantoRepository
     /**
      * @throws AuthorizationFailedException
      */
-    public function initialize(int $storageUid, array $driverConfiguration)
+    public function initialize(int $storageUid, array $driverConfiguration): void
     {
         $this->driverConfiguration = $driverConfiguration;
         $this->storageUid = $storageUid;
@@ -191,7 +191,7 @@ class CantoRepository
     {
         $scheme = CantoUtility::getSchemeFromCombinedIdentifier($fileIdentifier);
         $identifier = CantoUtility::getIdFromCombinedIdentifier($fileIdentifier);
-        $useMdc = CantoUtility::useMdcCDN($fileIdentifier);
+        $useMdc = CantoUtility::isMdcActivated($fileIdentifier);
         $fileData = $this->getFileDetails($scheme, $identifier, $useMdc);
         $sourcePath = $fileData['url']['directUrlOriginal'] ?? null;
         $fileExtension = PathUtility::pathinfo($fileData['name'], PATHINFO_EXTENSION);
@@ -246,7 +246,7 @@ class CantoRepository
     {
         $domain = $this->driverConfiguration['mdcDomainName'];
         $awsAccountId = $this->driverConfiguration['mdcAwsAccountId'];
-        return sprintf('https://%s/redention/%s/image_%s/', $domain, $awsAccountId, $assetId);
+        return sprintf('https://%s/rendition/%s/image_%s/', $domain, $awsAccountId, $assetId);
     }
 
     public function getFilesInFolder(

@@ -152,6 +152,17 @@
                     </config>
                 </TCEforms>
             </mdcAwsAccountId>
+            <masterImageSize>
+                <TCEforms>
+                    <label>LLL:EXT:canto_saas_fal/Resources/Private/Language/locallang_be.xlf:sys_file_storage.cantoDriverFlexform_masterImageSize</label>
+                    <config>
+                        <type>input</type>
+                        <eval>trim,int</eval>
+                        <size>30</size>
+                        <default>2048</default>
+                    </config>
+                </TCEforms>
+            </masterImageSize>
         </el>
     </ROOT>
 </T3DataStructure>

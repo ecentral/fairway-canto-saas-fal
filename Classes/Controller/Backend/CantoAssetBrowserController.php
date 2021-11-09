@@ -75,10 +75,11 @@ class CantoAssetBrowserController
 
     public function importCdn(ServerRequestInterface $request): ResponseInterface
     {
+        // todo: this will be unified in the process as we do not specify mdc usage per file but per site configuration
         return $this->buildFileFetchingResponse($request, true);
     }
 
-    private function buildFileFetchingResponse(ServerRequestInterface $request, bool $cdn = false): ResponseInterface
+    private function buildFileFetchingResponse(ServerRequestInterface $request, bool $useCdn = false): ResponseInterface
     {
         $storageUid = (int)($request->getQueryParams()['storageUid'] ?? 0);
         $scheme = $request->getQueryParams()['scheme'] ?? '';
@@ -86,7 +87,7 @@ class CantoAssetBrowserController
         $storage = $this->getCantoStorageByUid($storageUid);
 
         if ($scheme && $identifier) {
-            if ($cdn) {
+            if ($useCdn) {
                 $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)
                     ->getConnectionForTable('sys_file')->createQueryBuilder();
                 $result = $queryBuilder
@@ -105,11 +106,11 @@ class CantoAssetBrowserController
                     // this would be a better experience in the browser itself, disabling every button that is duplicated
                     // but that would probably have a huge performance impact, thus we do the switch here
                     // we only care about duplicates, when we are using mdc, as we dont have to download files impacts for cdn files
-                    $cdn = false;
+                    $useCdn = false;
                 }
             }
 
-            $combinedFileIdentifier = CantoUtility::buildCombinedIdentifier($scheme, $identifier, $cdn);
+            $combinedFileIdentifier = CantoUtility::buildCombinedIdentifier($scheme, $identifier, $useCdn);
 
             $file = $storage->getFile($combinedFileIdentifier);
             if ($file instanceof File) {
@@ -129,7 +130,7 @@ class CantoAssetBrowserController
     protected function buildAssetSearchObject(ServerRequestInterface $request): AssetSearch
     {
         $search = new AssetSearch();
-        $searchType = (string)$request->getQueryParams()['search']['type'] ?? '';
+        $searchType = $request->getQueryParams()['search']['type'] ?? '';
         $allowedFileExtensions = $request->getQueryParams()['allowedFileExtensions'] ?? '';
         if ($allowedFileExtensions) {
             $search->setKeyword(implode('|', array_map(
@@ -139,19 +140,19 @@ class CantoAssetBrowserController
         }
 
         // TODO We cannot use keyword search and file extension filter because of missing support for logical grouping.
-        switch ($searchType) {
+        switch ((string)$searchType) {
             case 'identifier':
-                $identifier = (string)$request->getQueryParams()['search']['identifier'] ?? '';
-                $scheme = (string)$request->getQueryParams()['search']['scheme'] ?? '';
+                $identifier = (string)($request->getQueryParams()['search']['identifier'] ?? '');
+                $scheme = (string)($request->getQueryParams()['search']['scheme'] ?? '');
                 $search->setIdentifier($identifier);
                 $search->setScheme($scheme);
                 break;
             case 'categories':
-                $searchQuery = (string)$request->getQueryParams()['search']['query'] ?? '';
+                $searchQuery = (string)($request->getQueryParams()['search']['query'] ?? '');
                 $search->setCategories($searchQuery);
                 break;
             case 'tags':
-                $searchQuery = (string)$request->getQueryParams()['search']['query'] ?? '';
+                $searchQuery = (string)($request->getQueryParams()['search']['query'] ?? '');
                 $search->setTags($searchQuery);
                 break;
             default:

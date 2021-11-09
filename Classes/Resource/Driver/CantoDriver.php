@@ -15,8 +15,8 @@ use Ecentral\CantoSaasApiClient\Endpoint\Authorization\AuthorizationFailedExcept
 use Ecentral\CantoSaasApiClient\Http\LibraryTree\GetTreeRequest;
 use Ecentral\CantoSaasApiClient\Http\LibraryTree\ListAlbumContentRequest;
 use Ecentral\CantoSaasApiClient\Http\LibraryTree\SearchFolderRequest;
+use Ecentral\CantoSaasFal\Resource\MdcUrlGenerator;
 use Ecentral\CantoSaasFal\Resource\Repository\CantoRepository;
-use Ecentral\CantoSaasFal\Utility\CantoMdcUrlProcessor;
 use Ecentral\CantoSaasFal\Utility\CantoUtility;
 use TYPO3\CMS\Core\Resource\Exception\FolderDoesNotExistException;
 use TYPO3\CMS\Core\Resource\ResourceStorage;
@@ -39,6 +39,8 @@ class CantoDriver extends AbstractReadOnlyDriver
 
     /** @var string[] */
     public static array $transientCachedFiles = [];
+
+    private ?MdcUrlGenerator $mdcUrlGenerator = null;
 
     public function __construct(array $configuration = [])
     {
@@ -68,6 +70,7 @@ class CantoDriver extends AbstractReadOnlyDriver
                 // TODO Show error message in TYPO3 Backend.
             }
         }
+        $this->mdcUrlGenerator = GeneralUtility::makeInstance(MdcUrlGenerator::class);
     }
 
     /**
@@ -79,17 +82,11 @@ class CantoDriver extends AbstractReadOnlyDriver
         return $this->capabilities;
     }
 
-    /**
-     * @return string
-     */
     public function getRootLevelFolder(): string
     {
         return $this->rootFolderIdentifier;
     }
 
-    /**
-     * @return string
-     */
     public function getDefaultFolder(): string
     {
         return $this->rootFolderIdentifier;
@@ -130,12 +127,11 @@ class CantoDriver extends AbstractReadOnlyDriver
     {
         $scheme = CantoUtility::getSchemeFromCombinedIdentifier($identifier);
         $fileIdentifier = CantoUtility::getIdFromCombinedIdentifier($identifier);
-        $useMdc = CantoUtility::useMdcCDN($identifier);
+        $useMdc = CantoUtility::isMdcActivated($identifier);
         $fileData = $this->cantoRepository->getFileDetails($scheme, $fileIdentifier, $useMdc);
-        if ($useMdc) {
+        if ($useMdc && $this->mdcUrlGenerator) {
             $url = $this->cantoRepository->generateMdcUrl($fileIdentifier);
-            $processor = new CantoMdcUrlProcessor($this->cantoRepository);
-            $url .= $processor->addOperationToMdcUrl([
+            $url .= $this->mdcUrlGenerator->addOperationToMdcUrl([
                 'width' => (int)$fileData['width'],
                 'height' => (int)$fileData['height'],
             ]);
@@ -160,7 +156,7 @@ class CantoDriver extends AbstractReadOnlyDriver
         $result = $this->cantoRepository->getFileDetails(
             $scheme,
             $explicitFileIdentifier,
-            CantoUtility::useMdcCDN($fileIdentifier)
+            CantoUtility::isMdcActivated($fileIdentifier)
         );
         return !empty($result);
     }
@@ -243,7 +239,8 @@ class CantoDriver extends AbstractReadOnlyDriver
         $subFolders = str_getcsv($folderData['idPath'], '/');
         return in_array(
             CantoUtility::getIdFromCombinedIdentifier($folderName),
-            $subFolders
+            $subFolders,
+            false
         );
     }
 
@@ -307,7 +304,7 @@ class CantoDriver extends AbstractReadOnlyDriver
 
     /**
      * @param string $fileIdentifier
-     * @param array $propertiesToExtract Array of properties which are be extracted
+     * @param array $propertiesToExtract Array of properties which are being extracted
      *                                   If empty all will be extracted
      * @throws FolderDoesNotExistException
      */
@@ -323,7 +320,7 @@ class CantoDriver extends AbstractReadOnlyDriver
         $result = $this->cantoRepository->getFileDetails(
             $scheme,
             $explicitFileIdentifier,
-            CantoUtility::useMdcCDN($fileIdentifier)
+            CantoUtility::isMdcActivated($fileIdentifier)
         );
         foreach ($result['relatedAlbums'] ?? [] as $album) {
             $folders[] = CantoUtility::buildCombinedIdentifier($album['scheme'], $album['id']);

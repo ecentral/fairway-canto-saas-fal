@@ -59,8 +59,8 @@ class WarmupCantoCache extends Command
         /** @var ResourceStorage $storage */
         foreach ($storages as $storage) {
             try {
-                $cantoRepository = $this->initializeCantoRepository($storage);
-                $this->warmupFolderCache($cantoRepository);
+                $repository = $this->initializeRepository($storage);
+                $this->warmupFolderCache($repository);
             } catch (AuthorizationFailedException | NotAuthorizedException | InvalidResponseException $e) {
                 $output->writeln($e->getMessage());
                 return 1;
@@ -75,7 +75,7 @@ class WarmupCantoCache extends Command
         $storageUid = (int)$input->getArgument('storageUid');
         if ($storageUid > 0) {
             $storage = $this->storageRepository->findByUid($storageUid);
-            if ($storage->getDriverType() === CantoDriver::DRIVER_NAME) {
+            if ($storage && $storage->getDriverType() === CantoDriver::DRIVER_NAME) {
                 $storages[] = $storage;
             }
         }
@@ -88,7 +88,7 @@ class WarmupCantoCache extends Command
     /**
      * @throws AuthorizationFailedException
      */
-    protected function initializeCantoRepository(ResourceStorage $storage): CantoRepository
+    protected function initializeRepository(ResourceStorage $storage): CantoRepository
     {
         $cantoRepository = GeneralUtility::makeInstance(CantoRepository::class);
         $cantoRepository->initialize(
@@ -98,10 +98,10 @@ class WarmupCantoCache extends Command
         return $cantoRepository;
     }
 
-    protected function warmupFolderCache(CantoRepository $cantoRepository): void
+    protected function warmupFolderCache(CantoRepository $repository): void
     {
-        $this->cantoFolderCache->flushByTags([$cantoRepository->getCantoCacheTag()]);
-        $cantoRepository->getFolderIdentifierTree(
+        $this->cantoFolderCache->flushByTags([$repository->getCantoCacheTag()]);
+        $repository->getFolderIdentifierTree(
             GetTreeRequest::SORT_BY_NAME,
             GetTreeRequest::SORT_DIRECTION_ASC
         );

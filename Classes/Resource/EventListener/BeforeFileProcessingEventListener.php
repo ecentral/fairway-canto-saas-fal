@@ -12,8 +12,8 @@ declare(strict_types=1);
 namespace Ecentral\CantoSaasFal\Resource\EventListener;
 
 use Ecentral\CantoSaasFal\Resource\Driver\CantoDriver;
+use Ecentral\CantoSaasFal\Resource\MdcUrlGenerator;
 use Ecentral\CantoSaasFal\Resource\Repository\CantoRepository;
-use Ecentral\CantoSaasFal\Utility\CantoMdcUrlProcessor;
 use Ecentral\CantoSaasFal\Utility\CantoUtility;
 use TYPO3\CMS\Core\Resource\Event\BeforeFileProcessingEvent;
 use TYPO3\CMS\Core\Resource\ProcessedFile;
@@ -23,11 +23,13 @@ final class BeforeFileProcessingEventListener
 {
     private CantoRepository $cantoRepository;
     private ProcessedFileRepository $processedFileRepository;
+    private MdcUrlGenerator $mdcUrlGenerator;
 
-    public function __construct(CantoRepository $cantoRepository, ProcessedFileRepository $processedFileRepository)
+    public function __construct(CantoRepository $cantoRepository, ProcessedFileRepository $processedFileRepository, MdcUrlGenerator $mdcUrlGenerator)
     {
         $this->cantoRepository = $cantoRepository;
         $this->processedFileRepository = $processedFileRepository;
+        $this->mdcUrlGenerator = $mdcUrlGenerator;
     }
 
     public function __invoke(BeforeFileProcessingEvent $event)
@@ -37,17 +39,16 @@ final class BeforeFileProcessingEventListener
         }
         $processedFile = $event->getProcessedFile();
         $identifier = $processedFile->getOriginalFile()->getIdentifier();
-        if (!CantoUtility::useMdcCDN($identifier)) {
+        if (!CantoUtility::isMdcActivated($identifier)) {
             return;
         }
-        $processor = new CantoMdcUrlProcessor($this->cantoRepository);
         $configuration = $event->getConfiguration();
         if ($event->getTaskType() === ProcessedFile::CONTEXT_IMAGEPREVIEW) {
             $configuration['fileExtension'] = 'jpg';
         }
-        $url = $processor->getCantoMdcUrl($processedFile->getOriginalFile(), $configuration);
+        $url = $this->mdcUrlGenerator->generateMdcUrl($processedFile->getOriginalFile(), $configuration);
         $properties = $processedFile->getProperties() ?? [];
-        $properties = array_merge($properties, $processor->getImageWidthHeight(
+        $properties = array_merge($properties, $this->mdcUrlGenerator->resolveImageWidthHeight(
             $processedFile->getOriginalFile(),
             $configuration
         ));

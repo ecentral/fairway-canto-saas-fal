@@ -9,22 +9,36 @@ declare(strict_types=1);
  * LICENSE file that was distributed with this source code.
  */
 
-namespace Ecentral\CantoSaasFal\Utility;
+namespace Ecentral\CantoSaasFal\Resource;
 
+use Ecentral\CantoSaasFal\Resource\Event\BeforeMdcUrlGenerationEvent;
 use Ecentral\CantoSaasFal\Resource\Repository\CantoRepository;
+use Ecentral\CantoSaasFal\Utility\CantoUtility;
+use TYPO3\CMS\Core\EventDispatcher\EventDispatcher;
 use TYPO3\CMS\Core\Imaging\ImageManipulation\Area;
 use TYPO3\CMS\Core\Resource\File;
 
-final class CantoMdcUrlProcessor
+final class MdcUrlGenerator
 {
-    private CantoRepository $cantoRepository;
+    // get image as a square, formatted as -B<image-size>
+    public const BOXED = '-B';
+    // get image scaled down to width+height, formatted as -S<width>x<height>
+    public const SCALED = '-S';
+    // get image formatted into a provided file extension, formatted as -F<FILE_EXT> [JPG, WEBP, PNG, TIF, GIF, JP2 (JPG2000)]
+    public const FORMATTED = '-F';
+    // get image cropped to an area, formatted as -C<width>x<height>,<x>,<y>
+    public const CROPPED = '-C';
 
-    public function __construct(CantoRepository $cantoRepository)
+    private CantoRepository $cantoRepository;
+    private EventDispatcher $eventDispatcher;
+
+    public function __construct(CantoRepository $cantoRepository, EventDispatcher $eventDispatcher)
     {
         $this->cantoRepository = $cantoRepository;
+        $this->eventDispatcher = $eventDispatcher;
     }
 
-    public function getCantoMdcUrl(File $file, array $configuration): string
+    public function generateMdcUrl(File $file, array $configuration): string
     {
         $assetId = CantoUtility::getIdFromCombinedIdentifier($file->getIdentifier());
         $transformedConfiguration = $this->transformConfiguration($file, $configuration);
@@ -34,7 +48,7 @@ final class CantoMdcUrlProcessor
     /**
      * @return array{width: int, height: int}
      */
-    public function getImageWidthHeight(File $file, array $processingConfiguration): array
+    public function resolveImageWidthHeight(File $file, array $processingConfiguration): array
     {
         $configuration = $this->transformConfiguration($file, $processingConfiguration);
         $width = min($configuration['width'], $processingConfiguration['maxWidth'] ?? PHP_INT_MAX);
@@ -51,33 +65,33 @@ final class CantoMdcUrlProcessor
      */
     public function addOperationToMdcUrl(array $configuration): string
     {
-        $scale = $this->enableScaling($configuration);
         // @todo are there alternatives than Area ?
         $crop = $configuration['crop'] instanceof Area;
         $scaleString = '';
         $formatString = '';
         $cropString = '';
-        if ($scale && $configuration['size']) {
-            $scaleString = '-B' . $configuration['size'];
+        if ($configuration['size']) {
+            $scaleString = self::BOXED . $configuration['size'];
         }
         if (!$scaleString && $configuration['width'] && $configuration['height']) {
-            $scaleString = '-S' . $configuration['width'] . 'x' . $configuration['height'];
+            $scaleString = self::SCALED . (int)$configuration['width'] . 'x' . (int)$configuration['height'];
         }
         if ($configuration['format']) {
-            $formatString = '-F' . $configuration['format'];
+            $formatString = self::FORMATTED . $configuration['format'];
         }
         if ($crop) {
             $croppingArea = $configuration['crop'];
             assert($croppingArea instanceof Area);
-            $cropString = '-C' . (int)$croppingArea->getWidth() . 'x' . (int)$croppingArea->getHeight();
+            $cropString = self::CROPPED . (int)$croppingArea->getWidth() . 'x' . (int)$croppingArea->getHeight();
             $cropString .= ',' . (int)$croppingArea->getOffsetLeft() . ',' . (int)$croppingArea->getOffsetTop();
         }
-        return sprintf('%s%s%s', $scaleString, $cropString, $formatString);
+        $event = new BeforeMdcUrlGenerationEvent($configuration, $scaleString, $cropString, $formatString, true);
+        return $this->eventDispatcher->dispatch($event)->getMdcUrl();
     }
 
     /**
-     * @param array{width: null|numeric, height: null|numeric, minWidth: null|numeric, minHeight: null|numeric, maxWidth: null|numeric, maxHeight: null|numeric, crop: ?Area} $configuration
-     * @return array{width: int, height: int, size: ?int, x: ?int, y: ?int, format: ?string, crop: ?Area} $configuration
+     * @param array{width: ?int, height: ?int, minWidth: null|numeric, minHeight: null|numeric, maxWidth: null|numeric, maxHeight: null|numeric, crop: ?Area} $configuration
+     * @return array{width: int, height: int, size?: ?int, x?: ?int, y?: ?int, format?: ?string, crop: ?Area, minWidth?: null|numeric, minHeight?: null|numeric, maxWidth?: null|numeric, maxHeight?: null|numeric} $configuration
      */
     private function transformConfiguration(File $file, array $configuration): array
     {
@@ -86,16 +100,18 @@ final class CantoMdcUrlProcessor
         $fileData = $this->cantoRepository->getFileDetails($scheme, $identifier, true);
 
         if ($configuration['width'] && $configuration['height']) {
+            $configuration['height'] = (int)$configuration['height'];
+            $configuration['width'] = (int)$configuration['width'];
             return $configuration;
         }
         $configuration['height'] = $configuration['height'] ?? $configuration['maxHeight'] ?? $fileData['height'];
         $configuration['width'] = $configuration['width'] ?? $configuration['maxWidth'] ?? $fileData['width'];
-        $configuration['height'] = (int)$configuration['height'];
-        $configuration['width'] = (int)$configuration['width'];
         if ($configuration['crop'] instanceof Area) {
             $configuration['height'] = min($configuration['height'], $configuration['crop']->getHeight());
             $configuration['width'] = min($configuration['width'], $configuration['crop']->getWidth());
         }
+        $configuration['height'] = (int)$configuration['height'];
+        $configuration['width'] = (int)$configuration['width'];
         if ($configuration['width'] === $configuration['height']) {
             $configuration['size'] = $configuration['width'];
         }
@@ -103,21 +119,5 @@ final class CantoMdcUrlProcessor
             $configuration['format'] = strtoupper($configuration['fileExtension']);
         }
         return $configuration;
-    }
-
-    /**
-     * @param array{width: null|numeric, height: null|numeric, minWidth: null|numeric, minHeight: null|numeric, maxWidth: null|numeric, maxHeight: null|numeric, crop: ?Area} $configuration
-     * @return bool
-     */
-    private function enableScaling(array $configuration): bool
-    {
-        $filtered = array_filter($configuration);
-        if (count($filtered) > 1) {
-            return true;
-        }
-        if (count($filtered) === 1 && array_keys($filtered)[0] !== 'crop') {
-            return true;
-        }
-        return false;
     }
 }

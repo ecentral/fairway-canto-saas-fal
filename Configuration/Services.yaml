@@ -33,6 +33,9 @@ services:
   Ecentral\CantoSaasFal\Controller\Backend\CantoAssetBrowserController:
     public: true
 
+  Ecentral\CantoSaasFal\Resource\MdcUrlGenerator:
+    public: true
+
   Ecentral\CantoSaasFal\Resource\Repository\CantoAlbumRepository:
     arguments:
       - 'sys_file_canto_album'
@@ -73,6 +76,7 @@ services:
     arguments:
       - "@Ecentral\\CantoSaasFal\\Resource\\Repository\\CantoRepository"
       - "@TYPO3\\CMS\\Core\\Resource\\ProcessedFileRepository"
+      - "@Ecentral\\CantoSaasFal\\Resource\\MdcUrlGenerator"
     tags:
       - name: event.listener
         identifier: cantoMdcProcessingFileEnricher

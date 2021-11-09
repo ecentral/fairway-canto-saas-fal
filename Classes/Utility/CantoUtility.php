@@ -11,6 +11,9 @@ declare(strict_types=1);
 
 namespace Ecentral\CantoSaasFal\Utility;
 
+use DateTime;
+use InvalidArgumentException;
+
 class CantoUtility
 {
     public const SCHEME_FOLDER = 'folder';
@@ -32,26 +35,33 @@ class CantoUtility
      * Split a combined identifier into its scheme and identifier
      *
      * @param string $combinedIdentifier
-     * @return array{identifier: string, scheme: string, mdc: bool} associative array with scheme, identifier and mcd-support-flag
+     * return format: array{identifier: string, scheme: string, mdc: bool}
+     * phpstan seems to have a bug here, not identifying properly that the keys actually exist, thus we for now just return array here
+     * @return array associative array with scheme, identifier and mcd-support-flag
      *
      * @throw \InvalidArgumentException
      */
     public static function splitCombinedIdentifier(string $combinedIdentifier): array
     {
         if (!self::isValidCombinedIdentifier($combinedIdentifier)) {
-            throw new \InvalidArgumentException(
+            throw new InvalidArgumentException(
                 'Invalid combined identifier given: ' . $combinedIdentifier,
                 1626954151
             );
         }
         $identification = array_combine(['scheme', 'identifier'], explode('#', $combinedIdentifier));
         $identification['mdc'] = str_contains($identification['scheme'], self::SCHEME_CDN_TOKEN);
-        $identification['scheme'] = str_replace(self::SCHEME_CDN_TOKEN, '', $identification['scheme']);
+        $scheme = str_replace(self::SCHEME_CDN_TOKEN, '', $identification['scheme']);
+        assert(is_string($scheme));
+        $identification['scheme'] = $scheme;
         return $identification;
     }
 
     public static function buildCombinedIdentifier(string $scheme, string $id, bool $withCdnPrefix = false): string
     {
+        // todo: after changing the behaviour of self::isMdcActivated we need to adjust this functionality
+        //  afterwards every file, no matter whether its mdc or not will have the same identifier
+        //  we still might provide the sys_file_reference with a "from-mdc" flag, to make file-based separation still possible
         $prefix = $withCdnPrefix ? self::SCHEME_CDN_TOKEN : '';
         return sprintf('%s%s#%s', $prefix, $scheme, $id);
     }
@@ -73,17 +83,20 @@ class CantoUtility
     }
 
     /**
+     * todo: this method will be fairly extended:
+     *  - @see FAIRCANTO-63
+     *  - provide EventDispatcher to enable or disable MDC globally
+     *  - limit MDC-usage for certain file-extensions
      * @throw \InvalidArgumentException
      */
-    public static function useMdcCDN(string $combinedIdentifier): bool
+    public static function isMdcActivated(string $combinedIdentifier): bool
     {
         return self::splitCombinedIdentifier($combinedIdentifier)['mdc'];
     }
 
     public static function buildTimestampFromCantoDate(string $cantoDate): int
     {
-        $dateTime = \DateTime::createFromFormat('YmdHisv', $cantoDate);
-        return $dateTime->getTimestamp();
+        return DateTime::createFromFormat('YmdHisv', $cantoDate)->getTimestamp();
     }
 
     public static function identifierToProcessedIdentifier(string $identifier): string

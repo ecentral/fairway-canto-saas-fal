@@ -28,7 +28,7 @@ class ForceJpgPreviewImage implements SingletonInterface
         if ($file instanceof File
             && $event->getTaskType() === ProcessedFile::CONTEXT_IMAGEPREVIEW
             && $event->getDriver() instanceof CantoDriver
-            && !CantoUtility::useMdcCDN($file->getIdentifier())
+            && !CantoUtility::isMdcActivated($file->getIdentifier())
         ) {
             $configuration = array_replace(
                 $event->getConfiguration(),
