@@ -18,6 +18,9 @@ use TYPO3\CMS\Core\EventDispatcher\EventDispatcher;
 use TYPO3\CMS\Core\Imaging\ImageManipulation\Area;
 use TYPO3\CMS\Core\Resource\File;
 
+/**
+ * todo: add documentation
+ */
 final class MdcUrlGenerator
 {
     // get image as a square, formatted as -B<image-size>
@@ -60,7 +63,29 @@ final class MdcUrlGenerator
     }
 
     /**
-     * @param array{width: int, height: int, size?: int, x?: int, y?: int, format?: string, crop?: ?Area} $configuration
+     * @return array{width: int, height: int, scale: float}
+     */
+    private function getMasterImageDimensions(File $file): array
+    {
+        $scheme = CantoUtility::getSchemeFromCombinedIdentifier($file->getIdentifier());
+        $identifier = CantoUtility::getIdFromCombinedIdentifier($file->getIdentifier());
+        $fileData = $this->cantoRepository->getFileDetails($scheme, $identifier, true);
+
+        $width = $fileData['width'] ?? $file->getProperty('width');
+        $height = $fileData['height'] ?? $file->getProperty('height');
+
+        $masterImageSize = $file->getStorage()->getConfiguration()['masterImageSize'];
+        $scale = min(1, $masterImageSize / $width, $masterImageSize / $height);
+
+        return [
+            'width' => $scale * $width,
+            'height' => $scale * $height,
+            'scale' => $scale,
+        ];
+    }
+
+    /**
+     * @param array{width: int, height: int, size?: int, x?: int, y?: int, format?: string, crop?: ?Area, resizedCropped?: array{width: int, height: int, offsetLeft: int, offsetTop: int}} $configuration
      * @return string
      */
     public function addOperationToMdcUrl(array $configuration): string
@@ -80,10 +105,9 @@ final class MdcUrlGenerator
             $formatString = self::FORMATTED . $configuration['format'];
         }
         if ($crop) {
-            $croppingArea = $configuration['crop'];
-            assert($croppingArea instanceof Area);
-            $cropString = self::CROPPED . (int)$croppingArea->getWidth() . 'x' . (int)$croppingArea->getHeight();
-            $cropString .= ',' . (int)$croppingArea->getOffsetLeft() . ',' . (int)$croppingArea->getOffsetTop();
+            $croppingArea = $configuration['resizedCropped'];
+            $cropString = self::CROPPED . $croppingArea['width'] . 'x' . $croppingArea['height'];
+            $cropString .= ',' . (int)$croppingArea['offsetLeft'] . ',' . (int)$croppingArea['offsetTop'];
         }
         $event = new BeforeMdcUrlGenerationEvent($configuration, $scaleString, $cropString, $formatString, true);
         return $this->eventDispatcher->dispatch($event)->getMdcUrl();
@@ -95,20 +119,23 @@ final class MdcUrlGenerator
      */
     private function transformConfiguration(File $file, array $configuration): array
     {
-        $scheme = CantoUtility::getSchemeFromCombinedIdentifier($file->getIdentifier());
-        $identifier = CantoUtility::getIdFromCombinedIdentifier($file->getIdentifier());
-        $fileData = $this->cantoRepository->getFileDetails($scheme, $identifier, true);
-
+        $imageDimension = $this->getMasterImageDimensions($file);
         if ($configuration['width'] && $configuration['height']) {
             $configuration['height'] = (int)$configuration['height'];
             $configuration['width'] = (int)$configuration['width'];
             return $configuration;
         }
-        $configuration['height'] = $configuration['height'] ?? $configuration['maxHeight'] ?? $fileData['height'];
-        $configuration['width'] = $configuration['width'] ?? $configuration['maxWidth'] ?? $fileData['width'];
+        $configuration['height'] = $configuration['height'] ?? $configuration['maxHeight'] ?? $imageDimension['height'];
+        $configuration['width'] = $configuration['width'] ?? $configuration['maxWidth'] ?? $imageDimension['width'];
         if ($configuration['crop'] instanceof Area) {
             $configuration['height'] = min($configuration['height'], $configuration['crop']->getHeight());
             $configuration['width'] = min($configuration['width'], $configuration['crop']->getWidth());
+            $configuration['resizedCropped'] = [
+                'width' => (int)($configuration['crop']->getWidth() * $imageDimension['scale']),
+                'height' => (int)($configuration['crop']->getHeight() * $imageDimension['scale']),
+                'offsetLeft' => (int)($configuration['crop']->getOffsetLeft() * $imageDimension['scale']),
+                'offsetTop' => (int)($configuration['crop']->getOffsetTop() * $imageDimension['scale']),
+            ];
         }
         $configuration['height'] = (int)$configuration['height'];
         $configuration['width'] = (int)$configuration['width'];
