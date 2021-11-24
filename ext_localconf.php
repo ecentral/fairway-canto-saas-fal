@@ -23,6 +23,11 @@ $GLOBALS['TYPO3_CONF_VARS']['SYS']['fal']['processors']['CantoPreviewProcessor']
     ]
 ];
 
+$GLOBALS['TYPO3_CONF_VARS']['SYS']['fal']['processors']['CantoMdcProcessor'] = [
+    'className' => \Ecentral\CantoSaasFal\Resource\Processing\CantoMdcProcessor::class,
+    'before' => ['LocalImageProcessor'],
+];
+
 // Register XClasses to handle multi folder assignments.
 $GLOBALS['TYPO3_CONF_VARS']['SYS']['Objects'][\TYPO3\CMS\Core\Resource\ResourceStorage::class] = [
     'className' => \Ecentral\CantoSaasFal\Xclass\ResourceStorage::class,

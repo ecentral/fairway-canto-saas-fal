@@ -7,33 +7,32 @@ define([
 ], function(ElementBrowser, RegularEvent, AjaxRequest, DocumentService, ClientStorage) {
   "use strict";
 
-  let Selectors = {};
-  (function(Selectors) {
-    Selectors['close'] = '[data-close]';
-    Selectors['searchForm'] = 'form.canto-asset-search-form';
-    Selectors['resultContainer'] = 'div.canto-asset-search-result-container';
-    Selectors['formFilterFields'] = '[data-canto-search]';
-    Selectors['paginationPage'] = '[data-pagination-page]';
-    Selectors['searchFormType'] = '[data-canto-search="type"]';
-  })(Selectors);
+  const Selectors = {
+    close: '[data-close]',
+    importFile: 'button.canto-picker-import-file',
+    importCdn: 'button.canto-picker-import-cdn',
+    searchForm: 'form.canto-asset-search-form',
+    resultContainer: 'div.canto-asset-search-result-container',
+    formFilterFields: '[data-canto-search]',
+    paginationPage: '[data-pagination-page]',
+    searchFormType: '[data-canto-search="type"]',
+  };
 
-  let StorageKeys = {};
-  (function(StorageKeys) {
-    StorageKeys['currentPage'] = 'cantoAssetPickerCurrentPage';
-    StorageKeys['searchWord'] = 'cantoAssetPickerSearchWord';
-    StorageKeys['type'] = 'cantoAssetPickerSearchType';
-    StorageKeys['identifier'] = 'cantoAssetPickerSearchIdentifier';
-    StorageKeys['scheme'] = 'cantoAssetPickerSearchScheme';
-  })(StorageKeys);
+  const StorageKeys = {
+    currentPage: 'cantoAssetPickerCurrentPage',
+    searchWord: 'cantoAssetPickerSearchWord',
+    type: 'cantoAssetPickerSearchType',
+    identifier: 'cantoAssetPickerSearchIdentifier',
+    scheme: 'cantoAssetPickerSearchScheme',
+  };
 
-  let defaultValues = {};
-  (function(defaultValues) {
-    defaultValues['currentPage'] = 1;
-    defaultValues['searchWord'] = '';
-    defaultValues['type'] = 'tags';
-    defaultValues['identifier'] = '';
-    defaultValues['scheme'] = 'image';
-  })(defaultValues);
+  const defaultValues = {
+    currentPage: 1,
+    searchWord: '',
+    type: 'tags',
+    identifier: '',
+    scheme: 'image',
+  };
 
   class BrowseCantoAssets {
     constructor() {
@@ -47,30 +46,56 @@ define([
       });
     }
 
+    isBetweenNumbers(number, a, b) {
+      if (Number.isNaN(number) || Number.isNaN(a) || Number.isNaN(b)) {
+        return false;
+      }
+      const min = Math.min(a, b);
+      const max = Math.max(a, b);
+      return number > min && number < max;
+    }
+
     registerEvents() {
-      const me = this;
       new RegularEvent('click', (event, targetEl) => {
         event.preventDefault();
-        const promise = BrowseCantoAssets.importFile(targetEl.dataset.scheme, targetEl.dataset.identifier, me.storageUid);
-        return promise.then((data) => {
-          BrowseCantoAssets.insertElement(data.fileName, data.fileUid, true);
-        });
+        const importFileButton = targetEl.querySelector(Selectors.importFile);
+        const importCdnButton = targetEl.querySelector(Selectors.importCdn);
+        const positionImportFileButton = importFileButton.getBoundingClientRect();
+        const positionImportCdnButton = importCdnButton.getBoundingClientRect();
+        if (
+          this.isBetweenNumbers(event.clientX, positionImportFileButton.left, positionImportFileButton.right) &&
+          this.isBetweenNumbers(event.clientY, positionImportFileButton.top, positionImportFileButton.bottom)
+        ) {
+          return BrowseCantoAssets.importFile(targetEl.dataset.scheme, targetEl.dataset.identifier, this.storageUid)
+            .then((data) => {
+              return BrowseCantoAssets.insertElement(data.fileName, data.fileUid, true);
+            });
+        }
+        if (
+          this.isBetweenNumbers(event.clientX, positionImportCdnButton.left, positionImportCdnButton.right) &&
+          this.isBetweenNumbers(event.clientY, positionImportCdnButton.top, positionImportCdnButton.bottom)
+        ) {
+          return BrowseCantoAssets.addCdnFile(targetEl.dataset.scheme, targetEl.dataset.identifier, this.storageUid)
+            .then((data) => {
+              return BrowseCantoAssets.insertElement(data.fileName, data.fileUid, true);
+            });
+        }
       }).delegateTo(document, Selectors.close);
 
       new RegularEvent('submit', (event, targetEl) => {
         event.preventDefault();
-        BrowseCantoAssets.doSearch(targetEl, me.storageUid, 1, me.allowedFileExtensions);
+        BrowseCantoAssets.doSearch(targetEl, this.storageUid, 1, this.allowedFileExtensions);
       }).delegateTo(document, Selectors.searchForm);
 
       new RegularEvent('click', (event, targetEl) => {
         event.preventDefault();
         const pageNumber = targetEl.dataset.paginationPage;
-        BrowseCantoAssets.doSearch(me.searchForm, me.storageUid, pageNumber, me.allowedFileExtensions);
+        BrowseCantoAssets.doSearch(this.searchForm, this.storageUid, pageNumber, this.allowedFileExtensions);
       }).delegateTo(document, Selectors.paginationPage);
 
       new RegularEvent('change', () => {
-        BrowseCantoAssets.updateForm(me.searchForm);
-      }).delegateTo(me.searchForm, Selectors.searchFormType);
+        BrowseCantoAssets.updateForm(this.searchForm);
+      }).delegateTo(this.searchForm, Selectors.searchFormType);
     }
 
     initializeResults() {
@@ -163,6 +188,13 @@ define([
       return searchParams;
     }
 
+    /**
+     * @async
+     * @param scheme
+     * @param identifier
+     * @param storageUid
+     * @returns {Promise<{fileName: string, fileUid: number}>}
+     */
     static importFile(scheme, identifier, storageUid) {
       const params = {
         'scheme': scheme,
@@ -170,6 +202,27 @@ define([
         'storageUid': storageUid
       };
       return (new AjaxRequest(TYPO3.settings.ajaxUrls.import_canto_file))
+        .withQueryArguments(params)
+        .get()
+        .then(async (response) => {
+          return await response.resolve();
+        });
+    }
+
+    /**
+     * @async
+     * @param scheme
+     * @param identifier
+     * @param storageUid
+     * @returns {Promise<{fileName: string, fileUid: number}>}
+     */
+    static addCdnFile(scheme, identifier, storageUid) {
+      const params = {
+        'scheme': scheme,
+        'identifier': identifier,
+        'storageUid': storageUid
+      };
+      return (new AjaxRequest(TYPO3.settings.ajaxUrls.add_canto_cdn_file))
         .withQueryArguments(params)
         .get()
         .then(async (response) => {

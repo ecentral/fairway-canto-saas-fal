@@ -14,6 +14,7 @@ namespace Ecentral\CantoSaasFal\Resource\Processing;
 use Ecentral\CantoSaasApiClient\Endpoint\Authorization\AuthorizationFailedException;
 use Ecentral\CantoSaasFal\Resource\Driver\CantoDriver;
 use Ecentral\CantoSaasFal\Resource\Repository\CantoRepository;
+use Ecentral\CantoSaasFal\Utility\CantoUtility;
 use TYPO3\CMS\Core\Imaging\GraphicalFunctions;
 use TYPO3\CMS\Core\Resource\Processing\ProcessorInterface;
 use TYPO3\CMS\Core\Resource\Processing\TaskInterface;
@@ -31,7 +32,8 @@ class CantoPreviewProcessor implements ProcessorInterface
     public function canProcessTask(TaskInterface $task): bool
     {
         return $task->getName() === 'Preview'
-            && $task->getSourceFile()->getStorage()->getDriverType() === CantoDriver::DRIVER_NAME;
+            && $task->getSourceFile()->getStorage()->getDriverType() === CantoDriver::DRIVER_NAME
+            && !CantoUtility::isMdcActivated($task->getSourceFile()->getIdentifier());
     }
 
     /**

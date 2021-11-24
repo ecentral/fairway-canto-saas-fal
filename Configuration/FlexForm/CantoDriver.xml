@@ -124,6 +124,45 @@
                     </config>
                 </TCEforms>
             </rootFolder>
+            <mdcEnabled>
+                <TCEforms>
+                    <label>LLL:EXT:canto_saas_fal/Resources/Private/Language/locallang_be.xlf:sys_file_storage.cantoDriverFlexform_mdcEnabled</label>
+                    <config>
+                        <type>check</type>
+                    </config>
+                </TCEforms>
+            </mdcEnabled>
+            <mdcDomainName>
+                <TCEforms>
+                    <label>LLL:EXT:canto_saas_fal/Resources/Private/Language/locallang_be.xlf:sys_file_storage.cantoDriverFlexform_mdcDomainName</label>
+                    <config>
+                        <type>input</type>
+                        <eval>trim</eval>
+                        <size>30</size>
+                    </config>
+                </TCEforms>
+            </mdcDomainName>
+            <mdcAwsAccountId>
+                <TCEforms>
+                    <label>LLL:EXT:canto_saas_fal/Resources/Private/Language/locallang_be.xlf:sys_file_storage.cantoDriverFlexform_mdcAwsAccountId</label>
+                    <config>
+                        <type>input</type>
+                        <eval>trim</eval>
+                        <size>30</size>
+                    </config>
+                </TCEforms>
+            </mdcAwsAccountId>
+            <masterImageSize>
+                <TCEforms>
+                    <label>LLL:EXT:canto_saas_fal/Resources/Private/Language/locallang_be.xlf:sys_file_storage.cantoDriverFlexform_masterImageSize</label>
+                    <config>
+                        <type>input</type>
+                        <eval>trim,int</eval>
+                        <size>30</size>
+                        <default>2048</default>
+                    </config>
+                </TCEforms>
+            </masterImageSize>
         </el>
     </ROOT>
 </T3DataStructure>

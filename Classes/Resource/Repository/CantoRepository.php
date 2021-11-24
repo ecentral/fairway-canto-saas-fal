@@ -24,6 +24,7 @@ use Ecentral\CantoSaasApiClient\Http\LibraryTree\ListAlbumContentRequest;
 use Ecentral\CantoSaasFal\Domain\Model\Dto\AssetSearch;
 use Ecentral\CantoSaasFal\Domain\Model\Dto\AssetSearchResponse;
 use Ecentral\CantoSaasFal\Resource\CantoClientFactory;
+use Ecentral\CantoSaasFal\Resource\Driver\CantoDriver;
 use Ecentral\CantoSaasFal\Utility\CantoUtility;
 use TYPO3\CMS\Core\Cache\Frontend\FrontendInterface;
 use TYPO3\CMS\Core\Registry;
@@ -33,8 +34,8 @@ use TYPO3\CMS\Core\Utility\PathUtility;
 
 class CantoRepository
 {
-    const REGISTRY_NAMESPACE = 'cantoSaasFal';
-    const CANTO_CACHE_TAG_BLUEPRINT = 'canto_storage_%s';
+    public const REGISTRY_NAMESPACE = 'cantoSaasFal';
+    public const CANTO_CACHE_TAG_BLUEPRINT = 'canto_storage_%s';
 
     /**
      * The session token is valid for 30 days.
@@ -70,7 +71,7 @@ class CantoRepository
     /**
      * @throws AuthorizationFailedException
      */
-    public function initialize(int $storageUid, array $driverConfiguration)
+    public function initialize(int $storageUid, array $driverConfiguration): void
     {
         $this->driverConfiguration = $driverConfiguration;
         $this->storageUid = $storageUid;
@@ -150,9 +151,9 @@ class CantoRepository
         }
     }
 
-    public function getFileDetails(string $scheme, string $fileIdentifier): ?array
+    public function getFileDetails(string $scheme, string $fileIdentifier, bool $useMdc = false): ?array
     {
-        $combinedIdentifier = CantoUtility::buildCombinedIdentifier($scheme, $fileIdentifier);
+        $combinedIdentifier = CantoUtility::buildCombinedIdentifier($scheme, $fileIdentifier, $useMdc);
         $cacheIdentifier = $this->buildValidCacheIdentifier($combinedIdentifier);
         if ($this->cantoFileCache->has($cacheIdentifier)) {
             return $this->cantoFileCache->get($cacheIdentifier);
@@ -165,6 +166,10 @@ class CantoRepository
             return null;
         }
         $result = $response->getResponseData();
+
+        if ($useMdc) {
+            $result['mdcUrl'] = $this->generateMdcUrl($fileIdentifier);
+        }
         $this->setFileCache($combinedIdentifier, $result);
 
         return $result;
@@ -186,7 +191,8 @@ class CantoRepository
     {
         $scheme = CantoUtility::getSchemeFromCombinedIdentifier($fileIdentifier);
         $identifier = CantoUtility::getIdFromCombinedIdentifier($fileIdentifier);
-        $fileData = $this->getFileDetails($scheme, $identifier);
+        $useMdc = CantoUtility::isMdcActivated($fileIdentifier);
+        $fileData = $this->getFileDetails($scheme, $identifier, $useMdc);
         $sourcePath = $fileData['url']['directUrlOriginal'] ?? null;
         $fileExtension = PathUtility::pathinfo($fileData['name'], PATHINFO_EXTENSION);
         if ($preview) {
@@ -200,20 +206,10 @@ class CantoRepository
             );
         }
         $temporaryPath = GeneralUtility::tempnam('canto_clone_', '.' . $fileExtension);
-        try {
-            $fileContentReadStream = $this->client
-                ->asset()
-                ->getAuthorizedUrlContent($sourcePath)
-                ->getBody()
-                ->detach();
-            $tempFileWriteStream = fopen($temporaryPath, 'w');
-            stream_copy_to_stream($fileContentReadStream, $tempFileWriteStream);
-        } catch (NotAuthorizedException | InvalidResponseException $e) {
-            throw new \RuntimeException(
-                sprintf('Getting original file content for file %s failed.', $fileIdentifier),
-                1627549128
-            );
+        if ($useMdc) {
+            return '';
         }
+        $this->downloadCantoFile($temporaryPath, $sourcePath, $fileIdentifier);
 
         touch($temporaryPath, CantoUtility::buildTimestampFromCantoDate($fileData['default']['Date modified']));
         if (!file_exists($temporaryPath)) {
@@ -222,7 +218,35 @@ class CantoRepository
                 1320577649
             );
         }
+        CantoDriver::$transientCachedFiles[] = $temporaryPath;
         return $temporaryPath;
+    }
+
+    private function downloadCantoFile(string $temporaryPath, ?string $sourcePath, string $fileIdentifier): void
+    {
+        try {
+            // this is the position to save the new .canto file
+            $fileContentReadStream = $this->client
+                ->asset()
+                ->getAuthorizedUrlContent($sourcePath)
+                ->getBody()
+                ->detach();
+            $tempFileWriteStream = fopen($temporaryPath, 'w');
+            stream_copy_to_stream($fileContentReadStream, $tempFileWriteStream);
+            fclose($tempFileWriteStream);
+        } catch (NotAuthorizedException | InvalidResponseException $e) {
+            throw new \RuntimeException(
+                sprintf('Getting original file content for file %s failed.', $fileIdentifier),
+                1627549128
+            );
+        }
+    }
+
+    public function generateMdcUrl(string $assetId): string
+    {
+        $domain = $this->driverConfiguration['mdcDomainName'];
+        $awsAccountId = $this->driverConfiguration['mdcAwsAccountId'];
+        return sprintf('https://%s/rendition/%s/image_%s/', $domain, $awsAccountId, $assetId);
     }
 
     public function getFilesInFolder(

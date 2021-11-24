@@ -97,7 +97,7 @@ class CantoAssetBrowser extends AbstractElementBrowser implements ElementBrowser
      */
     protected function initializeStorage(): void
     {
-        $storageId = (int)explode('|', $this->bparams)[5] ?? 0;
+        $storageId = (int)(explode('|', $this->bparams)[5] ?? 0);
         $this->storage = $this->findStorageById($storageId);
     }
 
