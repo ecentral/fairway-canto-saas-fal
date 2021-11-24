@@ -163,6 +163,16 @@
                     </config>
                 </TCEforms>
             </masterImageSize>
+            <metadataMapping>
+                <TCEforms>
+                    <label>Metadata-Field-Mapping</label>
+                    <config>
+                        <type>text</type>
+                        <renderType>t3editor</renderType>
+                        <rows>9</rows>
+                    </config>
+                </TCEforms>
+            </metadataMapping>
         </el>
     </ROOT>
 </T3DataStructure>

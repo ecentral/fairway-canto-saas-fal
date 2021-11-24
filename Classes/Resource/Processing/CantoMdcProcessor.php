@@ -54,7 +54,7 @@ final class CantoMdcProcessor implements ProcessorInterface
         $url = $this->mdcUrlGenerator->generateMdcUrl($task->getSourceFile(), $task->getConfiguration());
         $task->getTargetFile()->updateProcessingUrl($url);
         $properties = $task->getTargetFile()->getProperties();
-        $properties = array_merge($properties, $this->mdcUrlGenerator->resolveImageWidthHeight(
+        $properties = array_merge($properties ?? [], $this->mdcUrlGenerator->resolveImageWidthHeight(
             $task->getSourceFile(),
             $task->getConfiguration(),
         ));
