@@ -31,10 +31,10 @@
 				<source>MDC Enabled</source>
 			</trans-unit>
 			<trans-unit id="sys_file_storage.cantoDriverFlexform_mdcDomainName" resname="sys_file_storage.cantoDriverFlexform_mdcDomainName">
-				<source>MDC Enabled</source>
+				<source>MDC DomainName (e.g. your-cloudfront-id.cloudfront.net)</source>
 			</trans-unit>
 			<trans-unit id="sys_file_storage.cantoDriverFlexform_mdcAwsAccountId" resname="sys_file_storage.cantoDriverFlexform_mdcAwsAccountId">
-				<source>MDC Enabled</source>
+				<source>MDC AWS Account ID</source>
 			</trans-unit>
 			<trans-unit id="sys_file_storage.cantoDriverFlexform_masterImageSize" resname="sys_file_storage.cantoDriverFlexform_masterImageSize">
 				<source>Master Image Size</source>
