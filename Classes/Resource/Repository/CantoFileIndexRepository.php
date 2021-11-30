@@ -66,9 +66,17 @@ class CantoFileIndexRepository extends FileIndexRepository
             ->execute();
 
         $resultRows = [];
-        while ($row = $result->fetchAssociative()) {
-            $resultRows[$row['identifier']] = $row;
+        if (method_exists($result, 'fetchAssociative')) {
+            while ($row = $result->fetchAssociative()) {
+                $resultRows[$row['identifier']] = $row;
+            }
+        } else {
+            // Backward-Compatibility with doctrine/dbal < 2.11
+            while ($row = $result->fetchAll(\Doctrine\DBAL\FetchMode::ASSOCIATIVE)) {
+                $resultRows[$row['identifier']] = $row;
+            }
         }
+
 
         return $resultRows;
     }
