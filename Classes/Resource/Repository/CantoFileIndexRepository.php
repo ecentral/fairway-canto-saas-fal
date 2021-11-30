@@ -77,7 +77,6 @@ class CantoFileIndexRepository extends FileIndexRepository
             }
         }
 
-
         return $resultRows;
     }
 
