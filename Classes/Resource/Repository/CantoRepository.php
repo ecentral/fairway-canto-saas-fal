@@ -225,7 +225,6 @@ class CantoRepository
     private function downloadCantoFile(string $temporaryPath, ?string $sourcePath, string $fileIdentifier): void
     {
         try {
-            // this is the position to save the new .canto file
             $fileContentReadStream = $this->client
                 ->asset()
                 ->getAuthorizedUrlContent($sourcePath)

@@ -58,27 +58,35 @@ define([
     registerEvents() {
       new RegularEvent('click', (event, targetEl) => {
         event.preventDefault();
+        /** @type {HTMLElement|null} importFileButton */
         const importFileButton = targetEl.querySelector(Selectors.importFile);
+        /** @type {HTMLElement|null} importCdnButton */
         const importCdnButton = targetEl.querySelector(Selectors.importCdn);
-        const positionImportFileButton = importFileButton.getBoundingClientRect();
-        const positionImportCdnButton = importCdnButton.getBoundingClientRect();
-        if (
-          this.isBetweenNumbers(event.clientX, positionImportFileButton.left, positionImportFileButton.right) &&
-          this.isBetweenNumbers(event.clientY, positionImportFileButton.top, positionImportFileButton.bottom)
-        ) {
-          return BrowseCantoAssets.importFile(targetEl.dataset.scheme, targetEl.dataset.identifier, this.storageUid)
-            .then((data) => {
-              return BrowseCantoAssets.insertElement(data.fileName, data.fileUid, true);
-            });
+
+        if (importFileButton) {
+          const positionImportFileButton = importFileButton.getBoundingClientRect();
+          if (
+            this.isBetweenNumbers(event.clientX, positionImportFileButton.left, positionImportFileButton.right) &&
+            this.isBetweenNumbers(event.clientY, positionImportFileButton.top, positionImportFileButton.bottom)
+          ) {
+            return BrowseCantoAssets.importFile(targetEl.dataset.scheme, targetEl.dataset.identifier, this.storageUid)
+              .then((data) => {
+                return BrowseCantoAssets.insertElement(data.fileName, data.fileUid, true);
+              });
+          }
         }
-        if (
-          this.isBetweenNumbers(event.clientX, positionImportCdnButton.left, positionImportCdnButton.right) &&
-          this.isBetweenNumbers(event.clientY, positionImportCdnButton.top, positionImportCdnButton.bottom)
-        ) {
-          return BrowseCantoAssets.addCdnFile(targetEl.dataset.scheme, targetEl.dataset.identifier, this.storageUid)
-            .then((data) => {
-              return BrowseCantoAssets.insertElement(data.fileName, data.fileUid, true);
-            });
+
+        if (importCdnButton) {
+          const positionImportCdnButton = importCdnButton.getBoundingClientRect();
+          if (
+            this.isBetweenNumbers(event.clientX, positionImportCdnButton.left, positionImportCdnButton.right) &&
+            this.isBetweenNumbers(event.clientY, positionImportCdnButton.top, positionImportCdnButton.bottom)
+          ) {
+            return BrowseCantoAssets.addCdnFile(targetEl.dataset.scheme, targetEl.dataset.identifier, this.storageUid)
+              .then((data) => {
+                return BrowseCantoAssets.insertElement(data.fileName, data.fileUid, true);
+              });
+          }
         }
       }).delegateTo(document, Selectors.close);
 
