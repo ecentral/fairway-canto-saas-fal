@@ -1,0 +1,2 @@
+# cat=basic//; type=string; label=Secure Token for the metadata webhook
+    metadata_hook_token =

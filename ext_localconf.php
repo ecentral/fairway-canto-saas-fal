@@ -89,3 +89,14 @@ if ($GLOBALS['TYPO3_CONF_VARS']['SYS']['mediafile_ext']) {
 if ($GLOBALS['TYPO3_CONF_VARS']['GFX']['imagefile_ext']) {
     $GLOBALS['TYPO3_CONF_VARS']['GFX']['imagefile_ext'] .= ',eps';
 }
+
+\TYPO3\CMS\Extbase\Utility\ExtensionUtility::configurePlugin(
+    'Ecentral.CantoSaasFal',
+    'metadataWebhook',
+    [
+        \Ecentral\CantoSaasFal\Controller\MetadataWebhookController::class => 'index',
+    ],
+    [
+        \Ecentral\CantoSaasFal\Controller\MetadataWebhookController::class => 'index',
+    ],
+);

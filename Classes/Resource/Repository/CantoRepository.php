@@ -90,6 +90,11 @@ class CantoRepository
         $this->sessionTokenValid = $sessionTokenValid;
     }
 
+    public function getClient(): Client
+    {
+        return $this->client;
+    }
+
     /**
      * @throws InvalidResponseException
      * @throws NotAuthorizedException
