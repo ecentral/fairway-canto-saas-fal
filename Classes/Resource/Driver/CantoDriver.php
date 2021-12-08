@@ -98,6 +98,9 @@ class CantoDriver extends AbstractReadOnlyDriver
      */
     public function getParentFolderIdentifierOfIdentifier($fileIdentifier): string
     {
+        if (!$fileIdentifier) {
+            return '';
+        }
         $scheme = CantoUtility::getSchemeFromCombinedIdentifier($fileIdentifier);
         $explicitFileIdentifier = CantoUtility::getIdFromCombinedIdentifier($fileIdentifier);
         if ($explicitFileIdentifier === self::ROOT_FOLDER) {
@@ -356,16 +359,20 @@ class CantoDriver extends AbstractReadOnlyDriver
      */
     public function getFolderInfoByIdentifier($folderIdentifier): array
     {
+        $now = time();
+        $rootFolder = [
+            'identifier' => 'folder#' . self::ROOT_FOLDER,
+            'name' => 'Canto',
+            'mtime' => $now,
+            'ctime' => $now,
+            'storage' => $this->storageUid
+        ];
+        if (!$folderIdentifier || $folderIdentifier === self::ROOT_FOLDER) {
+            return $rootFolder;
+        }
         $explicitFolderIdentifier = CantoUtility::getIdFromCombinedIdentifier($folderIdentifier);
         if ($explicitFolderIdentifier === self::ROOT_FOLDER) {
-            $now = time();
-            return [
-                'identifier' => $folderIdentifier,
-                'name' => 'Canto',
-                'mtime' => $now,
-                'ctime' => $now,
-                'storage' => $this->storageUid
-            ];
+            return $rootFolder;
         }
         $scheme =CantoUtility::getSchemeFromCombinedIdentifier($folderIdentifier);
         $result = $this->cantoRepository->getFolderDetails($scheme, $explicitFolderIdentifier);

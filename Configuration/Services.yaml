@@ -72,6 +72,12 @@ services:
         identifier: forceCantoJpegPreview
         event: TYPO3\CMS\Core\Resource\Event\BeforeFileProcessingEvent
 
+  Ecentral\CantoSaasFal\Resource\EventListener\MetadataWebhookEventListener:
+    tags:
+      - name: event.listener
+        identifier: metadataWebhookEventListener
+        event: Ecentral\CantoSaasFal\Resource\Event\MetadataWebhookEvent
+
   Ecentral\CantoSaasFal\Resource\EventListener\BeforeFileProcessingEventListener:
     arguments:
       - "@Ecentral\\CantoSaasFal\\Resource\\Repository\\CantoRepository"
