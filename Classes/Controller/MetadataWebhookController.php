@@ -12,7 +12,7 @@ declare(strict_types=1);
 namespace Ecentral\CantoSaasFal\Controller;
 
 use Ecentral\CantoSaasFal\Exception;
-use Ecentral\CantoSaasFal\Resource\Event\MetadataWebhookEvent;
+use Ecentral\CantoSaasFal\Resource\Event\IncomingWebhookEvent;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Http\ServerRequest;
 use TYPO3\CMS\Extbase\Mvc\Controller\ActionController;
@@ -30,31 +30,52 @@ final class MetadataWebhookController extends ActionController
         $this->extensionConfiguration = $extensionConfiguration;
     }
 
-    public function canProcessRequest(RequestInterface $request)
+    public function canProcessRequest(RequestInterface $request): bool
     {
         return $request instanceof Request && $request->getMethod() === 'POST';
     }
 
-    public function indexAction()
+    public function indexAction(): string
+    {
+        $json = $this->getBody();
+        $metadataToken = $this->extensionConfiguration->get('canto_saas_fal', 'metadata_hook_token');
+        $assetVersionUpdate = $this->extensionConfiguration->get('canto_saas_fal', 'newversion_hook_token');
+        $assetDeletion = $this->extensionConfiguration->get('canto_saas_fal', 'deletion_hook_token');
+
+        switch ($json['secure_token']) {
+            case $metadataToken:
+                $type = IncomingWebhookEvent::METADATA_UPDATE;
+                break;
+            case $assetVersionUpdate:
+                $type = IncomingWebhookEvent::ASSET_VERSION_UPDATE;
+                break;
+            case $assetDeletion:
+                $type = IncomingWebhookEvent::ASSET_DELETION;
+                break;
+            default:
+                $type = IncomingWebhookEvent::CUSTOM;
+        }
+        $event = IncomingWebhookEvent::fromJsonArray($json, $type);
+
+        if ($type === IncomingWebhookEvent::CUSTOM) {
+            $event->setToken($json['secure_token']);
+        }
+
+        $this->eventDispatcher->dispatch($event);
+
+        return json_encode(['success' => true, 'type' => $type], JSON_THROW_ON_ERROR);
+    }
+
+    private function getBody(): array
     {
         try {
             $body = $this->serverRequest->getBody()->getContents();
             if (!$body) {
                 throw new \Exception('The webhook does not contain any data.');
             }
-            $json = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
+            return json_decode($body, true, 512, JSON_THROW_ON_ERROR);
         } catch (\Exception $exception) {
             throw new Exception('Could not perform any action on the webhook', 1638434149, $exception);
         }
-
-        $metadataToken = $this->extensionConfiguration->get('canto_saas_fal', 'metadata_hook_token');
-        $success = false;
-        if ($metadataToken === $json['secure_token']) {
-            $event = MetadataWebhookEvent::fromJsonArray($json);
-            $this->eventDispatcher->dispatch($event);
-            $success = true;
-        }
-
-        return json_encode(['success' => $success]);
     }
 }

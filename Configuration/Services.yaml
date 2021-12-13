@@ -49,6 +49,11 @@ services:
       - name: 'console.command'
         command: 'canto:warmupcache'
 
+  Ecentral\CantoSaasFal\Command\UpdateMetadataAssetsCommand:
+    tags:
+      - name: 'console.command'
+        command: 'canto:updatemetadataassets'
+
   Ecentral\CantoSaasFal\Resource\EventListener\HandleMultipleFolders:
     tags:
       - name: event.listener
@@ -76,7 +81,19 @@ services:
     tags:
       - name: event.listener
         identifier: metadataWebhookEventListener
-        event: Ecentral\CantoSaasFal\Resource\Event\MetadataWebhookEvent
+        event: Ecentral\CantoSaasFal\Resource\Event\IncomingWebhookEvent
+
+  Ecentral\CantoSaasFal\Resource\EventListener\NewAssetVersionWebhookEventListener:
+    tags:
+      - name: event.listener
+        identifier: newAssetVersionWebhookEventListener
+        event: Ecentral\CantoSaasFal\Resource\Event\IncomingWebhookEvent
+
+  Ecentral\CantoSaasFal\Resource\EventListener\DeleteAssetWebhookEventListener:
+    tags:
+      - name: event.listener
+        identifier: deleteAssetWebhookEventListener
+        event: Ecentral\CantoSaasFal\Resource\Event\IncomingWebhookEvent
 
   Ecentral\CantoSaasFal\Resource\EventListener\BeforeFileProcessingEventListener:
     arguments:
