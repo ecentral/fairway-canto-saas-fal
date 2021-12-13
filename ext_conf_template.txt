@@ -1,2 +1,6 @@
-# cat=basic//; type=string; label=Secure Token for the metadata webhook
+# cat=basic//; type=string; label=Secure Token for the 'Update Metadata' webhook
     metadata_hook_token =
+# cat=basic//; type=string; label=Secure Token for the 'Add New Version' webhook
+    newversion_hook_token =
+# cat=basic//; type=string; label=Secure Token for the 'Delete Asset' webhook
+    deletion_hook_token =
