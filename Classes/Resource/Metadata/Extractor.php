@@ -193,7 +193,7 @@ class Extractor implements ExtractorInterface
         $category = $repository->findByTitle($title)->toArray()[0] ?? null;
         if ($category === null) {
             $category = new Category();
-            $category->setDescription('Canto-Generated-Category');
+            $category->setDescription('Canto generated category');
             $category->setTitle($title);
             if ($parent) {
                 $category->setParent($parent);
