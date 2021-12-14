@@ -499,7 +499,7 @@ class CantoDriver extends AbstractReadOnlyDriver
             $lastSegmentIndex = count($idPathSegments) - 1;
             array_walk(
                 $idPathSegments,
-                function (string &$folderIdentifier, int $key, $scheme) use ($lastSegmentIndex, $folderInformation) {
+                static function (string &$folderIdentifier, int $key, $scheme) use ($lastSegmentIndex, $folderInformation) {
                     if ($key === $lastSegmentIndex) {
                         $scheme = $folderInformation['scheme'];
                     }
