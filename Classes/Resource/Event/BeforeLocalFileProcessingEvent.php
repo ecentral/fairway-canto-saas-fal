@@ -15,6 +15,9 @@ use TYPO3\CMS\Core\Utility\PathUtility;
 
 final class BeforeLocalFileProcessingEvent
 {
+    private const PREVIEW_IMAGE_FILE_EXTENSION = 'jpg';
+    private const DEFAULT_IMAGE_FILE_EXTENSION = 'png';
+
     private array $fileData;
     private bool $preview;
     private ?string $sourcePath = null;
@@ -57,7 +60,7 @@ final class BeforeLocalFileProcessingEvent
             return $this->fileData['url']['preview'] ?? null;
         }
         if ($this->scheme === 'image' && !in_array($this->getFileExtension(), $GLOBALS['CANTO_SAAS_FAL']['IMAGE_TYPES'], true)) {
-            $this->setFileExtension('png');
+            $this->setFileExtension(self::DEFAULT_IMAGE_FILE_EXTENSION);
             return $this->fileData['url']['PNG'] ?? null;
         }
         return $this->fileData['url']['directUrlOriginal'] ?? null;
@@ -69,7 +72,7 @@ final class BeforeLocalFileProcessingEvent
             return $this->fileExtension;
         }
         if ($this->isForPreview()) {
-            return 'jpg';
+            return self::PREVIEW_IMAGE_FILE_EXTENSION;
         }
         return PathUtility::pathinfo($this->fileData['name'], PATHINFO_EXTENSION);
     }
