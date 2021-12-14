@@ -37,7 +37,7 @@ final class CantoMdcProcessor implements ProcessorInterface
     {
         if ($task->getSourceFile()->getStorage()->getDriverType() === CantoDriver::DRIVER_NAME) {
             $identifier = $task->getTargetFile()->getIdentifier();
-            if (CantoUtility::isMdcActivated($identifier)) {
+            if (CantoUtility::isMdcActivated($task->getSourceFile()->getStorage()->getConfiguration())) {
                 return true;
             }
         }

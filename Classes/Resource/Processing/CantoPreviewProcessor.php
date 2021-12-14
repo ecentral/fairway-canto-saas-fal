@@ -33,7 +33,7 @@ class CantoPreviewProcessor implements ProcessorInterface
     {
         return $task->getName() === 'Preview'
             && $task->getSourceFile()->getStorage()->getDriverType() === CantoDriver::DRIVER_NAME
-            && !CantoUtility::isMdcActivated($task->getSourceFile()->getIdentifier());
+            && !CantoUtility::isMdcActivated($task->getSourceFile()->getStorage()->getConfiguration());
     }
 
     /**

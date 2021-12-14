@@ -69,7 +69,7 @@ final class MdcUrlGenerator
     {
         $scheme = CantoUtility::getSchemeFromCombinedIdentifier($file->getIdentifier());
         $identifier = CantoUtility::getIdFromCombinedIdentifier($file->getIdentifier());
-        $fileData = $this->cantoRepository->getFileDetails($scheme, $identifier, true);
+        $fileData = $this->cantoRepository->getFileDetails($scheme, $identifier);
 
         $width = $fileData['width'] ?? $file->getProperty('width');
         $height = $fileData['height'] ?? $file->getProperty('height');

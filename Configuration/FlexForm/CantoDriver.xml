@@ -124,14 +124,6 @@
                     </config>
                 </TCEforms>
             </rootFolder>
-            <mdcEnabled>
-                <TCEforms>
-                    <label>LLL:EXT:canto_saas_fal/Resources/Private/Language/locallang_be.xlf:sys_file_storage.cantoDriverFlexform_mdcEnabled</label>
-                    <config>
-                        <type>check</type>
-                    </config>
-                </TCEforms>
-            </mdcEnabled>
             <mdcDomainName>
                 <TCEforms>
                     <label>LLL:EXT:canto_saas_fal/Resources/Private/Language/locallang_be.xlf:sys_file_storage.cantoDriverFlexform_mdcDomainName</label>

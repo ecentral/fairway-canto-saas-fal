@@ -54,6 +54,11 @@ services:
       - name: 'console.command'
         command: 'canto:updatemetadataassets'
 
+  Ecentral\CantoSaasFal\Command\RemoveMdcPrefixForFilesCommand:
+    tags:
+      - name: 'console.command'
+        command: 'canto:removemdcprefixforfiles'
+
   Ecentral\CantoSaasFal\Resource\EventListener\HandleMultipleFolders:
     tags:
       - name: event.listener

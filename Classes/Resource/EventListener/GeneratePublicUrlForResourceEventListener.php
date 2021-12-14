@@ -32,7 +32,7 @@ final class GeneratePublicUrlForResourceEventListener
             return;
         }
         try {
-            if (CantoUtility::isMdcActivated($identifier)) {
+            if (CantoUtility::isMdcActivated($event->getStorage()->getConfiguration())) {
                 // This applies a public url for the given asset.
                 // If the file has been registered as a mdc-asset, then this returns the url for it
                 // Otherwise we get the url to the downloaded resource instead

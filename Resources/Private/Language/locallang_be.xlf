@@ -27,9 +27,6 @@
 			<trans-unit id="sys_file_storage.cantoDriverFlexform_rootFolder" resname="sys_file_storage.cantoDriverFlexform_rootFolder">
 				<source>Root folder</source>
 			</trans-unit>
-			<trans-unit id="sys_file_storage.cantoDriverFlexform_mdcEnabled" resname="sys_file_storage.cantoDriverFlexform_mdcEnabled">
-				<source>MDC Enabled</source>
-			</trans-unit>
 			<trans-unit id="sys_file_storage.cantoDriverFlexform_mdcDomainName" resname="sys_file_storage.cantoDriverFlexform_mdcDomainName">
 				<source>MDC DomainName (e.g. your-cloudfront-id.cloudfront.net)</source>
 			</trans-unit>

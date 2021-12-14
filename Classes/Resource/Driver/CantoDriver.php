@@ -130,8 +130,8 @@ class CantoDriver extends AbstractReadOnlyDriver
     {
         $scheme = CantoUtility::getSchemeFromCombinedIdentifier($identifier);
         $fileIdentifier = CantoUtility::getIdFromCombinedIdentifier($identifier);
-        $useMdc = CantoUtility::isMdcActivated($identifier);
-        $fileData = $this->cantoRepository->getFileDetails($scheme, $fileIdentifier, $useMdc);
+        $useMdc = CantoUtility::isMdcActivated($this->configuration);
+        $fileData = $this->cantoRepository->getFileDetails($scheme, $fileIdentifier);
         if ($useMdc && $this->mdcUrlGenerator) {
             $url = $this->cantoRepository->generateMdcUrl($fileIdentifier);
             $url .= $this->mdcUrlGenerator->addOperationToMdcUrl([
@@ -140,6 +140,7 @@ class CantoDriver extends AbstractReadOnlyDriver
             ]);
             return rawurldecode($url);
         }
+        // todo: add FAIRCANTO-72 here
         if (!empty($fileData['url']['directUrlOriginal'])) {
             return rawurldecode($fileData['url']['directUrlOriginal']);
         }
@@ -158,8 +159,7 @@ class CantoDriver extends AbstractReadOnlyDriver
         $explicitFileIdentifier = CantoUtility::getIdFromCombinedIdentifier($fileIdentifier);
         $result = $this->cantoRepository->getFileDetails(
             $scheme,
-            $explicitFileIdentifier,
-            CantoUtility::isMdcActivated($fileIdentifier)
+            $explicitFileIdentifier
         );
         return !empty($result);
     }
@@ -322,8 +322,7 @@ class CantoDriver extends AbstractReadOnlyDriver
         $explicitFileIdentifier = CantoUtility::getIdFromCombinedIdentifier($fileIdentifier);
         $result = $this->cantoRepository->getFileDetails(
             $scheme,
-            $explicitFileIdentifier,
-            CantoUtility::isMdcActivated($fileIdentifier)
+            $explicitFileIdentifier
         );
         foreach ($result['relatedAlbums'] ?? [] as $album) {
             $folders[] = CantoUtility::buildCombinedIdentifier($album['scheme'], $album['id']);

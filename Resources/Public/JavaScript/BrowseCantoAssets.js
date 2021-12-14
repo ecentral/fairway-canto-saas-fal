@@ -10,7 +10,6 @@ define([
   const Selectors = {
     close: '[data-close]',
     importFile: 'button.canto-picker-import-file',
-    importCdn: 'button.canto-picker-import-cdn',
     searchForm: 'form.canto-asset-search-form',
     resultContainer: 'div.canto-asset-search-result-container',
     formFilterFields: '[data-canto-search]',
@@ -60,8 +59,6 @@ define([
         event.preventDefault();
         /** @type {HTMLElement|null} importFileButton */
         const importFileButton = targetEl.querySelector(Selectors.importFile);
-        /** @type {HTMLElement|null} importCdnButton */
-        const importCdnButton = targetEl.querySelector(Selectors.importCdn);
 
         if (importFileButton) {
           const positionImportFileButton = importFileButton.getBoundingClientRect();
@@ -70,19 +67,6 @@ define([
             this.isBetweenNumbers(event.clientY, positionImportFileButton.top, positionImportFileButton.bottom)
           ) {
             return BrowseCantoAssets.importFile(targetEl.dataset.scheme, targetEl.dataset.identifier, this.storageUid)
-              .then((data) => {
-                return BrowseCantoAssets.insertElement(data.fileName, data.fileUid, true);
-              });
-          }
-        }
-
-        if (importCdnButton) {
-          const positionImportCdnButton = importCdnButton.getBoundingClientRect();
-          if (
-            this.isBetweenNumbers(event.clientX, positionImportCdnButton.left, positionImportCdnButton.right) &&
-            this.isBetweenNumbers(event.clientY, positionImportCdnButton.top, positionImportCdnButton.bottom)
-          ) {
-            return BrowseCantoAssets.addCdnFile(targetEl.dataset.scheme, targetEl.dataset.identifier, this.storageUid)
               .then((data) => {
                 return BrowseCantoAssets.insertElement(data.fileName, data.fileUid, true);
               });

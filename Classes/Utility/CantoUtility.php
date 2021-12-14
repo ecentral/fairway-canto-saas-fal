@@ -12,13 +12,15 @@ declare(strict_types=1);
 namespace Ecentral\CantoSaasFal\Utility;
 
 use DateTime;
+use Ecentral\CantoSaasFal\Resource\Event\MdcEnabledCheckEvent;
 use InvalidArgumentException;
+use TYPO3\CMS\Core\EventDispatcher\EventDispatcher;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class CantoUtility
 {
     public const SCHEME_FOLDER = 'folder';
     public const SCHEME_ALBUM = 'album';
-    private const SCHEME_CDN_TOKEN = 'cdn::';
     private const PROCESSING_PREFIX = 'processed::';
 
     public static function isValidCombinedIdentifier(string $combinedIdentifier): bool
@@ -37,7 +39,7 @@ class CantoUtility
      * @param string $combinedIdentifier
      * return format: array{identifier: string, scheme: string, mdc: bool}
      * phpstan seems to have a bug here, not identifying properly that the keys actually exist, thus we for now just return array here
-     * @return array associative array with scheme, identifier and mcd-support-flag
+     * @return array{scheme: string, identifier: string} associative array with scheme, identifier and mcd-support-flag
      *
      * @throw \InvalidArgumentException
      */
@@ -49,21 +51,12 @@ class CantoUtility
                 1626954151
             );
         }
-        $identification = array_combine(['scheme', 'identifier'], explode('#', $combinedIdentifier));
-        $identification['mdc'] = str_contains($identification['scheme'], self::SCHEME_CDN_TOKEN);
-        $scheme = str_replace(self::SCHEME_CDN_TOKEN, '', $identification['scheme']);
-        assert(is_string($scheme));
-        $identification['scheme'] = $scheme;
-        return $identification;
+        return array_combine(['scheme', 'identifier'], explode('#', $combinedIdentifier));
     }
 
-    public static function buildCombinedIdentifier(string $scheme, string $id, bool $withCdnPrefix = false): string
+    public static function buildCombinedIdentifier(string $scheme, string $id): string
     {
-        // todo: after changing the behaviour of self::isMdcActivated we need to adjust this functionality
-        //  afterwards every file, no matter whether its mdc or not will have the same identifier
-        //  we still might provide the sys_file_reference with a "from-mdc" flag, to make file-based separation still possible
-        $prefix = $withCdnPrefix ? self::SCHEME_CDN_TOKEN : '';
-        return sprintf('%s%s#%s', $prefix, $scheme, $id);
+        return sprintf('%s#%s', $scheme, $id);
     }
 
     /**
@@ -82,16 +75,19 @@ class CantoUtility
         return self::splitCombinedIdentifier($combinedIdentifier)['identifier'];
     }
 
-    /**
-     * todo: this method will be fairly extended:
-     *  - @see FAIRCANTO-63
-     *  - provide EventDispatcher to enable or disable MDC globally
-     *  - limit MDC-usage for certain file-extensions
-     * @throw \InvalidArgumentException
-     */
-    public static function isMdcActivated(string $combinedIdentifier): bool
+    public static function isMdcActivated(array $configuration): bool
     {
-        return self::splitCombinedIdentifier($combinedIdentifier)['mdc'];
+        if (!($configuration['mdcDomainName']  && $configuration['mdcAwsAccountId'])) {
+            return false;
+        }
+        $mdc = SiteConfigurationResolver::get('canto_mdc_enabled') ?? false;
+        if (isset($GLOBALS['CANTO_SAAS_FAL']['OVERRIDE_MDC_IS_ENABLED'])) {
+            $mdc = $GLOBALS['CANTO_SAAS_FAL']['OVERRIDE_MDC_IS_ENABLED'] ?? false;
+        }
+        $event = new MdcEnabledCheckEvent($mdc);
+        /** @var MdcEnabledCheckEvent $dispatchedEvent */
+        $dispatchedEvent = GeneralUtility::makeInstance(EventDispatcher::class)->dispatch($event);
+        return $dispatchedEvent->isMdcEnabled();
     }
 
     public static function buildTimestampFromCantoDate(string $cantoDate): int
