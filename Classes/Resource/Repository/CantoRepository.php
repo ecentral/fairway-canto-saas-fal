@@ -26,14 +26,12 @@ use Ecentral\CantoSaasFal\Domain\Model\Dto\AssetSearchResponse;
 use Ecentral\CantoSaasFal\Resource\CantoClientFactory;
 use Ecentral\CantoSaasFal\Resource\Driver\CantoDriver;
 use Ecentral\CantoSaasFal\Resource\Event\BeforeLocalFileProcessingEvent;
-use Ecentral\CantoSaasFal\Resource\EventListener\BeforeFileProcessingEventListener;
 use Ecentral\CantoSaasFal\Utility\CantoUtility;
 use TYPO3\CMS\Core\Cache\Frontend\FrontendInterface;
 use TYPO3\CMS\Core\EventDispatcher\EventDispatcher;
 use TYPO3\CMS\Core\Registry;
 use TYPO3\CMS\Core\Resource\Exception\FolderDoesNotExistException;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Core\Utility\PathUtility;
 
 class CantoRepository
 {

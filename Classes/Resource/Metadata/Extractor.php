@@ -18,7 +18,6 @@ use Ecentral\CantoSaasFal\Resource\Repository\CantoRepository;
 use Ecentral\CantoSaasFal\Utility\CantoUtility;
 use JsonException;
 use TYPO3\CMS\Core\Category\Collection\CategoryCollection;
-use TYPO3\CMS\Core\Collection\CollectionInterface;
 use TYPO3\CMS\Core\EventDispatcher\EventDispatcher;
 use TYPO3\CMS\Core\Resource\File;
 use TYPO3\CMS\Core\Resource\Index\ExtractorInterface;
