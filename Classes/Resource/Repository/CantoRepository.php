@@ -25,8 +25,11 @@ use Ecentral\CantoSaasFal\Domain\Model\Dto\AssetSearch;
 use Ecentral\CantoSaasFal\Domain\Model\Dto\AssetSearchResponse;
 use Ecentral\CantoSaasFal\Resource\CantoClientFactory;
 use Ecentral\CantoSaasFal\Resource\Driver\CantoDriver;
+use Ecentral\CantoSaasFal\Resource\Event\BeforeLocalFileProcessingEvent;
+use Ecentral\CantoSaasFal\Resource\EventListener\BeforeFileProcessingEventListener;
 use Ecentral\CantoSaasFal\Utility\CantoUtility;
 use TYPO3\CMS\Core\Cache\Frontend\FrontendInterface;
+use TYPO3\CMS\Core\EventDispatcher\EventDispatcher;
 use TYPO3\CMS\Core\Registry;
 use TYPO3\CMS\Core\Resource\Exception\FolderDoesNotExistException;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -58,14 +61,18 @@ class CantoRepository
 
     protected string $cantoCacheTag;
 
+    protected EventDispatcher $dispatcher;
+
     public function __construct(
         Registry $registry,
         FrontendInterface $cantoFolderCache,
-        FrontendInterface $cantoFileCache
+        FrontendInterface $cantoFileCache,
+        EventDispatcher $dispatcher
     ) {
         $this->registry = $registry;
         $this->cantoFolderCache = $cantoFolderCache;
         $this->cantoFileCache = $cantoFileCache;
+        $this->dispatcher = $dispatcher;
     }
 
     /**
@@ -198,19 +205,16 @@ class CantoRepository
         $identifier = CantoUtility::getIdFromCombinedIdentifier($fileIdentifier);
         $useMdc = CantoUtility::isMdcActivated($fileIdentifier);
         $fileData = $this->getFileDetails($scheme, $identifier, $useMdc);
-        $sourcePath = $fileData['url']['directUrlOriginal'] ?? null;
-        $fileExtension = PathUtility::pathinfo($fileData['name'], PATHINFO_EXTENSION);
-        if ($preview) {
-            $sourcePath = $fileData['url']['preview'] ?? null;
-            $fileExtension = 'jpg';
-        }
+        $event = new BeforeLocalFileProcessingEvent($fileData, $scheme, $preview);
+        $this->dispatcher->dispatch($event);
+        $sourcePath = $event->getSourcePath();
         if ($sourcePath === null) {
             throw new \RuntimeException(
                 sprintf('Getting original url for file %s failed.', $fileIdentifier),
                 1627391514
             );
         }
-        $temporaryPath = GeneralUtility::tempnam('canto_clone_', '.' . $fileExtension);
+        $temporaryPath = GeneralUtility::tempnam('canto_clone_', '.' . $event->getFileExtension());
         if ($useMdc) {
             return '';
         }
