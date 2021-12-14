@@ -17,9 +17,15 @@ use Ecentral\CantoSaasFal\Resource\Event\AfterMetaDataExtractionEvent;
 use Ecentral\CantoSaasFal\Resource\Repository\CantoRepository;
 use Ecentral\CantoSaasFal\Utility\CantoUtility;
 use JsonException;
+use TYPO3\CMS\Core\Category\Collection\CategoryCollection;
 use TYPO3\CMS\Core\EventDispatcher\EventDispatcher;
 use TYPO3\CMS\Core\Resource\File;
 use TYPO3\CMS\Core\Resource\Index\ExtractorInterface;
+use TYPO3\CMS\Core\Resource\Index\MetaDataRepository;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Extbase\Domain\Model\Category;
+use TYPO3\CMS\Extbase\Domain\Repository\CategoryRepository;
+use TYPO3\CMS\Extbase\Persistence\Generic\PersistenceManager;
 
 class Extractor implements ExtractorInterface
 {
@@ -89,7 +95,28 @@ class Extractor implements ExtractorInterface
             }
         }
         $event = new AfterMetaDataExtractionEvent($metadata, $mapping, $fileData);
-        return $this->dispatcher->dispatch($event)->getMetadata();
+        $metadata = $this->dispatcher->dispatch($event)->getMetadata();
+        if (array_key_exists('categoryMapping', $configuration)) {
+            try {
+                $mapping = json_decode($configuration['categoryMapping'], true, 512, JSON_THROW_ON_ERROR);
+                $categoryData = $this->applyMappedMetaData($mapping, [], $fileData);
+                $categories = $this->buildCategoryTree($categoryData);
+                GeneralUtility::makeInstance(PersistenceManager::class)->persistAll();
+                $metadataObject = GeneralUtility::makeInstance(MetaDataRepository::class)->findByFileUid($file->getUid());
+                if ($metadataObject) {
+                    foreach ($categories as $category) {
+                        $categoryCollection = CategoryCollection::load($category->getUid(), true, 'sys_file_metadata', 'categories');
+                        $categoryCollection->add([
+                            'uid' => $metadataObject['uid'],
+                        ]);
+                        $categoryCollection->persist();
+                    }
+                }
+            } catch (JsonException $exception) {
+                # todo: add mapping logging
+            }
+        }
+        return $metadata;
     }
 
     protected function fetchDataForFile(File $file): ?array
@@ -130,5 +157,46 @@ class Extractor implements ExtractorInterface
             }
         }
         return $this->extractFromMetadata($metadata[$key] ?? [], $fileKey);
+    }
+
+    /**
+     * @param array $json
+     * @param Category|null $parent
+     * @param CategoryRepository|null $categoryRepository
+     * @return Category[]
+     */
+    private function buildCategoryTree(array $json, Category $parent = null, CategoryRepository $categoryRepository = null): array
+    {
+        $categoryRepository ??= GeneralUtility::makeInstance(CategoryRepository::class);
+        $categories = [];
+        foreach ($json as $title => $children) {
+            $category = $parent;
+            if (is_string($title)) {
+                $category = $this->addCategory($title, $parent, $categoryRepository);
+                $categories[] = $category;
+            }
+            if (is_array($children) && $parent !== null) {
+                $categories = [...$categories, ...$this->buildCategoryTree($children, $category, $categoryRepository)];
+            }
+            if (is_string($children)) {
+                $categories[] = $this->addCategory($children, $category, $categoryRepository);
+            }
+        }
+        return $categories;
+    }
+
+    private function addCategory(string $title, ?Category $parent, CategoryRepository $repository): Category
+    {
+        $category = $repository->findByTitle($title)->toArray()[0] ?? null;
+        if ($category === null) {
+            $category = new Category();
+            $category->setDescription('Canto-Generated-Category');
+            $category->setTitle($title);
+            if ($parent) {
+                $category->setParent($parent);
+            }
+            $repository->add($category);
+        }
+        return $category;
     }
 }

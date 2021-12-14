@@ -39,6 +39,12 @@
 			<trans-unit id="sys_file_storage.cantoDriverFlexform_masterImageSize" resname="sys_file_storage.cantoDriverFlexform_masterImageSize">
 				<source>Master Image Size</source>
 			</trans-unit>
+			<trans-unit id="sys_file_storage.cantoDriverFlexform_metadataFieldMapping" resname="sys_file_storage.cantoDriverFlexform_metadataFieldMapping">
+				<source>Metadata Field Mapping</source>
+			</trans-unit>
+			<trans-unit id="sys_file_storage.cantoDriverFlexform_categoryFieldMapping" resname="sys_file_storage.cantoDriverFlexform_categoryFieldMapping">
+				<source>Category Field Mapping</source>
+			</trans-unit>
 			<trans-unit id="sys_file_storage.cantoDriverFlexform_rootFolder.description" resname="sys_file_storage.cantoDriverFlexform_rootFolder.description">
 				<source>Value must be folder identifier (not album, e.g. VPA4H. Default is Canto root directory</source>
 			</trans-unit>

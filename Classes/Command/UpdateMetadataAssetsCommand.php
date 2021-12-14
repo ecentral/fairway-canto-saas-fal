@@ -54,7 +54,7 @@ EOF
         $counter = 0;
         foreach ($files as $file) {
             assert($file instanceof File);
-            $output->writeln('Working on File: ' . $file->getIdentifier());
+            $output->writeln('Working on File: ' . $file->getIdentifier() . ' - ' . $file->getName());
             if ($file->getStorage()->getDriverType() !== CantoDriver::DRIVER_NAME) {
                 continue;
             }
