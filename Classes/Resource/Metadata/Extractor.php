@@ -18,6 +18,7 @@ use Ecentral\CantoSaasFal\Resource\Repository\CantoRepository;
 use Ecentral\CantoSaasFal\Utility\CantoUtility;
 use JsonException;
 use TYPO3\CMS\Core\Category\Collection\CategoryCollection;
+use TYPO3\CMS\Core\Collection\CollectionInterface;
 use TYPO3\CMS\Core\EventDispatcher\EventDispatcher;
 use TYPO3\CMS\Core\Resource\File;
 use TYPO3\CMS\Core\Resource\Index\ExtractorInterface;
@@ -106,6 +107,7 @@ class Extractor implements ExtractorInterface
                 if ($metadataObject) {
                     foreach ($categories as $category) {
                         $categoryCollection = CategoryCollection::load($category->getUid(), true, 'sys_file_metadata', 'categories');
+                        assert($categoryCollection instanceof CategoryCollection);
                         $categoryCollection->add([
                             'uid' => $metadataObject['uid'],
                         ]);
@@ -187,6 +189,7 @@ class Extractor implements ExtractorInterface
 
     private function addCategory(string $title, ?Category $parent, CategoryRepository $repository): Category
     {
+        assert(is_callable([$repository, 'findByTitle']));
         $category = $repository->findByTitle($title)->toArray()[0] ?? null;
         if ($category === null) {
             $category = new Category();
