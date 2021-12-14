@@ -165,7 +165,7 @@
             </masterImageSize>
             <metadataMapping>
                 <TCEforms>
-                    <label>Metadata-Field-Mapping</label>
+                    <label>LLL:EXT:canto_saas_fal/Resources/Private/Language/locallang_be.xlf:sys_file_storage.cantoDriverFlexform_metadataFieldMapping</label>
                     <config>
                         <type>text</type>
                         <renderType>t3editor</renderType>
@@ -173,6 +173,16 @@
                     </config>
                 </TCEforms>
             </metadataMapping>
+            <categoryMapping>
+                <TCEforms>
+                    <label>LLL:EXT:canto_saas_fal/Resources/Private/Language/locallang_be.xlf:sys_file_storage.cantoDriverFlexform_categoryFieldMapping</label>
+                    <config>
+                        <type>text</type>
+                        <renderType>t3editor</renderType>
+                        <rows>9</rows>
+                    </config>
+                </TCEforms>
+            </categoryMapping>
         </el>
     </ROOT>
 </T3DataStructure>
