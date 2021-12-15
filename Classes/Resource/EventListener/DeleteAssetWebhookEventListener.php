@@ -13,41 +13,55 @@ namespace Ecentral\CantoSaasFal\Resource\EventListener;
 
 use Ecentral\CantoSaasFal\Resource\Driver\CantoDriver;
 use Ecentral\CantoSaasFal\Resource\Event\IncomingWebhookEvent;
-use Ecentral\CantoSaasFal\Resource\Metadata\Extractor;
 use Ecentral\CantoSaasFal\Utility\CantoUtility;
 use TYPO3\CMS\Core\Resource\File;
+use TYPO3\CMS\Core\Resource\ProcessedFileRepository;
 use TYPO3\CMS\Core\Resource\ResourceFactory;
+use TYPO3\CMS\Core\Resource\ResourceStorage;
 use TYPO3\CMS\Core\Resource\StorageRepository;
 
-final class MetadataWebhookEventListener
+final class DeleteAssetWebhookEventListener
 {
-    private Extractor $metadataExtractor;
     private ResourceFactory $resourceFactory;
     private StorageRepository $storageRepository;
+    private ProcessedFileRepository $processedFileRepository;
 
-    public function __construct(Extractor $metadataExtractor, ResourceFactory $resourceFactory, StorageRepository $storageRepository)
+    public function __construct(ResourceFactory $resourceFactory, StorageRepository $storageRepository, ProcessedFileRepository $processedFileRepository)
     {
-        $this->metadataExtractor = $metadataExtractor;
         $this->resourceFactory = $resourceFactory;
         $this->storageRepository = $storageRepository;
+        $this->processedFileRepository = $processedFileRepository;
     }
 
     public function __invoke(IncomingWebhookEvent $event)
     {
-        if ($event->getType() !== IncomingWebhookEvent::METADATA_UPDATE) {
+        if ($event->getType() !== IncomingWebhookEvent::ASSET_DELETION) {
             return;
         }
         $cantoStorages = $this->storageRepository->findByStorageType(CantoDriver::DRIVER_NAME);
         $identifier = CantoUtility::buildCombinedIdentifier($event->getScheme(), $event->getId());
-        $file = null;
-        foreach ($cantoStorages as $storage) {
+        $file = $this->getFile($cantoStorages, $identifier);
+        if ($file !== null) {
+            foreach ($this->processedFileRepository->findAllByOriginalFile($file) as $processedFile) {
+                $processedFile->delete(true);
+            }
+            $file->delete();
+        }
+    }
+
+    /**
+     * @param ResourceStorage[] $storages
+     * @param string $identifier
+     * @return File|null
+     */
+    private function getFile(array $storages, string $identifier): ?File
+    {
+        foreach ($storages as $storage) {
             $file = $this->resourceFactory->getFileObjectByStorageAndIdentifier($storage->getUid(), $identifier);
             if ($file instanceof File) {
-                break;
+                return $file;
             }
         }
-
-        $metaData = $this->metadataExtractor->extractMetaData($file);
-        $file->getMetaData()->add($metaData)->save();
+        return null;
     }
 }

@@ -82,6 +82,9 @@ if (!is_array($GLOBALS['TYPO3_CONF_VARS']['SYS']['caching']['cacheConfigurations
     ];
 }
 
+$mediaFileExtensions = $GLOBALS['TYPO3_CONF_VARS']['SYS']['mediafile_ext'];
+$GLOBALS['CANTO_SAAS_FAL']['IMAGE_TYPES'] = explode(',', $mediaFileExtensions);
+
 if ($GLOBALS['TYPO3_CONF_VARS']['SYS']['mediafile_ext']) {
     $GLOBALS['TYPO3_CONF_VARS']['SYS']['mediafile_ext'] .= ',eps';
 }
