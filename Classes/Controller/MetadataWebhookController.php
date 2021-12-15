@@ -63,7 +63,12 @@ final class MetadataWebhookController extends ActionController
 
         $this->eventDispatcher->dispatch($event);
 
-        return json_encode(['success' => true, 'type' => $type], JSON_THROW_ON_ERROR);
+        try {
+            return json_encode(['success' => true, 'type' => $type], JSON_THROW_ON_ERROR);
+        } catch (\Exception $exception) {
+            // currently silenced, canto webhooks dont evaluate the response either way @todo add logging
+            return '';
+        }
     }
 
     private function getBody(): array
