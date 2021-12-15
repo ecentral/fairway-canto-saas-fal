@@ -161,16 +161,16 @@ class Extractor implements ExtractorInterface
     }
 
     /**
-     * @param array $json
+     * @param array $mappedCategoryConfiguration
      * @param Category|null $parent
      * @param CategoryRepository|null $categoryRepository
      * @return Category[]
      */
-    private function buildCategoryTree(array $json, Category $parent = null, CategoryRepository $categoryRepository = null): array
+    private function buildCategoryTree(array $mappedCategoryConfiguration, Category $parent = null, CategoryRepository $categoryRepository = null): array
     {
         $categoryRepository ??= GeneralUtility::makeInstance(CategoryRepository::class);
         $categories = [];
-        foreach ($json as $title => $children) {
+        foreach ($mappedCategoryConfiguration as $title => $children) {
             $category = $parent;
             if (is_string($title)) {
                 $category = $this->addCategory($title, $parent, $categoryRepository);
@@ -192,7 +192,7 @@ class Extractor implements ExtractorInterface
         $category = $repository->findByTitle($title)->toArray()[0] ?? null;
         if ($category === null) {
             $category = new Category();
-            $category->setDescription('Canto-Generated-Category');
+            $category->setDescription('Canto generated category');
             $category->setTitle($title);
             if ($parent) {
                 $category->setParent($parent);
