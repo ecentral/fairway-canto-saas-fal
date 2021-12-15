@@ -161,9 +161,9 @@ class CantoRepository
         }
     }
 
-    public function getFileDetails(string $scheme, string $fileIdentifier, bool $useMdc = false): ?array
+    public function getFileDetails(string $scheme, string $fileIdentifier): ?array
     {
-        $combinedIdentifier = CantoUtility::buildCombinedIdentifier($scheme, $fileIdentifier, $useMdc);
+        $combinedIdentifier = CantoUtility::buildCombinedIdentifier($scheme, $fileIdentifier);
         $cacheIdentifier = $this->buildValidCacheIdentifier($combinedIdentifier);
         if ($this->cantoFileCache->has($cacheIdentifier)) {
             return $this->cantoFileCache->get($cacheIdentifier);
@@ -177,7 +177,7 @@ class CantoRepository
         }
         $result = $response->getResponseData();
 
-        if ($useMdc) {
+        if (CantoUtility::isMdcActivated($this->driverConfiguration)) {
             $result['mdcUrl'] = $this->generateMdcUrl($fileIdentifier);
         }
         $this->setFileCache($combinedIdentifier, $result);
@@ -201,8 +201,8 @@ class CantoRepository
     {
         $scheme = CantoUtility::getSchemeFromCombinedIdentifier($fileIdentifier);
         $identifier = CantoUtility::getIdFromCombinedIdentifier($fileIdentifier);
-        $useMdc = CantoUtility::isMdcActivated($fileIdentifier);
-        $fileData = $this->getFileDetails($scheme, $identifier, $useMdc);
+        $useMdc = CantoUtility::isMdcActivated($this->driverConfiguration);
+        $fileData = $this->getFileDetails($scheme, $identifier);
         $event = new BeforeLocalFileProcessingEvent($fileData, $scheme, $preview);
         $this->dispatcher->dispatch($event);
         $sourcePath = $event->getSourcePath();

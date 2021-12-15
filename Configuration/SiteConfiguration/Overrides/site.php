@@ -39,5 +39,21 @@ $GLOBALS['SiteConfiguration']['site']['columns']['canto_asset_picker_storage'] =
     ],
 ];
 
+$GLOBALS['SiteConfiguration']['site']['columns']['canto_mdc_enabled'] = [
+    'label' => 'Enable MDC usage for site',
+    'onChange' => 'reload',
+    'config' => [
+        'type' => 'check',
+        'renderType' => 'checkboxToggle',
+        'default' => true,
+        'items' => [
+            [
+                0 => true,
+                1 => false
+            ]
+        ]
+    ],
+];
+
 $GLOBALS['SiteConfiguration']['site']['types']['0']['showitem']
     .= ',--div--;Canto,canto_enabled_asset_picker,canto_asset_picker_storage';

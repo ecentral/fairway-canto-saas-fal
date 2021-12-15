@@ -12,9 +12,13 @@
     <img src="{result.url.directUrlPreview}" alt="{result.name}" />
     <div class="canto-result-item-info">
         <h5>{result.name -> canto:format.fileName()}</h5>
-        <button class="btn canto-action-button canto-picker-import-file">Download</button>
         <f:if condition="{isMdcEnabled}">
-            <button class="btn canto-action-button canto-picker-import-cdn">Cloud</button>
+            <f:then>
+                <button class="btn canto-action-button canto-picker-import-file">Cloud</button>
+            </f:then>
+            <f:else>
+                <button class="btn canto-action-button canto-picker-import-file">Download</button>
+            </f:else>
         </f:if>
     </div>
 </a>

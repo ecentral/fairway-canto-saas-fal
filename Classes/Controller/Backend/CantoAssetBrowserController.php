@@ -21,7 +21,6 @@ use Ecentral\CantoSaasFal\Resource\Repository\Exception\InvalidSearchTypeExcepti
 use Ecentral\CantoSaasFal\Utility\CantoUtility;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Http\JsonResponse;
 use TYPO3\CMS\Core\Http\Response;
 use TYPO3\CMS\Core\Pagination\SimplePagination;
@@ -60,7 +59,7 @@ class CantoAssetBrowserController
             'results' => $paginator,
             'pagination' => new SimplePagination($paginator),
             'queryParams' => $request->getQueryParams(),
-            'isMdcEnabled' => $storage->getConfiguration()['mdcEnabled'] ?? false,
+            'isMdcEnabled' => CantoUtility::isMdcActivated($storage->getConfiguration()),
         ]);
 
         $response = new Response();
@@ -73,13 +72,7 @@ class CantoAssetBrowserController
         return $this->buildFileFetchingResponse($request);
     }
 
-    public function importCdn(ServerRequestInterface $request): ResponseInterface
-    {
-        // todo: this will be unified in the process as we do not specify mdc usage per file but per site configuration
-        return $this->buildFileFetchingResponse($request, true);
-    }
-
-    private function buildFileFetchingResponse(ServerRequestInterface $request, bool $useCdn = false): ResponseInterface
+    private function buildFileFetchingResponse(ServerRequestInterface $request): ResponseInterface
     {
         $storageUid = (int)($request->getQueryParams()['storageUid'] ?? 0);
         $scheme = $request->getQueryParams()['scheme'] ?? '';
@@ -87,30 +80,7 @@ class CantoAssetBrowserController
         $storage = $this->getCantoStorageByUid($storageUid);
 
         if ($scheme && $identifier) {
-            if ($useCdn) {
-                $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)
-                    ->getConnectionForTable('sys_file')->createQueryBuilder();
-                $result = $queryBuilder
-                    ->select('identifier')
-                    ->from('sys_file')
-                    ->where($queryBuilder->expr()->eq(
-                        'identifier',
-                        $queryBuilder->createNamedParameter(
-                            CantoUtility::buildCombinedIdentifier($scheme, $identifier, true)
-                        )
-                    ))
-                    ->execute()
-                    ->fetchAllAssociative();
-                if (count($result) > 0) {
-                    // toggling the mdc on/off depending on whether the file already exists or not
-                    // this would be a better experience in the browser itself, disabling every button that is duplicated
-                    // but that would probably have a huge performance impact, thus we do the switch here
-                    // we only care about duplicates, when we are using mdc, as we dont have to download files impacts for cdn files
-                    $useCdn = false;
-                }
-            }
-
-            $combinedFileIdentifier = CantoUtility::buildCombinedIdentifier($scheme, $identifier, $useCdn);
+            $combinedFileIdentifier = CantoUtility::buildCombinedIdentifier($scheme, $identifier);
 
             $file = $storage->getFile($combinedFileIdentifier);
             if ($file instanceof File) {
