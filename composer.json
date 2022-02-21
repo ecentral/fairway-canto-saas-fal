@@ -22,7 +22,8 @@
     "typo3/cms-core": "^10.4",
     "typo3/cms-filemetadata": "^10.4",
     "guzzlehttp/guzzle": "^6.3 || ^7.3",
-    "psr/log": "^1.1"
+    "psr/log": "^1.1",
+    "fairway/canto-saas-api": "@dev"
   },
   "require-dev": {
     "friendsofphp/php-cs-fixer": "^3.0",
@@ -31,14 +32,12 @@
   },
   "autoload": {
     "psr-4": {
-      "Ecentral\\CantoSaasFal\\": "Classes",
-      "Ecentral\\CantoSaasApiClient\\": "Resources/Private/Vendor/canto_saas_api_client/src"
+      "Ecentral\\CantoSaasFal\\": "Classes"
     }
   },
   "autoload-dev": {
     "psr-4": {
-      "Ecentral\\CantoSaasFal\\Tests\\": "Tests",
-      "Ecentral\\CantoSaasApiClient\\Tests\\": "Resources/Private/Vendor/canto_saas_api_client/tests"
+      "Ecentral\\CantoSaasFal\\Tests\\": "Tests"
     }
   },
   "replace": {
