@@ -47,8 +47,9 @@ final class Exporter
         if ($fileUid === null) {
             return false;
         }
-        $file = $this->fileRepository->findByUid($fileUid);
-        if (!$file) {
+        try {
+            $file = $this->fileRepository->findByUid($fileUid);
+        } catch (\Exception $e) {
             return false;
         }
         assert($file instanceof File);

@@ -885,7 +885,7 @@ class CantoDriver extends AbstractDriver
             // replace with logger
             debug([$request, $e->getPrevious()->getMessage()]);
         }
-        return $fileIdentifier;
+        return true;
     }
 
     /**
