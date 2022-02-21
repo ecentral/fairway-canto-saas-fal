@@ -13,6 +13,6 @@ namespace Ecentral\CantoSaasFal\Resource\Driver;
 
 use TYPO3\CMS\Core\Resource\Exception;
 
-class ReadOnlyException extends Exception
+class NotSupportedException extends Exception
 {
 }

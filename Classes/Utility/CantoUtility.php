@@ -105,4 +105,12 @@ class CantoUtility
         }
         return self::PROCESSING_PREFIX . $identifier;
     }
+
+    public static function flushCache(CantoRepository $repository): void
+    {
+        $cache = GeneralUtility::getContainer()->get('cache.canto_folder');
+        $cache->flushByTags([$repository->getCantoCacheTag()]);
+        $cache = GeneralUtility::getContainer()->get('cache.canto_file');
+        $cache->flushByTags([$repository->getCantoCacheTag()]);
+    }
 }

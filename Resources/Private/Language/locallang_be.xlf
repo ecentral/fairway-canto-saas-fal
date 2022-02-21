@@ -42,6 +42,9 @@
 			<trans-unit id="sys_file_storage.cantoDriverFlexform_categoryFieldMapping" resname="sys_file_storage.cantoDriverFlexform_categoryFieldMapping">
 				<source>Category Field Mapping</source>
 			</trans-unit>
+			<trans-unit id="sys_file_storage.cantoDriverFlexform_metadataExportMapping" resname="sys_file_storage.cantoDriverFlexform_metadataExportMapping">
+				<source>Metadata to Canto - Export Field Mapping (Empty = disabled synchronisation)</source>
+			</trans-unit>
 			<trans-unit id="sys_file_storage.cantoDriverFlexform_rootFolder.description" resname="sys_file_storage.cantoDriverFlexform_rootFolder.description">
 				<source>Value must be folder identifier (not album, e.g. VPA4H. Default is Canto root directory</source>
 			</trans-unit>

@@ -309,7 +309,7 @@ class CantoRepository
                 return [];
             }
         }
-        return $this->cantoFolderCache->get($cacheIdentifier);
+        return $this->cantoFolderCache->get($cacheIdentifier) ?: [];
     }
 
     protected function buildFolderTree(array $treeItems): array

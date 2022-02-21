@@ -45,7 +45,7 @@ use TYPO3\CMS\Core\Utility\Exception\MissingArrayPathException;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\PathUtility;
 
-class CantoDriver extends AbstractReadOnlyDriver
+class CantoDriver extends AbstractDriver
 {
     public const DRIVER_NAME = 'Canto';
 
@@ -65,7 +65,8 @@ class CantoDriver extends AbstractReadOnlyDriver
     public function __construct(array $configuration = [])
     {
         parent::__construct($configuration);
-        $this->capabilities = ResourceStorage::CAPABILITY_BROWSABLE;
+        $this->capabilities = ResourceStorage::CAPABILITY_BROWSABLE |
+            ResourceStorage::CAPABILITY_WRITABLE;
         $this->rootFolderIdentifier = $this->buildRootFolderIdentifier();
     }
 
@@ -73,10 +74,10 @@ class CantoDriver extends AbstractReadOnlyDriver
     {
         $this->validCantoConfiguration = is_int($this->storageUid)
             && $this->storageUid > 0
-            && strlen($this->configuration['cantoName'] ?? '') > 0
-            && strlen($this->configuration['cantoDomain'] ?? '') > 0
-            && strlen($this->configuration['appId'] ?? '') > 0
-            && strlen($this->configuration['appSecret'] ?? '') > 0;
+            && ($this->configuration['cantoName'] ?? '') !== ''
+            && ($this->configuration['cantoDomain'] ?? '') !== ''
+            && ($this->configuration['appId'] ?? '') !== ''
+            && ($this->configuration['appSecret'] ?? '') !== '';
     }
 
     public function initialize()
@@ -239,8 +240,7 @@ class CantoDriver extends AbstractReadOnlyDriver
      */
     public function fileExistsInFolder($fileName, $folderIdentifier): bool
     {
-        // TODO: Implement fileExistsInFolder() method.
-        return true;
+        return $this->getFileInFolder($fileName, $folderIdentifier) !== '';
     }
 
     /**
@@ -252,19 +252,37 @@ class CantoDriver extends AbstractReadOnlyDriver
         if ($folderName === $folderIdentifier) {
             return true;
         }
-        $scheme = CantoUtility::getSchemeFromCombinedIdentifier($folderIdentifier);
-        $explicitFolderIdentifier = CantoUtility::getIdFromCombinedIdentifier($folderIdentifier);
         try {
-            $folderData = $this->cantoRepository->getFolderDetails($scheme, $explicitFolderIdentifier);
-        } catch (FolderDoesNotExistException $e) {
+            $parentFolderId = CantoUtility::getIdFromCombinedIdentifier($folderIdentifier);
+            $request = new GetTreeRequest($parentFolderId);
+            $parentFolderChildren = $this->cantoRepository
+                ->getClient()
+                ->libraryTree()
+                ->getTree($request)
+                ->getResults();
+        } catch (NotAuthorizedException|InvalidResponseException $e) {
             return false;
         }
-        $subFolders = str_getcsv($folderData['idPath'], '/');
-        return in_array(
-            CantoUtility::getIdFromCombinedIdentifier($folderName),
-            $subFolders,
-            false
-        );
+
+        if ($parentFolderChildren === []) {
+            return false;
+        }
+
+        if (!CantoUtility::isValidCombinedIdentifier($folderName)) {
+            foreach ($parentFolderChildren as $leaf) {
+                if ($leaf['name'] === $folderName) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        $folderId = CantoUtility::getIdFromCombinedIdentifier($folderName);
+        foreach ($parentFolderChildren as $leaf) {
+            if ($leaf['id'] === $folderId) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -286,7 +304,7 @@ class CantoDriver extends AbstractReadOnlyDriver
     {
         return [
             'r' => true,
-            'w' => false,
+            'w' => true,
         ];
     }
 
@@ -393,7 +411,7 @@ class CantoDriver extends AbstractReadOnlyDriver
         if ($explicitFolderIdentifier === self::ROOT_FOLDER) {
             return $rootFolder;
         }
-        $scheme =CantoUtility::getSchemeFromCombinedIdentifier($folderIdentifier);
+        $scheme = CantoUtility::getSchemeFromCombinedIdentifier($folderIdentifier);
         $result = $this->cantoRepository->getFolderDetails($scheme, $explicitFolderIdentifier);
         // TODO Find solution how to handle equal folder and album names.
         $folderName = sprintf('F: %s', $result['name']);
@@ -416,8 +434,17 @@ class CantoDriver extends AbstractReadOnlyDriver
      */
     public function getFileInFolder($fileName, $folderIdentifier): string
     {
-        // TODO: Implement getFileInFolder() method.
-        return $fileName;
+        $filesWithName = $this->getFilesInFolder(
+            $folderIdentifier,
+            0,
+            0,
+            false,
+            [$fileName],
+        ) ?? [];
+        if (count($filesWithName) !== 1) {
+            return '';
+        }
+        return $filesWithName[0];
     }
 
     /**
@@ -441,7 +468,8 @@ class CantoDriver extends AbstractReadOnlyDriver
         array $filenameFilterCallbacks = [],
         $sort = '',
         $sortRev = false
-    ): array {
+    ): array
+    {
         $scheme = CantoUtility::getSchemeFromCombinedIdentifier($folderIdentifier);
         $explicitFolderIdentifier = CantoUtility::getIdFromCombinedIdentifier($folderIdentifier);
         if ($scheme === CantoUtility::SCHEME_FOLDER || $explicitFolderIdentifier === self::ROOT_FOLDER) {
@@ -475,8 +503,17 @@ class CantoDriver extends AbstractReadOnlyDriver
      */
     public function getFolderInFolder($folderName, $folderIdentifier): string
     {
-        // TODO: Implement getFolderInFolder() method.
-        return $folderName;
+        $foldersWithName = $this->getFoldersInFolder(
+                $folderIdentifier,
+                0,
+                0,
+                false,
+                [$folderIdentifier],
+            ) ?? [];
+        if (count($foldersWithName) !== 1) {
+            return '';
+        }
+        return $foldersWithName[0];
     }
 
     /**
@@ -501,7 +538,8 @@ class CantoDriver extends AbstractReadOnlyDriver
         array $folderNameFilterCallbacks = [],
         $sort = '',
         $sortRev = false
-    ): array {
+    ): array
+    {
         $scheme = CantoUtility::getSchemeFromCombinedIdentifier($folderIdentifier);
         if ($scheme === CantoUtility::SCHEME_ALBUM) {
             // Albums contain only files, not folders.
@@ -579,7 +617,8 @@ class CantoDriver extends AbstractReadOnlyDriver
         $folderIdentifier,
         $recursive = false,
         array $folderNameFilterCallbacks = []
-    ): int {
+    ): int
+    {
         return count($this->getFoldersInFolder(
             $folderIdentifier,
             0,
@@ -666,5 +705,249 @@ class CantoDriver extends AbstractReadOnlyDriver
                 unlink($cachedFile);
             }
         }
+    }
+
+    /**
+     * Creates a folder, within a parent folder.
+     * If no parent folder is given, a root level folder will be created
+     *
+     * @param string $newFolderName
+     * @param string $parentFolderIdentifier
+     * @param bool $recursive
+     * @return string the Identifier of the new folder
+     */
+    public function createFolder($newFolderName, $parentFolderIdentifier = '', $recursive = false): string
+    {
+        $createAlbum = str_starts_with($newFolderName, 'A:');
+        $newFolderName = str_replace(['A:', 'F:'], '', $newFolderName);
+        $request = new CreateAlbumFolderRequest($newFolderName);
+        $request->setParentFolder(CantoUtility::getIdFromCombinedIdentifier($parentFolderIdentifier));
+        try {
+            if ($createAlbum) {
+                return 'album#' . $this->cantoRepository->getClient()->libraryTree()->createAlbum($request)->getId();
+            }
+            $folder = $this->cantoRepository->getClient()->libraryTree()->createFolder($request);
+            $id = 'folder#' . $folder->getId();
+            $this->cantoRepository->setFolderCache($id, $folder->getResponseData());
+            return $id;
+        } catch (NotAuthorizedException|InvalidResponseException $e) {
+            throw new RuntimeException('Creating the folder did not work - ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Renames a folder in this storage.
+     *
+     * @param string $folderIdentifier
+     * @param string $newName
+     * @return array A map of old to new file identifiers of all affected resources
+     */
+    public function renameFolder($folderIdentifier, $newName)
+    {
+        throw new NotSupportedException('Renaming a folder is currently not supported.', 1626963089);
+    }
+
+    /**
+     * Removes a folder in filesystem.
+     *
+     * @param string $folderIdentifier
+     * @param bool $deleteRecursively
+     * @return bool
+     */
+    public function deleteFolder($folderIdentifier, $deleteRecursively = false)
+    {
+        $request = new DeleteFolderOrAlbumRequest();
+        ['scheme' => $scheme, 'identifier' => $identifier] = CantoUtility::splitCombinedIdentifier($folderIdentifier);
+        $request->addFolder($identifier, $scheme);
+        try {
+            return $this->cantoRepository->getClient()->libraryTree()->deleteFolderOrAlbum($request)->isSuccessful();
+        } catch (\Exception $e) {
+            if ($e->getPrevious() instanceof GuzzleException) {
+                // replace with logger
+                debug([$request, $e->getPrevious()->getMessage()]);
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Adds a file from the local server hard disk to a given path in TYPO3s
+     * virtual file system. This assumes that the local file exists, so no
+     * further check is done here! After a successful operation the original
+     * file must not exist anymore.
+     *
+     * @param string $localFilePath within public web path
+     * @param string $targetFolderIdentifier
+     * @param string $newFileName optional, if not given original name is used
+     * @param bool $removeOriginal if set the original file will be removed
+     *                                after successful operation
+     * @return string the identifier of the new file
+     */
+    public function addFile($localFilePath, $targetFolderIdentifier, $newFileName = '', $removeOriginal = true)
+    {
+        $uploadSettingsRequest = new GetUploadSettingRequest(false);
+        $response = $this->cantoRepository->getClient()->upload()->getUploadSetting($uploadSettingsRequest);
+        $request = new UploadFileRequest(
+            $localFilePath,
+            $response,
+        );
+        $request->setScheme('image');
+        if (CantoUtility::getSchemeFromCombinedIdentifier($targetFolderIdentifier) === 'folder') {
+            throw new \Exception('Files need to be within an album, not a folder');
+        }
+        $request->setAlbumId(CantoUtility::getIdFromCombinedIdentifier($targetFolderIdentifier));
+        $request->setFileName($newFileName);
+        $this->cantoRepository->getClient()->upload()->uploadFile($request);
+        $id = '';
+        while ($id === '') {
+            $status = $this->cantoRepository->getClient()->upload()->queryUploadStatus(new QueryUploadStatusRequest());
+            sleep(2);
+            foreach ($status->getStatusItems() as $item) {
+                if ($item->name === $newFileName && $item->status === Status::STATUS_DONE) {
+                    $id = CantoUtility::buildCombinedIdentifier($item->scheme, $item->id);
+                }
+            }
+        }
+        if ($id && $removeOriginal) {
+            unlink($localFilePath);
+        }
+        return $id;
+    }
+
+    /**
+     * Creates a new (empty) file and returns the identifier.
+     *
+     * @param string $fileName
+     * @param string $parentFolderIdentifier
+     * @return string
+     */
+    public function createFile($fileName, $parentFolderIdentifier)
+    {
+        $path = '/tmp/' . $fileName;
+        touch($path);
+        return $this->addFile($path, $parentFolderIdentifier, $fileName);
+    }
+
+    /**
+     * Copies a file *within* the current storage.
+     * Note that this is only about an inner storage copy action,
+     * where a file is just copied to another folder in the same storage.
+     *
+     * @param string $fileIdentifier
+     * @param string $targetFolderIdentifier
+     * @param string $fileName
+     * @return string the Identifier of the new file
+     */
+    public function copyFileWithinStorage($fileIdentifier, $targetFolderIdentifier, $fileName)
+    {
+        throw new NotSupportedException('This driver does not support this operation yet.', 1626963232);
+    }
+
+    /**
+     * Renames a file in this storage.
+     *
+     * @param string $fileIdentifier
+     * @param string $newName The target path (including the file name!)
+     * @return string The identifier of the file after renaming
+     */
+    public function renameFile($fileIdentifier, $newName)
+    {
+        ['scheme' => $scheme, 'identifier' => $identifier] = CantoUtility::splitCombinedIdentifier($fileIdentifier);
+        $request = new RenameContentRequest($scheme, $identifier, $newName);
+        try {
+            $this->cantoRepository->getClient()->asset()->renameContent($request);
+            CantoUtility::flushCache($this->cantoRepository);
+        } catch (InvalidResponseException $e) {
+            // replace with logger
+            debug([$request, $e->getPrevious()->getMessage()]);
+        }
+        return $fileIdentifier;
+    }
+
+    /**
+     * Replaces a file with file in local file system.
+     *
+     * @param string $fileIdentifier
+     * @param string $localFilePath
+     * @return bool TRUE if the operation succeeded
+     */
+    public function replaceFile($fileIdentifier, $localFilePath)
+    {
+        throw new NotSupportedException('This driver does not support this operation yet.', 1626963248);
+    }
+
+    /**
+     * Removes a file from the filesystem. This does not check if the file is
+     * still used or if it is a bad idea to delete it for some other reason
+     * this has to be taken care of in the upper layers (e.g. the Storage)!
+     *
+     * @param string $fileIdentifier
+     * @return bool TRUE if deleting the file succeeded
+     */
+    public function deleteFile($fileIdentifier)
+    {
+        ['scheme' => $scheme, 'identifier' => $identifier] = CantoUtility::splitCombinedIdentifier($fileIdentifier);
+        $request = new BatchDeleteContentRequest();
+        $request->addContent($scheme, $identifier);
+        try {
+            $this->cantoRepository->getClient()->asset()->batchDeleteContent($request);
+        } catch (InvalidResponseException $e) {
+            // replace with logger
+            debug([$request, $e->getPrevious()->getMessage()]);
+        }
+        return $fileIdentifier;
+    }
+
+    /**
+     * Moves a file *within* the current storage.
+     * Note that this is only about an inner-storage move action,
+     * where a file is just moved to another folder in the same storage.
+     *
+     * @param string $fileIdentifier
+     * @param string $targetFolderIdentifier
+     * @param string $newFileName
+     * @return string
+     */
+    public function moveFileWithinStorage($fileIdentifier, $targetFolderIdentifier, $newFileName)
+    {
+        throw new NotSupportedException('This driver does not support this operation yet.', 1626963285);
+    }
+
+    /**
+     * Folder equivalent to moveFileWithinStorage().
+     *
+     * @param string $sourceFolderIdentifier
+     * @param string $targetFolderIdentifier
+     * @param string $newFolderName
+     * @return array All files which are affected, map of old => new file identifiers
+     */
+    public function moveFolderWithinStorage($sourceFolderIdentifier, $targetFolderIdentifier, $newFolderName)
+    {
+        throw new NotSupportedException('This driver does not support this operation yet.', 1626963299);
+    }
+
+    /**
+     * Folder equivalent to copyFileWithinStorage().
+     *
+     * @param string $sourceFolderIdentifier
+     * @param string $targetFolderIdentifier
+     * @param string $newFolderName
+     * @return bool
+     */
+    public function copyFolderWithinStorage($sourceFolderIdentifier, $targetFolderIdentifier, $newFolderName)
+    {
+        throw new NotSupportedException('This driver does not support this operation yet.', 1626963313);
+    }
+
+    /**
+     * Sets the contents of a file to the specified value.
+     *
+     * @param string $fileIdentifier
+     * @param string $contents
+     * @return int The number of bytes written to the file
+     */
+    public function setFileContents($fileIdentifier, $contents)
+    {
+        throw new NotSupportedException('This driver does not support this operation yet.', 1626963332);
     }
 }
