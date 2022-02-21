@@ -11,10 +11,10 @@ declare(strict_types=1);
 
 namespace Ecentral\CantoSaasFal\Resource\Processing;
 
-use Fairway\CantoSaasApi\Endpoint\Authorization\AuthorizationFailedException;
 use Ecentral\CantoSaasFal\Resource\Driver\CantoDriver;
 use Ecentral\CantoSaasFal\Resource\Repository\CantoRepository;
 use Ecentral\CantoSaasFal\Utility\CantoUtility;
+use Fairway\CantoSaasApi\Endpoint\Authorization\AuthorizationFailedException;
 use TYPO3\CMS\Core\Imaging\GraphicalFunctions;
 use TYPO3\CMS\Core\Resource\Processing\ProcessorInterface;
 use TYPO3\CMS\Core\Resource\Processing\TaskInterface;

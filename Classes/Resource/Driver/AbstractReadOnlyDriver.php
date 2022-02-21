@@ -15,5 +15,4 @@ use TYPO3\CMS\Core\Resource\Driver\AbstractDriver;
 
 abstract class AbstractReadOnlyDriver extends AbstractDriver
 {
-
 }

@@ -1,5 +1,12 @@
 <?php
 
+/*
+ * This file is part of the "canto_saas_fal" Extension for TYPO3 CMS.
+ *
+ * For the full copyright and license information, please read the
+ * LICENSE file that was distributed with this source code.
+ */
+
 namespace Ecentral\CantoSaasFal\Xclass;
 
 use TYPO3\CMS\Backend\Clipboard\Clipboard;
@@ -17,7 +24,6 @@ class FileListController extends \TYPO3\CMS\Filelist\Controller\FileListControll
      * Overriding FileListController::registerButtons to disable File-Uploads in Folders.
      * Canto only allows Files within Albums, and thus we disable that here
      *
-     * @return void
      * @throws \TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException
      */
     protected function registerButtons()
@@ -74,9 +80,9 @@ class FileListController extends \TYPO3\CMS\Filelist\Controller\FileListControll
 
         // Upload button (only if upload to this directory is allowed)
         if ($this->folderObject && $this->folderObject->getStorage()->checkUserActionPermission(
-                'add',
-                'File'
-            ) && $this->folderObject->checkActionPermission('write')
+            'add',
+            'File'
+        ) && $this->folderObject->checkActionPermission('write')
 // START CHANGE IN XCLASS
             && $this->folderObject->checkActionPermission('writeFolder')
 // END CHANGE IN XCLASS
@@ -98,9 +104,9 @@ class FileListController extends \TYPO3\CMS\Filelist\Controller\FileListControll
         // New folder button
         if ($this->folderObject && $this->folderObject->checkActionPermission('write')
             && ($this->folderObject->getStorage()->checkUserActionPermission(
-                    'add',
-                    'File'
-                ) || $this->folderObject->checkActionPermission('add'))
+                'add',
+                'File'
+            ) || $this->folderObject->checkActionPermission('add'))
         ) {
             $newButton = $buttonBar->makeLinkButton()
                 ->setHref((string)$uriBuilder->buildUriFromRoute(
@@ -124,9 +130,9 @@ class FileListController extends \TYPO3\CMS\Filelist\Controller\FileListControll
                 foreach ($elFromTable as $key => $element) {
                     $clipBoardElement = $resourceFactory->retrieveFileOrFolderObject($element);
                     if ($clipBoardElement instanceof Folder && $clipBoardElement->getStorage()->isWithinFolder(
-                            $clipBoardElement,
-                            $this->folderObject
-                        )
+                        $clipBoardElement,
+                        $this->folderObject
+                    )
                     ) {
                         $addPasteButton = false;
                     }

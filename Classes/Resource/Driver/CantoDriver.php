@@ -11,32 +11,25 @@ declare(strict_types=1);
 
 namespace Ecentral\CantoSaasFal\Resource\Driver;
 
-use Ecentral\CantoSaasFal\Domain\Model\Dto\AssetSearch;
+use Ecentral\CantoSaasFal\Resource\MdcUrlGenerator;
+use Ecentral\CantoSaasFal\Resource\Repository\CantoRepository;
+use Ecentral\CantoSaasFal\Utility\CantoUtility;
 use Fairway\CantoSaasApi\DTO\Status;
 use Fairway\CantoSaasApi\Endpoint\Authorization\AuthorizationFailedException;
 use Fairway\CantoSaasApi\Endpoint\Authorization\NotAuthorizedException;
 use Fairway\CantoSaasApi\Http\Asset\BatchDeleteContentRequest;
 use Fairway\CantoSaasApi\Http\Asset\RenameContentRequest;
-use Fairway\CantoSaasApi\Http\Asset\SearchRequest;
 use Fairway\CantoSaasApi\Http\InvalidResponseException;
 use Fairway\CantoSaasApi\Http\LibraryTree\CreateAlbumFolderRequest;
 use Fairway\CantoSaasApi\Http\LibraryTree\DeleteFolderOrAlbumRequest;
-use Fairway\CantoSaasApi\Http\LibraryTree\GetDetailsRequest;
 use Fairway\CantoSaasApi\Http\LibraryTree\GetTreeRequest;
 use Fairway\CantoSaasApi\Http\LibraryTree\ListAlbumContentRequest;
 use Fairway\CantoSaasApi\Http\LibraryTree\SearchFolderRequest;
-use Ecentral\CantoSaasFal\Resource\MdcUrlGenerator;
-use Ecentral\CantoSaasFal\Resource\Repository\CantoRepository;
-use Ecentral\CantoSaasFal\Utility\CantoUtility;
 use Fairway\CantoSaasApi\Http\Upload\GetUploadSettingRequest;
-use Fairway\CantoSaasApi\Http\Upload\GetUploadSettingResponse;
 use Fairway\CantoSaasApi\Http\Upload\QueryUploadStatusRequest;
-use Fairway\CantoSaasApi\Http\Upload\QueryUploadStatusResponse;
 use Fairway\CantoSaasApi\Http\Upload\UploadFileRequest;
-use Fairway\CantoSaasApi\Http\UploadRequest;
 use GuzzleHttp\Exception\GuzzleException;
 use RuntimeException;
-use TYPO3\CMS\Backend\Controller\Page\TreeController;
 use TYPO3\CMS\Core\Resource\Driver\AbstractDriver;
 use TYPO3\CMS\Core\Resource\Exception\FolderDoesNotExistException;
 use TYPO3\CMS\Core\Resource\ResourceStorage;
@@ -468,8 +461,7 @@ class CantoDriver extends AbstractDriver
         array $filenameFilterCallbacks = [],
         $sort = '',
         $sortRev = false
-    ): array
-    {
+    ): array {
         $scheme = CantoUtility::getSchemeFromCombinedIdentifier($folderIdentifier);
         $explicitFolderIdentifier = CantoUtility::getIdFromCombinedIdentifier($folderIdentifier);
         if ($scheme === CantoUtility::SCHEME_FOLDER || $explicitFolderIdentifier === self::ROOT_FOLDER) {
@@ -504,12 +496,12 @@ class CantoDriver extends AbstractDriver
     public function getFolderInFolder($folderName, $folderIdentifier): string
     {
         $foldersWithName = $this->getFoldersInFolder(
-                $folderIdentifier,
-                0,
-                0,
-                false,
-                [$folderIdentifier],
-            ) ?? [];
+            $folderIdentifier,
+            0,
+            0,
+            false,
+            [$folderIdentifier],
+        ) ?? [];
         if (count($foldersWithName) !== 1) {
             return '';
         }
@@ -538,8 +530,7 @@ class CantoDriver extends AbstractDriver
         array $folderNameFilterCallbacks = [],
         $sort = '',
         $sortRev = false
-    ): array
-    {
+    ): array {
         $scheme = CantoUtility::getSchemeFromCombinedIdentifier($folderIdentifier);
         if ($scheme === CantoUtility::SCHEME_ALBUM) {
             // Albums contain only files, not folders.
@@ -617,8 +608,7 @@ class CantoDriver extends AbstractDriver
         $folderIdentifier,
         $recursive = false,
         array $folderNameFilterCallbacks = []
-    ): int
-    {
+    ): int {
         return count($this->getFoldersInFolder(
             $folderIdentifier,
             0,

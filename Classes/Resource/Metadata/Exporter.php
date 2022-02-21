@@ -2,6 +2,13 @@
 
 declare(strict_types=1);
 
+/*
+ * This file is part of the "canto_saas_fal" Extension for TYPO3 CMS.
+ *
+ * For the full copyright and license information, please read the
+ * LICENSE file that was distributed with this source code.
+ */
+
 namespace Ecentral\CantoSaasFal\Resource\Metadata;
 
 use Ecentral\CantoSaasFal\Resource\Event\BeforeMetadataUploadEvent;
@@ -29,7 +36,8 @@ final class Exporter
         $this->dispatcher = $dispatcher;
     }
 
-    public function exportToCanto(int $uid, array $metadata) {
+    public function exportToCanto(int $uid, array $metadata)
+    {
         $result = $this->connection->getQueryBuilderForTable('sys_file_metadata')
             ->select('file')
             ->from('sys_file_metadata')

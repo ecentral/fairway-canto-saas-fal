@@ -11,11 +11,11 @@ declare(strict_types=1);
 
 namespace Ecentral\CantoSaasFal\Pagination;
 
-use Fairway\CantoSaasApi\Endpoint\Authorization\NotAuthorizedException;
-use Fairway\CantoSaasApi\Http\InvalidResponseException;
 use Ecentral\CantoSaasFal\Domain\Model\Dto\AssetSearch;
 use Ecentral\CantoSaasFal\Domain\Model\Dto\AssetSearchResponse;
 use Ecentral\CantoSaasFal\Resource\Repository\CantoRepository;
+use Fairway\CantoSaasApi\Endpoint\Authorization\NotAuthorizedException;
+use Fairway\CantoSaasApi\Http\InvalidResponseException;
 use TYPO3\CMS\Core\Pagination\AbstractPaginator;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 

@@ -53,6 +53,7 @@
       "[ -L .Build/Web/typo3conf/ext/canto_saas_fal ] || ln -snvf ../../../../. .Build/Web/typo3conf/ext/canto_saas_fal"
     ],
     "phpcsfixer": "php-cs-fixer fix --config=.php-cs-fixer.dist.php -v --dry-run --using-cache=no --diff",
+    "phpcsfixer:fix": "php-cs-fixer fix --config=.php-cs-fixer.dist.php -v --using-cache=no --diff",
     "phpstan": "phpstan analyse -c phpstan.neon"
   },
   "extra": {

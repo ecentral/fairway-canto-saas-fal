@@ -11,11 +11,11 @@ declare(strict_types=1);
 
 namespace Ecentral\CantoSaasFal\Resource\Metadata;
 
-use Fairway\CantoSaasApi\Endpoint\Authorization\AuthorizationFailedException;
 use Ecentral\CantoSaasFal\Resource\Driver\CantoDriver;
 use Ecentral\CantoSaasFal\Resource\Event\AfterMetaDataExtractionEvent;
 use Ecentral\CantoSaasFal\Resource\Repository\CantoRepository;
 use Ecentral\CantoSaasFal\Utility\CantoUtility;
+use Fairway\CantoSaasApi\Endpoint\Authorization\AuthorizationFailedException;
 use JsonException;
 use TYPO3\CMS\Core\Category\Collection\CategoryCollection;
 use TYPO3\CMS\Core\EventDispatcher\EventDispatcher;
