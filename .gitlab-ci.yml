@@ -44,19 +44,3 @@ phpstan:
     key: composer-cache
     paths:
       - .composer/cache
-
-phpunit:canto-saas-api-client:
-  stage: test
-  image: registry.gitlab.com/codemonkey1988/docker-composer-image:2-php$PHP_VERSION
-  before_script:
-    - mkdir -p .composer/cache
-    - COMPOSER_CACHE_DIR=.composer/cache composer install
-  script:
-    - .Build/bin/phpunit --colors Resources/Private/Vendor/canto_saas_api_client/tests/
-  parallel:
-    matrix:
-      - PHP_VERSION: [ '7.4' ]
-  cache:
-    key: composer-cache
-    paths:
-      - .composer/cache
