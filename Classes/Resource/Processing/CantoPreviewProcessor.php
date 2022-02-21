@@ -11,7 +11,7 @@ declare(strict_types=1);
 
 namespace Ecentral\CantoSaasFal\Resource\Processing;
 
-use Ecentral\CantoSaasApiClient\Endpoint\Authorization\AuthorizationFailedException;
+use Fairway\CantoSaasApi\Endpoint\Authorization\AuthorizationFailedException;
 use Ecentral\CantoSaasFal\Resource\Driver\CantoDriver;
 use Ecentral\CantoSaasFal\Resource\Repository\CantoRepository;
 use Ecentral\CantoSaasFal\Utility\CantoUtility;

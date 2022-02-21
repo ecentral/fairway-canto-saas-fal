@@ -11,7 +11,7 @@ declare(strict_types=1);
 
 namespace Ecentral\CantoSaasFal\Controller\Backend;
 
-use Ecentral\CantoSaasApiClient\Endpoint\Authorization\AuthorizationFailedException;
+use Fairway\CantoSaasApi\Endpoint\Authorization\AuthorizationFailedException;
 use Ecentral\CantoSaasFal\Domain\Model\Dto\AssetSearch;
 use Ecentral\CantoSaasFal\Pagination\SearchResultPaginator;
 use Ecentral\CantoSaasFal\Resource\Driver\CantoDriver;

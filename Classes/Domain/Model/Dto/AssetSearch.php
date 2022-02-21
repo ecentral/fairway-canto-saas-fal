@@ -11,7 +11,7 @@ declare(strict_types=1);
 
 namespace Ecentral\CantoSaasFal\Domain\Model\Dto;
 
-use Ecentral\CantoSaasApiClient\Http\Asset\SearchRequest;
+use Fairway\CantoSaasApi\Http\Asset\SearchRequest;
 
 class AssetSearch
 {
