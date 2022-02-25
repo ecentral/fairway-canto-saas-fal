@@ -806,6 +806,8 @@ class CantoDriver extends AbstractDriver
         $id = '';
         while ($id === '') {
             $status = $this->cantoRepository->getClient()->upload()->queryUploadStatus(new QueryUploadStatusRequest());
+            // We need to wait for AWS to process the image, only then will we be able to show, that the file has been uploaded successfully and display it in the list.
+            // The file though has already been uploaded at this point, it just is not yet present in canto
             sleep(2);
             foreach ($status->getStatusItems() as $item) {
                 if ($item->name === $newFileName && $item->status === Status::STATUS_DONE) {
