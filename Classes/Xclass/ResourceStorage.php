@@ -30,7 +30,7 @@ class ResourceStorage extends \TYPO3\CMS\Core\Resource\ResourceStorage
 
     public function checkFolderActionPermission($action, Folder $folder = null)
     {
-        if ($folder !== null && $action === 'writeFolder') {
+        if ($folder !== null && $action === 'writeFolder' && $this->getDriverType() === CantoDriver::DRIVER_NAME) {
             return CantoUtility::getSchemeFromCombinedIdentifier($folder->getIdentifier()) !== 'folder';
         }
         return parent::checkFolderActionPermission($action, $folder);

@@ -131,7 +131,10 @@ class CantoRepository
         $combinedIdentifier = CantoUtility::buildCombinedIdentifier($scheme, $folderIdentifier);
         $cacheIdentifier = $this->buildValidCacheIdentifier($combinedIdentifier);
         if ($this->cantoFolderCache->has($cacheIdentifier)) {
-            return $this->cantoFolderCache->get($cacheIdentifier);
+            $cacheItem = $this->cantoFolderCache->get($cacheIdentifier);
+            if (is_array($cacheItem)) {
+                return $cacheItem;
+            }
         }
 
         $request = new GetDetailsRequest($folderIdentifier, $scheme);

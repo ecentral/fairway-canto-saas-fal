@@ -391,7 +391,7 @@ class CantoDriver extends AbstractDriver
     {
         $now = time();
         $rootFolder = [
-            'identifier' => 'folder#' . self::ROOT_FOLDER,
+            'identifier' => 'folder' . CantoUtility::SPLIT_CHARACTER . self::ROOT_FOLDER,
             'name' => 'Canto',
             'mtime' => $now,
             'ctime' => $now,
@@ -427,17 +427,19 @@ class CantoDriver extends AbstractDriver
      */
     public function getFileInFolder($fileName, $folderIdentifier): string
     {
-        $filesWithName = $this->getFilesInFolder(
+        $filesWithName = $this->resolveFilesInFolder(
             $folderIdentifier,
             0,
             0,
             false,
-            [$fileName],
+            [],
         ) ?? [];
-        if (count($filesWithName) !== 1) {
-            return '';
+        foreach ($filesWithName as $file) {
+            if ($file['name'] === $fileName) {
+                return $file['id'];
+            }
         }
-        return $filesWithName[0];
+        return '';
     }
 
     /**
@@ -462,31 +464,43 @@ class CantoDriver extends AbstractDriver
         $sort = '',
         $sortRev = false
     ): array {
-        $scheme = CantoUtility::getSchemeFromCombinedIdentifier($folderIdentifier);
-        $explicitFolderIdentifier = CantoUtility::getIdFromCombinedIdentifier($folderIdentifier);
-        if ($scheme === CantoUtility::SCHEME_FOLDER || $explicitFolderIdentifier === self::ROOT_FOLDER) {
-            // There are no files in folders, just other files and albums.
-            return [];
-        }
         $files = [];
-        $sortBy = $this->mapSortBy($sort);
-        $sortDirection = $sortRev ? ListAlbumContentRequest::SORT_DIRECTION_DESC
-            : ListAlbumContentRequest::SORT_DIRECTION_ASC;
-        $limit = $numberOfItems > 0 ? min($numberOfItems, 1000) : 1000;
-        // TODO Check if there are more that 1000 files and make multiple requests if needed.
-        $results = $this->cantoRepository->getFilesInFolder(
-            $explicitFolderIdentifier,
-            $start,
-            $limit,
-            $sortBy,
-            $sortDirection
-        );
+        $results = $this->resolveFilesInFolder($folderIdentifier, $start, $numberOfItems, $recursive, $filenameFilterCallbacks, $sort, $sortRev);
         foreach ($results as $result) {
             $fileIdentifier = CantoUtility::buildCombinedIdentifier($result['scheme'], $result['id']);
             $this->cantoRepository->setFileCache($fileIdentifier, $result);
             $files[] = $fileIdentifier;
         }
         return $files;
+    }
+
+    protected function resolveFilesInFolder(
+        string $folderIdentifier,
+        int $start = 0,
+        int $numberOfItems = 0,
+        bool $recursive = false,
+        array $filenameFilterCallbacks = [],
+        string $sort = '',
+        bool $sortRev = false
+    ) {
+        $scheme = CantoUtility::getSchemeFromCombinedIdentifier($folderIdentifier);
+        $explicitFolderIdentifier = CantoUtility::getIdFromCombinedIdentifier($folderIdentifier);
+        if ($scheme === CantoUtility::SCHEME_FOLDER || $explicitFolderIdentifier === self::ROOT_FOLDER) {
+            // There are no files in folders, just other files and albums.
+            return [];
+        }
+        $sortBy = $this->mapSortBy($sort);
+        $sortDirection = $sortRev ? ListAlbumContentRequest::SORT_DIRECTION_DESC
+            : ListAlbumContentRequest::SORT_DIRECTION_ASC;
+        $limit = $numberOfItems > 0 ? min($numberOfItems, 1000) : 1000;
+        // TODO Check if there are more that 1000 files and make multiple requests if needed.
+        return $this->cantoRepository->getFilesInFolder(
+            $explicitFolderIdentifier,
+            $start,
+            $limit,
+            $sortBy,
+            $sortDirection
+        );
     }
 
     /**
@@ -757,6 +771,7 @@ class CantoDriver extends AbstractDriver
                 debug([$request, $e->getPrevious()->getMessage()]);
             }
         }
+        CantoUtility::flushCache($this->cantoRepository);
         return false;
     }
 
@@ -801,6 +816,7 @@ class CantoDriver extends AbstractDriver
         if ($id && $removeOriginal) {
             unlink($localFilePath);
         }
+        CantoUtility::flushCache($this->cantoRepository);
         return $id;
     }
 
@@ -815,7 +831,9 @@ class CantoDriver extends AbstractDriver
     {
         $path = '/tmp/' . $fileName;
         touch($path);
-        return $this->addFile($path, $parentFolderIdentifier, $fileName);
+        $identifier = $this->addFile($path, $parentFolderIdentifier, $fileName);
+        CantoUtility::flushCache($this->cantoRepository);
+        return $identifier;
     }
 
     /**
@@ -885,6 +903,7 @@ class CantoDriver extends AbstractDriver
             // replace with logger
             debug([$request, $e->getPrevious()->getMessage()]);
         }
+        CantoUtility::flushCache($this->cantoRepository);
         return true;
     }
 

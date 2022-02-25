@@ -22,11 +22,12 @@ class CantoUtility
 {
     public const SCHEME_FOLDER = 'folder';
     public const SCHEME_ALBUM = 'album';
+    public const SPLIT_CHARACTER = '<>';
     private const PROCESSING_PREFIX = 'processed::';
 
     public static function isValidCombinedIdentifier(string $combinedIdentifier): bool
     {
-        return count(explode('#', $combinedIdentifier)) === 2;
+        return count(explode(self::SPLIT_CHARACTER, $combinedIdentifier)) === 2;
     }
 
     public static function isFolder(string $scheme): bool
@@ -52,12 +53,12 @@ class CantoUtility
                 1626954151
             );
         }
-        return array_combine(['scheme', 'identifier'], explode('#', $combinedIdentifier));
+        return array_combine(['scheme', 'identifier'], explode(self::SPLIT_CHARACTER, $combinedIdentifier));
     }
 
     public static function buildCombinedIdentifier(string $scheme, string $id): string
     {
-        return sprintf('%s#%s', $scheme, $id);
+        return sprintf('%s%s%s', $scheme, self::SPLIT_CHARACTER, $id);
     }
 
     /**

@@ -63,6 +63,11 @@ services:
       - name: 'console.command'
         command: 'canto:removemdcprefixforfiles'
 
+  Ecentral\CantoSaasFal\Command\MigrateFileIdentifiersToNewFormat:
+    tags:
+      - name: 'console.command'
+        command: 'canto:migratefileidentifiers'
+
   Ecentral\CantoSaasFal\Resource\EventListener\HandleMultipleFolders:
     tags:
       - name: event.listener
