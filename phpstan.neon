@@ -1,13 +1,46 @@
-includes:
-  - phpstan-baseline.neon
-
 parameters:
   level: 5
   paths:
     - Classes
     - Configuration
-    - Resources/Private/Vendor/canto_saas_api_client/src
   reportUnmatchedIgnoredErrors: false
   ignoreErrors:
     - '#JetBrains\\PhpStorm\\ArrayShape#'
     - '#fetchAssociative\(\)#'
+    -
+      message: "#^Access to constant STATUS_DONE on an unknown class Fairway\\\\CantoSaasApi\\\\DTO\\\\Status\\.$#"
+      count: 1
+      path: Classes/Resource/Driver/CantoDriver.php
+
+    -
+      message: "#^Call to an undefined method Fairway\\\\CantoSaasApi\\\\Http\\\\Upload\\\\QueryUploadStatusResponse\\:\\:getStatusItems\\(\\)\\.$#"
+      count: 1
+      path: Classes/Resource/Driver/CantoDriver.php
+
+    -
+      message: "#^Left side of && is always true\\.$#"
+      count: 1
+      path: Classes/Resource/Driver/CantoDriver.php
+
+    -
+      message: "#^Method Fairway\\\\CantoSaasApi\\\\Endpoint\\\\LibraryTree\\:\\:deleteFolderOrAlbum\\(\\) invoked with 1 parameter, 0 required\\.$#"
+      count: 1
+      path: Classes/Resource/Driver/CantoDriver.php
+
+    -
+      message: "#^Call to an undefined method Fairway\\\\CantoSaasApi\\\\Http\\\\Asset\\\\BatchUpdatePropertiesResponse\\:\\:isSuccessful\\(\\)\\.$#"
+      count: 1
+      path: Classes/Resource/Metadata/Exporter.php
+    -
+      message: "#^Call to an undefined method TYPO3\\\\CMS\\\\Core\\\\Resource\\\\FolderInterface\\:\\:getCombinedIdentifier\\(\\)\\.$#"
+      count: 2
+      path: Classes/Xclass/FileListController.php
+
+    -
+      message: "#^Left side of && is always true\\.$#"
+      count: 2
+      path: Classes/Xclass/FileListController.php
+    -
+      message: "#^Cannot call method fetchAllAssociative\\(\\) on Doctrine\\\\DBAL\\\\Driver\\\\ResultStatement\\|int\\.$#"
+      count: 1
+      path: Classes/Command/MigrateFileIdentifiersToNewFormat.php

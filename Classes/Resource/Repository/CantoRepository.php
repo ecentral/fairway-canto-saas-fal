@@ -11,22 +11,22 @@ declare(strict_types=1);
 
 namespace Ecentral\CantoSaasFal\Resource\Repository;
 
-use Ecentral\CantoSaasApiClient\Client;
-use Ecentral\CantoSaasApiClient\Endpoint\Authorization\AuthorizationFailedException;
-use Ecentral\CantoSaasApiClient\Endpoint\Authorization\NotAuthorizedException;
-use Ecentral\CantoSaasApiClient\Http\Asset\GetContentDetailsRequest;
-use Ecentral\CantoSaasApiClient\Http\Asset\SearchRequest;
-use Ecentral\CantoSaasApiClient\Http\Authorization\OAuth2Request;
-use Ecentral\CantoSaasApiClient\Http\InvalidResponseException;
-use Ecentral\CantoSaasApiClient\Http\LibraryTree\GetDetailsRequest;
-use Ecentral\CantoSaasApiClient\Http\LibraryTree\GetTreeRequest;
-use Ecentral\CantoSaasApiClient\Http\LibraryTree\ListAlbumContentRequest;
 use Ecentral\CantoSaasFal\Domain\Model\Dto\AssetSearch;
 use Ecentral\CantoSaasFal\Domain\Model\Dto\AssetSearchResponse;
 use Ecentral\CantoSaasFal\Resource\CantoClientFactory;
 use Ecentral\CantoSaasFal\Resource\Driver\CantoDriver;
 use Ecentral\CantoSaasFal\Resource\Event\BeforeLocalFileProcessingEvent;
 use Ecentral\CantoSaasFal\Utility\CantoUtility;
+use Fairway\CantoSaasApi\Client;
+use Fairway\CantoSaasApi\Endpoint\Authorization\AuthorizationFailedException;
+use Fairway\CantoSaasApi\Endpoint\Authorization\NotAuthorizedException;
+use Fairway\CantoSaasApi\Http\Asset\GetContentDetailsRequest;
+use Fairway\CantoSaasApi\Http\Asset\SearchRequest;
+use Fairway\CantoSaasApi\Http\Authorization\OAuth2Request;
+use Fairway\CantoSaasApi\Http\InvalidResponseException;
+use Fairway\CantoSaasApi\Http\LibraryTree\GetDetailsRequest;
+use Fairway\CantoSaasApi\Http\LibraryTree\GetTreeRequest;
+use Fairway\CantoSaasApi\Http\LibraryTree\ListAlbumContentRequest;
 use TYPO3\CMS\Core\Cache\Frontend\FrontendInterface;
 use TYPO3\CMS\Core\EventDispatcher\EventDispatcher;
 use TYPO3\CMS\Core\Registry;
@@ -131,7 +131,10 @@ class CantoRepository
         $combinedIdentifier = CantoUtility::buildCombinedIdentifier($scheme, $folderIdentifier);
         $cacheIdentifier = $this->buildValidCacheIdentifier($combinedIdentifier);
         if ($this->cantoFolderCache->has($cacheIdentifier)) {
-            return $this->cantoFolderCache->get($cacheIdentifier);
+            $cacheItem = $this->cantoFolderCache->get($cacheIdentifier);
+            if (is_array($cacheItem)) {
+                return $cacheItem;
+            }
         }
 
         $request = new GetDetailsRequest($folderIdentifier, $scheme);
@@ -309,7 +312,7 @@ class CantoRepository
                 return [];
             }
         }
-        return $this->cantoFolderCache->get($cacheIdentifier);
+        return $this->cantoFolderCache->get($cacheIdentifier) ?: [];
     }
 
     protected function buildFolderTree(array $treeItems): array

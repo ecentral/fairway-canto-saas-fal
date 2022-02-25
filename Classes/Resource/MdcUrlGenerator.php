@@ -114,8 +114,8 @@ final class MdcUrlGenerator
     }
 
     /**
-     * @param array{width: ?int, height: ?int, minWidth: null|numeric, minHeight: null|numeric, maxWidth: null|numeric, maxHeight: null|numeric, crop: ?Area} $configuration
-     * @return array{width: int, height: int, size?: ?int, x?: ?int, y?: ?int, format?: ?string, crop: ?Area, minWidth?: null|numeric, minHeight?: null|numeric, maxWidth?: null|numeric, maxHeight?: null|numeric} $configuration
+     * @param array{width: ?int, height: ?int, minWidth: numeric|null, minHeight: numeric|null, maxWidth: numeric|null, maxHeight: numeric|null, crop: ?Area} $configuration
+     * @return array{width: int, height: int, size?: ?int, x?: ?int, y?: ?int, format?: ?string, crop: ?Area, minWidth?: numeric|null, minHeight?: numeric|null, maxWidth?: numeric|null, maxHeight?: numeric|null}
      */
     private function transformConfiguration(File $file, array $configuration): array
     {

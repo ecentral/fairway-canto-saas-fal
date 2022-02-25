@@ -175,6 +175,16 @@
                     </config>
                 </TCEforms>
             </categoryMapping>
+            <metadataExportMapping>
+                <TCEforms>
+                    <label>LLL:EXT:canto_saas_fal/Resources/Private/Language/locallang_be.xlf:sys_file_storage.cantoDriverFlexform_metadataExportMapping</label>
+                    <config>
+                        <type>text</type>
+                        <renderType>t3editor</renderType>
+                        <rows>9</rows>
+                    </config>
+                </TCEforms>
+            </metadataExportMapping>
         </el>
     </ROOT>
 </T3DataStructure>

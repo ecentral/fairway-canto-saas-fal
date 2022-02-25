@@ -37,6 +37,9 @@ services:
   Ecentral\CantoSaasFal\Resource\MdcUrlGenerator:
     public: true
 
+  Ecentral\CantoSaasFal\Resource\Metadata\Exporter:
+    public: true
+
   Ecentral\CantoSaasFal\Resource\Repository\CantoAlbumRepository:
     arguments:
       - 'sys_file_canto_album'
@@ -59,6 +62,11 @@ services:
     tags:
       - name: 'console.command'
         command: 'canto:removemdcprefixforfiles'
+
+  Ecentral\CantoSaasFal\Command\MigrateFileIdentifiersToNewFormat:
+    tags:
+      - name: 'console.command'
+        command: 'canto:migratefileidentifiers'
 
   Ecentral\CantoSaasFal\Resource\EventListener\HandleMultipleFolders:
     tags:
@@ -110,6 +118,15 @@ services:
       - name: event.listener
         identifier: cantoMdcProcessingFileEnricher
         event: TYPO3\CMS\Core\Resource\Event\BeforeFileProcessingEvent
+
+  Ecentral\CantoSaasFal\Resource\EventListener\AfterFormEnginePageInitializedEventListener:
+    arguments:
+      - "@Ecentral\\CantoSaasFal\\Resource\\Repository\\CantoRepository"
+    tags:
+      - name: event.listener
+        identifier: afterFormEnginePageInitializedEventListener
+        event: TYPO3\CMS\Core\Resource\Event\AfterFormEnginePageInitializedEvent
+        before: 'legacy-slot'
 
   cache.canto_folder:
     class: TYPO3\CMS\Core\Cache\Frontend\FrontendInterface

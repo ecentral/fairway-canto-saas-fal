@@ -11,8 +11,8 @@ declare(strict_types=1);
 
 namespace Ecentral\CantoSaasFal\Resource;
 
-use Ecentral\CantoSaasApiClient\Client;
-use Ecentral\CantoSaasApiClient\ClientOptions;
+use Fairway\CantoSaasApi\Client;
+use Fairway\CantoSaasApi\ClientOptions;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 use TYPO3\CMS\Core\Http\Client\GuzzleClientFactory;

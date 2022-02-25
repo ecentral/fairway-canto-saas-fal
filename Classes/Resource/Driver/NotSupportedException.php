@@ -9,8 +9,10 @@ declare(strict_types=1);
  * LICENSE file that was distributed with this source code.
  */
 
-namespace Ecentral\CantoSaasApiClient\Http;
+namespace Ecentral\CantoSaasFal\Resource\Driver;
 
-class InvalidRequestException extends \Exception
+use TYPO3\CMS\Core\Resource\Exception;
+
+class NotSupportedException extends Exception
 {
 }

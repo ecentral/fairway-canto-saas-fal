@@ -13,6 +13,8 @@ namespace Ecentral\CantoSaasFal\Xclass;
 
 use Ecentral\CantoSaasFal\Resource\Driver\CantoDriver;
 use Ecentral\CantoSaasFal\Resource\Repository\CantoFileIndexRepository;
+use Ecentral\CantoSaasFal\Utility\CantoUtility;
+use TYPO3\CMS\Core\Resource\Folder;
 use TYPO3\CMS\Core\Resource\Index\FileIndexRepository;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
@@ -24,5 +26,13 @@ class ResourceStorage extends \TYPO3\CMS\Core\Resource\ResourceStorage
             return GeneralUtility::makeInstance(CantoFileIndexRepository::class);
         }
         return parent::getFileIndexRepository();
+    }
+
+    public function checkFolderActionPermission($action, Folder $folder = null)
+    {
+        if ($folder !== null && $action === 'writeFolder' && $this->getDriverType() === CantoDriver::DRIVER_NAME) {
+            return CantoUtility::getSchemeFromCombinedIdentifier($folder->getIdentifier()) !== 'folder';
+        }
+        return parent::checkFolderActionPermission($action, $folder);
     }
 }

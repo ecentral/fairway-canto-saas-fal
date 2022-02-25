@@ -35,6 +35,9 @@ $GLOBALS['TYPO3_CONF_VARS']['SYS']['Objects'][\TYPO3\CMS\Core\Resource\ResourceS
 $GLOBALS['TYPO3_CONF_VARS']['SYS']['Objects'][\TYPO3\CMS\Core\Resource\Index\Indexer::class] = [
     'className' => \Ecentral\CantoSaasFal\Xclass\Indexer::class,
 ];
+$GLOBALS['TYPO3_CONF_VARS']['SYS']['Objects'][\TYPO3\CMS\Filelist\Controller\FileListController::class] = [
+    'className' => \Ecentral\CantoSaasFal\Xclass\FileListController::class,
+];
 
 // Hooks
 $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processDatamapClass'][1627626213]
@@ -102,4 +105,12 @@ if ($GLOBALS['TYPO3_CONF_VARS']['GFX']['imagefile_ext']) {
     [
         \Ecentral\CantoSaasFal\Controller\MetadataWebhookController::class => 'index',
     ],
+);
+
+$signalSlotDispatcher = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\TYPO3\CMS\Extbase\SignalSlot\Dispatcher::class);
+$signalSlotDispatcher->connect(
+    TYPO3\CMS\Backend\Controller\EditDocumentController::class,
+    'initAfter',
+    Ecentral\CantoSaasFal\Resource\EventListener\AfterFormEnginePageInitializedEventListener::class,
+    'updateMetadataInCantoSlot'
 );
