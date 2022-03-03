@@ -11,6 +11,7 @@ declare(strict_types=1);
 
 namespace Ecentral\CantoSaasFal\Command;
 
+use Doctrine\DBAL\FetchMode;
 use Ecentral\CantoSaasFal\Resource\Driver\CantoDriver;
 use Ecentral\CantoSaasFal\Utility\CantoUtility;
 use Symfony\Component\Console\Command\Command;
@@ -48,11 +49,13 @@ final class MigrateFileIdentifiersToNewFormat extends Command
         $builder = $connection->getQueryBuilderForTable('sys_file');
         foreach ($this->storageRepository->findByStorageType(CantoDriver::DRIVER_NAME) as $storage) {
             $uid = $storage->getUid();
-            $result = $builder->select('uid', 'identifier')
+            $statement = $builder->select('uid', 'identifier')
                 ->from('sys_file')
                 ->where($builder->expr()->eq('storage', $uid))
-                ->execute()
-                ->fetchAllAssociative();
+                ->execute();
+            $result = method_exists($statement, 'fetchAllAssociative') ?
+                $statement->fetchAllAssociative() :
+                $statement->fetchAll(FetchMode::ASSOCIATIVE);
             foreach ($result as $item) {
                 if (!str_contains($item['identifier'], '#')) {
                     continue;
