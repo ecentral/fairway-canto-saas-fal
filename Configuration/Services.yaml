@@ -16,7 +16,6 @@ services:
 
   Ecentral\CantoSaasFal\Resource\Repository\CantoRepository:
     public: true
-    shared: false
     arguments:
       - '@TYPO3\CMS\Core\Registry'
       - '@cache.canto_folder'
