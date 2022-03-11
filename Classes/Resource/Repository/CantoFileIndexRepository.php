@@ -102,6 +102,7 @@ class CantoFileIndexRepository extends FileIndexRepository
         $storageUids = array_unique($storageUids);
         $folderIdentifiers = array_unique($folderIdentifiers);
 
+        /** @var QueryBuilder $queryBuilder */
         $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)
             ->getQueryBuilderForTable($this->table);
 
@@ -159,8 +160,14 @@ class CantoFileIndexRepository extends FileIndexRepository
         $result = $queryBuilder->execute();
 
         $fileRecords = [];
-        while ($fileRecord = $result->fetchAssociative()) {
-            $fileRecords[$fileRecord['identifier']] = $fileRecord;
+        if (method_exists($result, 'fetchAssociative')) {
+            while ($fileRecord = $result->fetchAssociative()) {
+                $fileRecords[$fileRecord['identifier']] = $fileRecord;
+            }
+        } else {
+            while ($fileRecord = $result->fetch(\Doctrine\DBAL\FetchMode::ASSOCIATIVE)) {
+                $fileRecords[$fileRecord['identifier']] = $fileRecord;
+            }
         }
 
         return $fileRecords;
