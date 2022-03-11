@@ -11,6 +11,7 @@ declare(strict_types=1);
 
 namespace Ecentral\CantoSaasFal\Resource\Metadata;
 
+use Doctrine\DBAL\FetchMode;
 use Ecentral\CantoSaasFal\Resource\Event\BeforeMetadataUploadEvent;
 use Ecentral\CantoSaasFal\Resource\Repository\CantoRepository;
 use Ecentral\CantoSaasFal\Utility\CantoUtility;
@@ -43,7 +44,13 @@ final class Exporter
             ->from('sys_file_metadata')
             ->where('uid = ' . $uid)
             ->execute();
-        $fileUid = $result->fetchAssociative()['file'] ?? null;
+
+        if (method_exists($result, 'fetchAssociative')) {
+            $fileUid = $result->fetchAssociative()['file'] ?? null;
+        } else {
+            $fileUid = $result->fetch(FetchMode::ASSOCIATIVE)['file'] ?? null;
+        }
+
         if ($fileUid === null) {
             return false;
         }
