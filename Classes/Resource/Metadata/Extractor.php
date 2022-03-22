@@ -13,6 +13,7 @@ namespace Ecentral\CantoSaasFal\Resource\Metadata;
 
 use Ecentral\CantoSaasFal\Resource\Driver\CantoDriver;
 use Ecentral\CantoSaasFal\Resource\Event\AfterMetaDataExtractionEvent;
+use Ecentral\CantoSaasFal\Resource\Metadata\MetadataRepository as CantoMetadataRepository;
 use Ecentral\CantoSaasFal\Resource\Repository\CantoRepository;
 use Ecentral\CantoSaasFal\Utility\CantoUtility;
 use Fairway\CantoSaasApi\Endpoint\Authorization\AuthorizationFailedException;
@@ -85,21 +86,22 @@ class Extractor implements ExtractorInterface
                 'copyright' => $fileData['default']['Copyright'],
             ]
         );
+        $mappedMetadata = [];
         $mapping = [];
         if (array_key_exists('metadataMapping', $configuration)) {
             try {
                 $mapping = json_decode($configuration['metadataMapping'], true, 512, JSON_THROW_ON_ERROR);
-                $metadata = $this->applyMappedMetaData($mapping, $metadata, $fileData);
+                $mappedMetadata = $this->applyMappedMetaData($mapping, [], $fileData);
             } catch (JsonException $exception) {
                 # todo: add mapping logging
             }
         }
-        $event = new AfterMetaDataExtractionEvent($metadata, $mapping, $fileData);
-        $metadata = $this->dispatcher->dispatch($event)->getMetadata();
+
         if (array_key_exists('categoryMapping', $configuration)) {
             try {
                 $mapping = json_decode($configuration['categoryMapping'], true, 512, JSON_THROW_ON_ERROR);
-                $categoryData = $this->applyMappedMetaData($mapping, [], $fileData);
+                // we currently do not support translating sys_categories
+                $categoryData = $this->applyMappedMetaData($mapping, [], $fileData)[0] ?? [];
                 $categories = $this->buildCategoryTree($categoryData);
                 GeneralUtility::makeInstance(PersistenceManager::class)->persistAll();
                 $metadataObject = GeneralUtility::makeInstance(MetaDataRepository::class)->findByFileUid($file->getUid());
@@ -117,7 +119,31 @@ class Extractor implements ExtractorInterface
                 # todo: add mapping logging
             }
         }
-        return $metadata;
+
+        $metadataRepository = GeneralUtility::makeInstance(CantoMetadataRepository::class);
+        assert($metadataRepository instanceof CantoMetadataRepository);
+        $metadataParentUid = null;
+        foreach ($mappedMetadata as $languageUid => $metadataArray) {
+            $result = $metadataRepository->findByFileUidAndLanguageUid($file->getUid(), (int)$languageUid);
+            if ($result) {
+                $result = array_replace($result, $metadataArray);
+                $metadataRepository->update($file->getUid(), $result);
+            } elseif ($languageUid === 0) {
+                $metadataParentUid = $metadataRepository->createMetaDataRecord($file->getUid(), $metadataArray)['uid'];
+            } elseif ($metadataParentUid !== null) {
+                $metadataRepository->createMetaDataRecord($file->getUid(), array_merge(
+                    [
+                        'sys_language_uid' => $languageUid,
+                        'l10n_parent' => $metadataParentUid,
+                    ],
+                    $metadataArray
+                ));
+            }
+        }
+
+        $metadata = array_merge($metadata, $mappedMetadata[0]);
+        $event = new AfterMetaDataExtractionEvent($metadata, $mapping, $fileData);
+        return $this->dispatcher->dispatch($event)->getMetadata();
     }
 
     protected function fetchDataForFile(File $file): ?array
@@ -130,10 +156,15 @@ class Extractor implements ExtractorInterface
     private function applyMappedMetaData(array $mapping, array $metadata, array $fileData): array
     {
         foreach ($mapping as $metadataKey => $fileDataKey) {
-            $fileDataKeyArray = explode('->', $fileDataKey);
-            $value = $this->extractFromMetadata($fileData, $fileDataKeyArray);
-            if ($value) {
-                $metadata[$metadataKey] = $value;
+            if (is_string($fileDataKey)) {
+                $fileDataKey = [0 => $fileDataKey];
+            }
+            foreach ($fileDataKey as $languageUid => $key) {
+                $fileDataKeyArray = explode('->', $key);
+                $value = $this->extractFromMetadata($fileData, $fileDataKeyArray);
+                if ($value) {
+                    $metadata[(int)$languageUid][$metadataKey] = $value;
+                }
             }
         }
 
@@ -169,6 +200,7 @@ class Extractor implements ExtractorInterface
     private function buildCategoryTree(array $mappedCategoryConfiguration, Category $parent = null, CategoryRepository $categoryRepository = null): array
     {
         $categoryRepository ??= GeneralUtility::makeInstance(CategoryRepository::class);
+        assert($categoryRepository instanceof CategoryRepository);
         $categories = [];
         foreach ($mappedCategoryConfiguration as $title => $children) {
             $category = $parent;

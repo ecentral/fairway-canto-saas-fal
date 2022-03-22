@@ -47,7 +47,6 @@ EOF
 
     public function execute(InputInterface $input, OutputInterface $output): int
     {
-        $storages = $this->storageRepository->findByStorageType(CantoDriver::DRIVER_NAME);
         $fileRepository = GeneralUtility::makeInstance(FileRepository::class);
         assert($fileRepository instanceof FileRepository);
         $files = $fileRepository->findAll();
@@ -58,14 +57,19 @@ EOF
             if ($file->getStorage()->getDriverType() !== CantoDriver::DRIVER_NAME) {
                 continue;
             }
-            $metaData = $this->metadataExtractor->extractMetaData($file);
-            if ($metaData) {
-                $file->getMetaData()->add($metaData)->save();
-                $file->getForLocalProcessing(true);
-                $processedFileRepository = GeneralUtility::makeInstance(ProcessedFileRepository::class);
-                foreach ($processedFileRepository->findAllByOriginalFile($file) as $processedFile) {
-                    $processedFile->delete(true);
+            try {
+                $metaData = $this->metadataExtractor->extractMetaData($file);
+                if ($metaData) {
+                    $file->getMetaData()->add($metaData)->save();
+                    $file->getForLocalProcessing(true);
+                    $processedFileRepository = GeneralUtility::makeInstance(ProcessedFileRepository::class);
+                    foreach ($processedFileRepository->findAllByOriginalFile($file) as $processedFile) {
+                        $processedFile->delete(true);
+                    }
                 }
+            } catch (\Exception $e) {
+                $output->writeln('File ' . $file->getIdentifier() . ' failed: ' . $e->getMessage());
+                continue;
             }
             if (++$counter > 1000) {
                 $counter = 0;
