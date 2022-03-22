@@ -66,8 +66,10 @@ final class Exporter
             return false;
         }
         $mapping = json_decode($configuration['metadataExportMapping'], true);
+        $language = (int)$metadata['sys_language_uid'];
+        $this->transformMetadataAndMappingArray($metadata, $mapping, $language);
         $this->cantoRepository->initialize($file->getStorage()->getUid(), $configuration);
-        $properties = $this->transformMetadataIntoPropertiesArray($metadata, $mapping);
+        $properties = $this->transformMetadataIntoPropertiesArray($metadata, $mapping, $language);
         $event = $this->dispatcher->dispatch(new BeforeMetadataUploadEvent($scheme, $identifier, $properties));
         assert($event instanceof BeforeMetadataUploadEvent);
         $cantoRequest = new BatchUpdatePropertiesRequest();
@@ -92,7 +94,32 @@ final class Exporter
         return false;
     }
 
-    private function transformMetadataIntoPropertiesArray(array $data, array $mapping): array
+    /**
+     * This adds support for the data's sys_language_uid
+     * Removes all mapping fields not required in the current language
+     */
+    private function transformMetadataAndMappingArray(array &$metadata, array &$mapping, int $language): void
+    {
+        $mappingWithLanguageUid = [];
+        foreach ($mapping as $key => $value) {
+            if ($language === 0 && !str_contains($key, ':')) {
+                $mappingWithLanguageUid['0:' . $key] = $value;
+            }
+            if (!str_starts_with($key, $language . ':')) {
+                continue;
+            }
+            $mappingWithLanguageUid[$key] = $value;
+        }
+        $mapping = $mappingWithLanguageUid;
+
+        $metadataWithLanguage = [];
+        foreach ($metadata as $metadataKey => $metadataValue) {
+            $metadataWithLanguage[$language . ':' . $metadataKey] = $metadataValue;
+        }
+        $metadata = $metadataWithLanguage;
+    }
+
+    private function transformMetadataIntoPropertiesArray(array $data, array $mapping, int $language): array
     {
         $properties = [];
         foreach ($mapping as $metadataKey => $cantoField) {

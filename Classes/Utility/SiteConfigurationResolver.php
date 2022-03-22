@@ -36,12 +36,13 @@ final class SiteConfigurationResolver
 
     public function getCurrentSite(): Site
     {
-        $site = $this->getTypo3Request()->getAttribute('site');
+        $request = $this->getTypo3Request();
+        $site = $request ? $request->getAttribute('site') : null;
         // In (Ajax) Backend Requests, this is NullSite
         if ($site instanceof Site) {
             return $site;
         }
-        $ajax = $this->getTypo3Request()->getParsedBody()['ajax'] ?? $this->getTypo3Request()->getQueryParams()['ajax'];
+        $ajax = $request ? ($request->getParsedBody()['ajax'] ?? $request->getQueryParams()['ajax']) : null;
         $url = '';
         if ($ajax['context'] !== null) {
             $config = [];
@@ -55,7 +56,10 @@ final class SiteConfigurationResolver
             }
         }
         // should the site attribute not be set for a normal Request, them we fall back to the SiteFinder-Method way
-        $returnUrl = $url ?: $this->getTypo3Request()->getQueryParams()['returnUrl'] ?? '';
+        $returnUrl = '';
+        if ($request && !$url) {
+            $returnUrl = $request->getQueryParams()['returnUrl'] ?? '';
+        }
         $queryString = parse_url($returnUrl, PHP_URL_QUERY) ?? '';
         parse_str($queryString, $queryParams);
         $pageId = (int)$queryParams['id'];
@@ -75,7 +79,7 @@ final class SiteConfigurationResolver
         return $this->getSiteFinder()->getSiteByPageId($pageId);
     }
 
-    private function getTypo3Request(): ServerRequest
+    private function getTypo3Request(): ?ServerRequest
     {
         return $GLOBALS['TYPO3_REQUEST'];
     }
