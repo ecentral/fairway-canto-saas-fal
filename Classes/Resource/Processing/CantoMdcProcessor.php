@@ -52,14 +52,18 @@ final class CantoMdcProcessor implements ProcessorInterface
         );
         $fullFileIdentifier = $task->getTargetFile()->getIdentifier();
         $url = $this->mdcUrlGenerator->generateMdcUrl($task->getSourceFile(), $task->getConfiguration());
+        $task->getTargetFile()->setName($task->getTargetFileName());
         $task->getTargetFile()->updateProcessingUrl($url);
-        $properties = $task->getTargetFile()->getProperties();
-        $properties = array_merge($properties ?? [], $this->mdcUrlGenerator->resolveImageWidthHeight(
-            $task->getSourceFile(),
-            $task->getConfiguration(),
-        ));
-        $properties['processing_url'] = $url;
         $task->getTargetFile()->setIdentifier(CantoUtility::identifierToProcessedIdentifier($fullFileIdentifier));
+        $properties = $task->getTargetFile()->getProperties();
+        $properties = array_merge(
+            $properties ?? [],
+            $this->mdcUrlGenerator->resolveImageWidthHeight(
+                $task->getSourceFile(),
+                $task->getConfiguration()
+            )
+        );
+        $properties['processing_url'] = $url;
         $task->getTargetFile()->updateProperties($properties ?? []);
         $task->setExecuted(true);
     }
