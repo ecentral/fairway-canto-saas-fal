@@ -179,10 +179,6 @@ class CantoRepository
             return null;
         }
         $result = $response->getResponseData();
-
-        if (CantoUtility::isMdcActivated($this->driverConfiguration)) {
-            $result['mdcUrl'] = $this->generateMdcUrl($fileIdentifier);
-        }
         $this->setFileCache($combinedIdentifier, $result);
 
         return $result;
