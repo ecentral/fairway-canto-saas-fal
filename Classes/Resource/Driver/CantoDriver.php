@@ -115,12 +115,12 @@ class CantoDriver extends AbstractDriver
         if (!$fileIdentifier) {
             return '';
         }
-        $scheme = CantoUtility::getSchemeFromCombinedIdentifier($fileIdentifier);
-        $explicitFileIdentifier = CantoUtility::getIdFromCombinedIdentifier($fileIdentifier);
-        if ($explicitFileIdentifier === self::ROOT_FOLDER) {
+        if ($fileIdentifier === $this->rootFolderIdentifier) {
             return $fileIdentifier;
         }
 
+        $scheme = CantoUtility::getSchemeFromCombinedIdentifier($fileIdentifier);
+        $explicitFileIdentifier = CantoUtility::getIdFromCombinedIdentifier($fileIdentifier);
         if (CantoUtility::isFolder($scheme)) {
             $result = $this->cantoRepository->getFolderDetails($scheme, $explicitFileIdentifier);
             $pathIds = explode('/', $result['idPath']);
@@ -183,12 +183,12 @@ class CantoDriver extends AbstractDriver
      */
     public function folderExists($folderIdentifier): bool
     {
-        $explicitFolderIdentifier = CantoUtility::getIdFromCombinedIdentifier($folderIdentifier);
-        if ($explicitFolderIdentifier === self::ROOT_FOLDER) {
+        if ($folderIdentifier === $this->rootFolderIdentifier) {
             return true;
         }
 
         $scheme = CantoUtility::getSchemeFromCombinedIdentifier($folderIdentifier);
+        $explicitFolderIdentifier = CantoUtility::getIdFromCombinedIdentifier($folderIdentifier);
         try {
             $result = $this->cantoRepository->getFolderDetails($scheme, $explicitFolderIdentifier);
         } catch (FolderDoesNotExistException $e) {
@@ -391,19 +391,16 @@ class CantoDriver extends AbstractDriver
     {
         $now = time();
         $rootFolder = [
-            'identifier' => 'folder' . CantoUtility::SPLIT_CHARACTER . self::ROOT_FOLDER,
+            'identifier' => $this->rootFolderIdentifier,
             'name' => 'Canto',
             'mtime' => $now,
             'ctime' => $now,
             'storage' => $this->storageUid
         ];
-        if (!$folderIdentifier || $folderIdentifier === self::ROOT_FOLDER) {
+        if (!$folderIdentifier || $folderIdentifier === $this->rootFolderIdentifier) {
             return $rootFolder;
         }
         $explicitFolderIdentifier = CantoUtility::getIdFromCombinedIdentifier($folderIdentifier);
-        if ($explicitFolderIdentifier === self::ROOT_FOLDER) {
-            return $rootFolder;
-        }
         $scheme = CantoUtility::getSchemeFromCombinedIdentifier($folderIdentifier);
         $result = $this->cantoRepository->getFolderDetails($scheme, $explicitFolderIdentifier);
         // TODO Find solution how to handle equal folder and album names.
@@ -484,11 +481,12 @@ class CantoDriver extends AbstractDriver
         bool $sortRev = false
     ) {
         $scheme = CantoUtility::getSchemeFromCombinedIdentifier($folderIdentifier);
-        $explicitFolderIdentifier = CantoUtility::getIdFromCombinedIdentifier($folderIdentifier);
-        if ($scheme === CantoUtility::SCHEME_FOLDER || $explicitFolderIdentifier === self::ROOT_FOLDER) {
+        if ($scheme === CantoUtility::SCHEME_FOLDER || $folderIdentifier === $this->rootFolderIdentifier) {
             // There are no files in folders, just other files and albums.
             return [];
         }
+
+        $explicitFolderIdentifier = CantoUtility::getIdFromCombinedIdentifier($folderIdentifier);
         $sortBy = $this->mapSortBy($sort);
         $sortDirection = $sortRev ? ListAlbumContentRequest::SORT_DIRECTION_DESC
             : ListAlbumContentRequest::SORT_DIRECTION_ASC;
@@ -555,7 +553,9 @@ class CantoDriver extends AbstractDriver
         $sortBy = GetTreeRequest::SORT_BY_NAME;
         $sortDirection = $sortRev ? GetTreeRequest::SORT_DIRECTION_DESC : GetTreeRequest::SORT_DIRECTION_ASC;
         $folderTree = $this->cantoRepository->getFolderIdentifierTree($sortBy, $sortDirection);
-        if ($explicitFolderIdentifier !== self::ROOT_FOLDER) {
+        if ($folderIdentifier === $this->rootFolderIdentifier) {
+            $folderTree = $folderTree[$this->rootFolderIdentifier] ?? $folderTree;
+        } else {
             $folderInformation = $this->cantoRepository->getFolderDetails($scheme, $explicitFolderIdentifier);
             $idPathSegments = str_getcsv($folderInformation['idPath'], '/');
             $lastSegmentIndex = count($idPathSegments) - 1;
@@ -569,6 +569,9 @@ class CantoDriver extends AbstractDriver
                 },
                 CantoUtility::SCHEME_FOLDER
             );
+            if (in_array($this->rootFolderIdentifier, $idPathSegments)) {
+                $idPathSegments = array_slice($idPathSegments, array_search($this->rootFolderIdentifier, $idPathSegments) + 1);
+            }
             $idPath = implode('/', $idPathSegments);
             try {
                 $folderTree = ArrayUtility::getValueByPath($folderTree, $idPath);
@@ -605,7 +608,7 @@ class CantoDriver extends AbstractDriver
     {
         $scheme = CantoUtility::getSchemeFromCombinedIdentifier($folderIdentifier);
         $explicitFolderIdentifier = CantoUtility::getIdFromCombinedIdentifier($folderIdentifier);
-        if ($scheme === CantoUtility::SCHEME_FOLDER || $explicitFolderIdentifier === self::ROOT_FOLDER) {
+        if ($scheme === CantoUtility::SCHEME_FOLDER || $folderIdentifier === $this->rootFolderIdentifier) {
             // Folders can not have files, just other folders and albums.
             return 0;
         }
@@ -660,17 +663,20 @@ class CantoDriver extends AbstractDriver
 
     protected function buildRootFolderIdentifier(): string
     {
-        $rootFolderScheme = $this->configuration['rootFolderScheme'] ?? CantoUtility::SCHEME_FOLDER;
-        $rootFolder = $this->configuration['rootFolder'] ?? self::ROOT_FOLDER;
-        if (CantoUtility::isFolder($rootFolderScheme) && $rootFolder !== '') {
-            return CantoUtility::buildCombinedIdentifier(
-                $rootFolderScheme,
-                $rootFolder
-            );
+        $rootFolderScheme = CantoUtility::SCHEME_FOLDER;
+        if (!empty($this->configuration['rootFolderScheme'])
+            && $this->configuration['rootFolderScheme'] === CantoUtility::SCHEME_ALBUM
+        ) {
+            $rootFolderScheme = CantoUtility::SCHEME_ALBUM;
         }
+        $rootFolder = self::ROOT_FOLDER;
+        if (!empty($this->configuration['rootFolder'])) {
+            $rootFolder = $this->configuration['rootFolder'];
+        }
+
         return CantoUtility::buildCombinedIdentifier(
-            CantoUtility::SCHEME_FOLDER,
-            self::ROOT_FOLDER
+            $rootFolderScheme,
+            $rootFolder
         );
     }
 
