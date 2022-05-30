@@ -208,7 +208,7 @@ class Extractor implements ExtractorInterface
                 $category = $this->addCategory($title, $parent, $categoryRepository);
                 $categories[] = $category;
             }
-            if (is_array($children) && $parent !== null) {
+            if (is_array($children) && $category !== null) {
                 $categories = [...$categories, ...$this->buildCategoryTree($children, $category, $categoryRepository)];
             }
             if (is_string($children)) {
