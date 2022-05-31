@@ -11,6 +11,7 @@ declare(strict_types=1);
 
 namespace Ecentral\CantoSaasFal\Resource\Metadata;
 
+use Doctrine\DBAL\FetchMode;
 use Ecentral\CantoSaasFal\Resource\Driver\CantoDriver;
 use Ecentral\CantoSaasFal\Resource\Event\AfterMetaDataExtractionEvent;
 use Ecentral\CantoSaasFal\Resource\Metadata\MetadataRepository as CantoMetadataRepository;
@@ -18,11 +19,11 @@ use Ecentral\CantoSaasFal\Resource\Repository\CantoRepository;
 use Ecentral\CantoSaasFal\Utility\CantoUtility;
 use Fairway\CantoSaasApi\Endpoint\Authorization\AuthorizationFailedException;
 use JsonException;
-use TYPO3\CMS\Core\Category\Collection\CategoryCollection;
+use TYPO3\CMS\Core\Database\ConnectionPool;
+use TYPO3\CMS\Core\Database\Query\QueryBuilder;
 use TYPO3\CMS\Core\EventDispatcher\EventDispatcher;
 use TYPO3\CMS\Core\Resource\File;
 use TYPO3\CMS\Core\Resource\Index\ExtractorInterface;
-use TYPO3\CMS\Core\Resource\Index\MetaDataRepository;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Domain\Model\Category;
 use TYPO3\CMS\Extbase\Domain\Repository\CategoryRepository;
@@ -97,6 +98,38 @@ class Extractor implements ExtractorInterface
             }
         }
 
+        $metadataObjects = [];
+        $metadataRepository = GeneralUtility::makeInstance(CantoMetadataRepository::class);
+        assert($metadataRepository instanceof CantoMetadataRepository);
+        $metadataParentUid = null;
+        $parentMetadataArray = $metadataRepository->findByFileUid($file->getUid());
+        if (isset($parentMetadataArray['uid'])) {
+            $metadataParentUid = $parentMetadataArray['uid'];
+        }
+        foreach ($mappedMetadata as $languageUid => $metadataArray) {
+            $languageUid = (int)$languageUid;
+            $result = $metadataRepository->findByFileUidAndLanguageUid($file->getUid(), $languageUid);
+            $updatedUid = null;
+            if ($result) {
+                $result = array_replace($result, $metadataArray);
+                $metadataRepository->updateByFileUidAndLanguageUid($file->getUid(), $languageUid, $result);
+                $updatedUid = $result['uid'];
+            } elseif (empty($result) && $languageUid === 0 && $metadataParentUid === null) {
+                $metadataParentUid = $metadataRepository->createMetaDataRecord($file->getUid(), $metadataArray)['uid'];
+                $updatedUid = $metadataParentUid;
+            } elseif (empty($result) && $languageUid !== 0 && $metadataParentUid !== null) {
+                $result = $metadataRepository->createMetaDataRecord($file->getUid(), array_merge(
+                    [
+                        'sys_language_uid' => $languageUid,
+                        'l10n_parent' => $metadataParentUid,
+                    ],
+                    $metadataArray
+                ));
+                $updatedUid = $result['uid'];
+            }
+            $metadataObjects[] = $updatedUid;
+        }
+
         if (array_key_exists('categoryMapping', $configuration)) {
             try {
                 $mapping = json_decode($configuration['categoryMapping'], true, 512, JSON_THROW_ON_ERROR);
@@ -104,44 +137,15 @@ class Extractor implements ExtractorInterface
                 $categoryData = $this->applyMappedMetaData($mapping, [], $fileData)[0] ?? [];
                 $categories = $this->buildCategoryTree($categoryData);
                 GeneralUtility::makeInstance(PersistenceManager::class)->persistAll();
-                $metadataObject = GeneralUtility::makeInstance(MetaDataRepository::class)->findByFileUid($file->getUid());
-                if ($metadataObject) {
-                    foreach ($categories as $category) {
-                        $categoryCollection = CategoryCollection::load($category->getUid(), true, 'sys_file_metadata', 'categories');
-                        assert($categoryCollection instanceof CategoryCollection);
-                        $categoryCollection->add([
-                            'uid' => $metadataObject['uid'],
-                        ]);
-                        $categoryCollection->persist();
-                    }
+                foreach ($metadataObjects as $metadataObjectUid) {
+                    $this->saveMetadataCategory((int)$metadataObjectUid, $categories);
                 }
             } catch (JsonException $exception) {
                 # todo: add mapping logging
             }
         }
 
-        $metadataRepository = GeneralUtility::makeInstance(CantoMetadataRepository::class);
-        assert($metadataRepository instanceof CantoMetadataRepository);
-        $metadataParentUid = null;
-        foreach ($mappedMetadata as $languageUid => $metadataArray) {
-            $result = $metadataRepository->findByFileUidAndLanguageUid($file->getUid(), (int)$languageUid);
-            if ($result) {
-                $result = array_replace($result, $metadataArray);
-                $metadataRepository->update($file->getUid(), $result);
-            } elseif ($languageUid === 0) {
-                $metadataParentUid = $metadataRepository->createMetaDataRecord($file->getUid(), $metadataArray)['uid'];
-            } elseif ($metadataParentUid !== null) {
-                $metadataRepository->createMetaDataRecord($file->getUid(), array_merge(
-                    [
-                        'sys_language_uid' => $languageUid,
-                        'l10n_parent' => $metadataParentUid,
-                    ],
-                    $metadataArray
-                ));
-            }
-        }
-
-        $metadata = array_merge($metadata, $mappedMetadata[0]);
+        $metadata = array_merge($metadata, $mappedMetadata[0] ?? []);
         $event = new AfterMetaDataExtractionEvent($metadata, $mapping, $fileData);
         return $this->dispatcher->dispatch($event)->getMetadata();
     }
@@ -232,5 +236,47 @@ class Extractor implements ExtractorInterface
             $repository->add($category);
         }
         return $category;
+    }
+
+    private function saveMetadataCategory(int $metadataUid, array $data)
+    {
+        $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)
+            ->getConnectionForTable('sys_category_record_mm')
+            ->createQueryBuilder();
+
+        assert($queryBuilder instanceof QueryBuilder);
+        $list = array_map(
+            function (array $item) {
+                // return category uid
+                return (int)$item['uid_local'];
+            },
+            $queryBuilder->select('uid_local', 'uid_foreign')
+            ->from('sys_category_record_mm')
+            ->where($queryBuilder->expr()->eq('uid_foreign', $metadataUid))
+            ->execute()
+            ->fetchAll(FetchMode::ASSOCIATIVE)
+        );
+        $processedCategoryUids = [];
+        foreach ($data as $category) {
+            $processedCategoryUids[] = $category->getUid();
+            if (in_array($category->getUid(), $list, true)) {
+                continue;
+            }
+            $queryBuilder
+                ->insert('sys_category_record_mm')
+                ->values([
+                    'uid_local' => $category->getUid(),
+                    'uid_foreign' => $metadataUid,
+                    'tablenames' => 'sys_file_metadata',
+                    'fieldname' => 'categories',
+                    'sorting' => 0,
+                    'sorting_foreign' => 0,
+                ])
+                ->execute()
+            ;
+        }
+        $diff = array_diff($list, $processedCategoryUids);
+        // diff is a list of items that is in the database but not in the category list coming from canto
+        // todo: taking care of deletions
     }
 }
