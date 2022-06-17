@@ -173,8 +173,8 @@ class Extractor implements ExtractorInterface
     {
         $uidList = [];
         foreach ($mapping as $categoryUid => $categoryConfiguration) {
-            [$collection, $customField] = explode('->', $categoryConfiguration['alternative']);
-            [$collectionAlternative, $customFieldAlternative] = explode('->', $categoryConfiguration['alternative']);
+            [$collection, $customField] = explode('->', $categoryConfiguration['field']);
+            [$collectionAlternative, $customFieldAlternative] = explode('->', $categoryConfiguration['alternative'] ?? '');
             $data = $fileData[$collection][$customField] ?? $fileData[$collectionAlternative][$customFieldAlternative] ?? null;
             if ($data === null) {
                 continue;
@@ -237,8 +237,11 @@ class Extractor implements ExtractorInterface
                         ->fetchAll(FetchMode::ASSOCIATIVE)
                     ;
                     if (!empty($translatedUid)) {
-                        $categoryUidForMetadata = $translatedUid[0]['uid'];
+                        $categoryUidForMetadata = (int)$translatedUid[0]['uid'];
                     }
+                }
+                if ($categoryUidForMetadata === 0) {
+                    continue;
                 }
                 $processedCategoryUids[] = $categoryUidForMetadata;
                 if (in_array($categoryUidForMetadata, $list, true)) {
