@@ -25,9 +25,6 @@ use TYPO3\CMS\Core\EventDispatcher\EventDispatcher;
 use TYPO3\CMS\Core\Resource\File;
 use TYPO3\CMS\Core\Resource\Index\ExtractorInterface;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Extbase\Domain\Model\Category;
-use TYPO3\CMS\Extbase\Domain\Repository\CategoryRepository;
-use TYPO3\CMS\Extbase\Persistence\Generic\PersistenceManager;
 
 class Extractor implements ExtractorInterface
 {
@@ -127,19 +124,16 @@ class Extractor implements ExtractorInterface
                 ));
                 $updatedUid = $result['uid'];
             }
-            $metadataObjects[] = $updatedUid;
+            $metadataObjects[$languageUid] = $updatedUid;
         }
 
         if (array_key_exists('categoryMapping', $configuration)) {
             try {
                 $mapping = json_decode($configuration['categoryMapping'], true, 512, JSON_THROW_ON_ERROR);
-                // we currently do not support translating sys_categories
-                $categoryData = $this->applyMappedMetaData($mapping, [], $fileData)[0] ?? [];
-                $categories = $this->buildCategoryTree($categoryData);
-                GeneralUtility::makeInstance(PersistenceManager::class)->persistAll();
-                foreach ($metadataObjects as $metadataObjectUid) {
-                    $this->saveMetadataCategory((int)$metadataObjectUid, $categories);
-                }
+                $this->saveMetadataCategories(
+                    $metadataObjects,
+                    $this->applyMappedCategoryData($mapping, $fileData)
+                );
             } catch (JsonException $exception) {
                 # todo: add mapping logging
             }
@@ -175,6 +169,26 @@ class Extractor implements ExtractorInterface
         return $metadata;
     }
 
+    private function applyMappedCategoryData(array $mapping, array $fileData): array
+    {
+        $uidList = [];
+        foreach ($mapping as $categoryUid => $categoryConfiguration) {
+            [$collection, $customField] = explode('->', $categoryConfiguration['field']);
+            [$collectionAlternative, $customFieldAlternative] = explode('->', $categoryConfiguration['alternative'] ?? '');
+            $data = $fileData[$collection][$customField] ?? $fileData[$collectionAlternative][$customFieldAlternative] ?? null;
+            if ($data === null) {
+                continue;
+            }
+            $flippedMapping = array_flip($categoryConfiguration['mapping']);
+            $uidList[] = $categoryUid;
+            foreach ($data as $customFieldValue) {
+                $uidList[] = str_replace('_', '', $flippedMapping[$customFieldValue]);
+            }
+        }
+
+        return array_map(static fn ($uid) => (int)$uid, $uidList);
+    }
+
     private function extractFromMetadata(array $metadata, array $fileKey)
     {
         if (!$metadata || !$fileKey) {
@@ -196,87 +210,73 @@ class Extractor implements ExtractorInterface
     }
 
     /**
-     * @param array $mappedCategoryConfiguration
-     * @param Category|null $parent
-     * @param CategoryRepository|null $categoryRepository
-     * @return Category[]
+     * @param array<string|int> $metadataUids
+     * @param int[] $categoryUids
+     * @return void
      */
-    private function buildCategoryTree(array $mappedCategoryConfiguration, Category $parent = null, CategoryRepository $categoryRepository = null): array
+    private function saveMetadataCategories(array $metadataUids, array $categoryUids): void
     {
-        $categoryRepository ??= GeneralUtility::makeInstance(CategoryRepository::class);
-        assert($categoryRepository instanceof CategoryRepository);
-        $categories = [];
-        foreach ($mappedCategoryConfiguration as $title => $children) {
-            $category = $parent;
-            if (is_string($title)) {
-                $category = $this->addCategory($title, $parent, $categoryRepository);
-                $categories[] = $category;
+        foreach ($metadataUids as $languageUid => $metadataUid) {
+            $qb = $this->getQueryBuilder('sys_category_record_mm');
+            $list = array_map(static fn (array $item) => (int)$item['uid_local'],
+                $qb->select('uid_local', 'uid_foreign')
+                    ->from('sys_category_record_mm')
+                    ->where($qb->expr()->eq('uid_foreign', $metadataUid))
+                    ->execute()
+                    ->fetchAll(FetchMode::ASSOCIATIVE));
+            $processedCategoryUids = [];
+            foreach ($categoryUids as $categoryUid) {
+                $categoryUidForMetadata = $categoryUid;
+                if ($languageUid !== 0) {
+                    $sysCategoryQB = $this->getQueryBuilder('sys_category');
+                    $translatedUid = $sysCategoryQB->select('uid')
+                        ->from('sys_category')
+                        ->where($sysCategoryQB->expr()->eq('l10n_parent', $categoryUid))
+                        ->andWhere($sysCategoryQB->expr()->eq('sys_language_uid', $languageUid))
+                        ->execute()
+                        ->fetchAll(FetchMode::ASSOCIATIVE)
+                    ;
+                    if (!empty($translatedUid)) {
+                        $categoryUidForMetadata = (int)$translatedUid[0]['uid'];
+                    }
+                }
+                if ($categoryUidForMetadata === 0) {
+                    continue;
+                }
+                $processedCategoryUids[] = $categoryUidForMetadata;
+                if (in_array($categoryUidForMetadata, $list, true)) {
+                    continue;
+                }
+                $qb
+                    ->insert('sys_category_record_mm')
+                    ->values([
+                        'uid_local' => $categoryUidForMetadata,
+                        'uid_foreign' => $metadataUid,
+                        'tablenames' => 'sys_file_metadata',
+                        'fieldname' => 'categories',
+                        'sorting' => 0,
+                        'sorting_foreign' => 0,
+                    ])
+                    ->execute()
+                ;
             }
-            if (is_array($children) && $category !== null) {
-                $categories = [...$categories, ...$this->buildCategoryTree($children, $category, $categoryRepository)];
-            }
-            if (is_string($children)) {
-                $categories[] = $this->addCategory($children, $category, $categoryRepository);
+            $diff = array_diff($list, $processedCategoryUids);
+            if (!empty($diff)) {
+                $qb->delete('sys_category_record_mm')
+                    ->where($qb->expr()->eq('uid_foreign', $metadataUid))
+                    ->andWhere($qb->expr()->in('uid_local', $diff))
+                    ->andWhere($qb->expr()->eq('tablenames', $qb->quote('sys_file_metadata')))
+                    ->andWhere($qb->expr()->eq('fieldname', $qb->quote('categories')))
+                    ->execute()
+                ;
             }
         }
-        return $categories;
     }
 
-    private function addCategory(string $title, ?Category $parent, CategoryRepository $repository): Category
+    private function getQueryBuilder(string $forTable): QueryBuilder
     {
-        assert(is_callable([$repository, 'findByTitle']));
-        $category = $repository->findByTitle($title)->toArray()[0] ?? null;
-        if ($category === null) {
-            $category = new Category();
-            $category->setDescription('Canto generated category');
-            $category->setTitle($title);
-            if ($parent) {
-                $category->setParent($parent);
-            }
-            $repository->add($category);
-        }
-        return $category;
-    }
-
-    private function saveMetadataCategory(int $metadataUid, array $data)
-    {
-        $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)
-            ->getConnectionForTable('sys_category_record_mm')
+        return GeneralUtility::makeInstance(ConnectionPool::class)
+            ->getConnectionForTable($forTable)
             ->createQueryBuilder();
-
-        assert($queryBuilder instanceof QueryBuilder);
-        $list = array_map(
-            function (array $item) {
-                // return category uid
-                return (int)$item['uid_local'];
-            },
-            $queryBuilder->select('uid_local', 'uid_foreign')
-            ->from('sys_category_record_mm')
-            ->where($queryBuilder->expr()->eq('uid_foreign', $metadataUid))
-            ->execute()
-            ->fetchAll(FetchMode::ASSOCIATIVE)
-        );
-        $processedCategoryUids = [];
-        foreach ($data as $category) {
-            $processedCategoryUids[] = $category->getUid();
-            if (in_array($category->getUid(), $list, true)) {
-                continue;
-            }
-            $queryBuilder
-                ->insert('sys_category_record_mm')
-                ->values([
-                    'uid_local' => $category->getUid(),
-                    'uid_foreign' => $metadataUid,
-                    'tablenames' => 'sys_file_metadata',
-                    'fieldname' => 'categories',
-                    'sorting' => 0,
-                    'sorting_foreign' => 0,
-                ])
-                ->execute()
-            ;
-        }
-        $diff = array_diff($list, $processedCategoryUids);
-        // diff is a list of items that is in the database but not in the category list coming from canto
-        // todo: taking care of deletions
     }
 }
