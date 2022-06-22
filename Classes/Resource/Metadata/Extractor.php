@@ -212,18 +212,19 @@ class Extractor implements ExtractorInterface
     /**
      * @param array<string|int> $metadataUids
      * @param int[] $categoryUids
-     * @return void
      */
     private function saveMetadataCategories(array $metadataUids, array $categoryUids): void
     {
         foreach ($metadataUids as $languageUid => $metadataUid) {
             $qb = $this->getQueryBuilder('sys_category_record_mm');
-            $list = array_map(static fn (array $item) => (int)$item['uid_local'],
+            $list = array_map(
+                static fn (array $item) => (int)$item['uid_local'],
                 $qb->select('uid_local', 'uid_foreign')
                     ->from('sys_category_record_mm')
                     ->where($qb->expr()->eq('uid_foreign', $metadataUid))
                     ->execute()
-                    ->fetchAll(FetchMode::ASSOCIATIVE));
+                    ->fetchAll(FetchMode::ASSOCIATIVE)
+            );
             $processedCategoryUids = [];
             foreach ($categoryUids as $categoryUid) {
                 $categoryUidForMetadata = $categoryUid;
