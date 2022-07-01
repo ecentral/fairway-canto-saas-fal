@@ -290,25 +290,27 @@ class CantoRepository
     {
         $treeIdentifier = sha1($this->storageUid . $sortBy . $sortDirection);
         $cacheIdentifier = sprintf('fulltree_%s', $treeIdentifier);
-        if (!$this->cantoFolderCache->has($cacheIdentifier)) {
-            try {
-                $folderIdentifier = '';
-                if ($this->driverConfiguration['rootFolderScheme'] === CantoUtility::SCHEME_FOLDER
-                    && $this->driverConfiguration['rootFolder'] !== '') {
-                    $folderIdentifier = $this->driverConfiguration['rootFolder'];
-                }
-                $response = $this->client->libraryTree()->getTree(new GetTreeRequest($folderIdentifier));
-                $folderTree = $this->buildFolderTree($response->getResults());
-                $this->cantoFolderCache->set(
-                    $cacheIdentifier,
-                    $folderTree,
-                    [$this->cantoCacheTag]
-                );
-            } catch (NotAuthorizedException | InvalidResponseException $e) {
-                return [];
-            }
+        if ($this->cantoFolderCache->has($cacheIdentifier)) {
+            return $this->cantoFolderCache->get($cacheIdentifier);
         }
-        return $this->cantoFolderCache->get($cacheIdentifier) ?: [];
+
+        try {
+            $folderIdentifier = '';
+            if ($this->driverConfiguration['rootFolderScheme'] === CantoUtility::SCHEME_FOLDER
+                && $this->driverConfiguration['rootFolder'] !== '') {
+                $folderIdentifier = $this->driverConfiguration['rootFolder'];
+            }
+            $response = $this->client->libraryTree()->getTree(new GetTreeRequest($folderIdentifier));
+            $folderTree = $this->buildFolderTree($response->getResults());
+            $this->cantoFolderCache->set(
+                $cacheIdentifier,
+                $folderTree,
+                [$this->cantoCacheTag]
+            );
+        } catch (NotAuthorizedException | InvalidResponseException $e) {
+            return [];
+        }
+        return $folderTree ?: [];
     }
 
     protected function buildFolderTree(array $treeItems): array
