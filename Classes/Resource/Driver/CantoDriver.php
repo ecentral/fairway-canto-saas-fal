@@ -29,8 +29,12 @@ use Fairway\CantoSaasApi\Http\Upload\GetUploadSettingRequest;
 use Fairway\CantoSaasApi\Http\Upload\QueryUploadStatusRequest;
 use Fairway\CantoSaasApi\Http\Upload\UploadFileRequest;
 use GuzzleHttp\Exception\GuzzleException;
+use Psr\Http\Message\ResponseInterface;
 use RuntimeException;
+use TYPO3\CMS\Core\Http\FalDumpFileContentsDecoratorStream;
+use TYPO3\CMS\Core\Http\Response;
 use TYPO3\CMS\Core\Resource\Driver\AbstractDriver;
+use TYPO3\CMS\Core\Resource\Driver\StreamableDriverInterface;
 use TYPO3\CMS\Core\Resource\Exception\FolderDoesNotExistException;
 use TYPO3\CMS\Core\Resource\ResourceStorage;
 use TYPO3\CMS\Core\Utility\ArrayUtility;
@@ -38,7 +42,7 @@ use TYPO3\CMS\Core\Utility\Exception\MissingArrayPathException;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\PathUtility;
 
-class CantoDriver extends AbstractDriver
+class CantoDriver extends AbstractDriver implements StreamableDriverInterface
 {
     public const DRIVER_NAME = 'Canto';
 
@@ -715,6 +719,28 @@ class CantoDriver extends AbstractDriver
                 unlink($cachedFile);
             }
         }
+    }
+
+    public function streamFile(string $identifier, array $properties): ResponseInterface
+    {
+        $fileInfo = $this->getFileInfoByIdentifier($identifier, ['name', 'mimetype', 'mtime', 'size']);
+        $downloadName = $properties['filename_overwrite'] ?? $fileInfo['name'] ?? '';
+        $mimeType = $properties['mimetype_overwrite'] ?? $fileInfo['mimetype'] ?? '';
+        $contentDisposition = ($properties['as_download'] ?? false) ? 'attachment' : 'inline';
+
+        return new Response(
+            new FalDumpFileContentsDecoratorStream($identifier, $this, (int)$fileInfo['size']),
+            200,
+            [
+                'Content-Disposition' => $contentDisposition . '; filename="' . $downloadName . '"',
+                'Content-Type' => $mimeType,
+                'Content-Length' => (string)$fileInfo['size'],
+                'Last-Modified' => gmdate('D, d M Y H:i:s', $fileInfo['mtime']) . ' GMT',
+                // Cache-Control header is needed here to solve an issue with browser IE8 and lower
+                // See for more information: http://support.microsoft.com/kb/323308
+                'Cache-Control' => '',
+            ]
+        );
     }
 
     /**
