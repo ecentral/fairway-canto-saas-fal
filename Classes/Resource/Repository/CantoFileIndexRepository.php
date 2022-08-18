@@ -70,7 +70,7 @@ class CantoFileIndexRepository extends FileIndexRepository
             while ($row = $result->fetchAssociative()) {
                 $resultRows[$row['identifier']] = $row;
             }
-        } else {
+        } elseif (method_exists($result, 'fetchAll')) {
             // Backward-Compatibility with doctrine/dbal < 2.11
             while ($row = $result->fetchAll(\Doctrine\DBAL\FetchMode::ASSOCIATIVE)) {
                 $resultRows[$row['identifier']] = $row;
@@ -164,7 +164,7 @@ class CantoFileIndexRepository extends FileIndexRepository
             while ($fileRecord = $result->fetchAssociative()) {
                 $fileRecords[$fileRecord['identifier']] = $fileRecord;
             }
-        } else {
+        } elseif (method_exists($result, 'fetch')) {
             while ($fileRecord = $result->fetch(\Doctrine\DBAL\FetchMode::ASSOCIATIVE)) {
                 $fileRecords[$fileRecord['identifier']] = $fileRecord;
             }

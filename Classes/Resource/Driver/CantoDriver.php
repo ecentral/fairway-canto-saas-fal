@@ -33,6 +33,8 @@ use Psr\Http\Message\ResponseInterface;
 use RuntimeException;
 use TYPO3\CMS\Core\Http\FalDumpFileContentsDecoratorStream;
 use TYPO3\CMS\Core\Http\Response;
+use TYPO3\CMS\Core\Messaging\FlashMessage;
+use TYPO3\CMS\Core\Messaging\FlashMessageService;
 use TYPO3\CMS\Core\Resource\Driver\AbstractDriver;
 use TYPO3\CMS\Core\Resource\Driver\StreamableDriverInterface;
 use TYPO3\CMS\Core\Resource\Exception\FolderDoesNotExistException;
@@ -834,8 +836,20 @@ class CantoDriver extends AbstractDriver implements StreamableDriverInterface
         }
         $request->setAlbumId(CantoUtility::getIdFromCombinedIdentifier($targetFolderIdentifier));
         $request->setFileName($newFileName);
-        $this->cantoRepository->getClient()->upload()->uploadFile($request);
+        try {
+            $this->cantoRepository->getClient()->upload()->uploadFile($request);
+        } catch (NotAuthorizedException $e) {
+            $this->sendFlashMessageToUser('Not Authorized', $e->getMessage(), FlashMessage::ERROR);
+            throw $e;
+        } catch (InvalidResponseException $e) {
+            $this->sendFlashMessageToUser('Invalid Response', $e->getMessage(), FlashMessage::ERROR);
+            throw $e;
+        } catch (\JsonException $e) {
+            $this->sendFlashMessageToUser('JSON Exception', $e->getMessage(), FlashMessage::ERROR);
+            throw $e;
+        }
         $id = '';
+        $count = 0;
         while ($id === '') {
             $status = $this->cantoRepository->getClient()->upload()->queryUploadStatus(new QueryUploadStatusRequest());
             // We need to wait for AWS to process the image, only then will we be able to show, that the file has been uploaded successfully and display it in the list.
@@ -845,6 +859,10 @@ class CantoDriver extends AbstractDriver implements StreamableDriverInterface
                 if ($item->name === $newFileName && $item->status === Status::STATUS_DONE) {
                     $id = CantoUtility::buildCombinedIdentifier($item->scheme, $item->id);
                 }
+            }
+            if (++$count > 15) {
+                $this->sendFlashMessageToUser('Timeout', 'File not fully processed. Please reload', FlashMessage::WARNING, );
+                return '';
             }
         }
         if ($id && $removeOriginal) {
@@ -992,5 +1010,19 @@ class CantoDriver extends AbstractDriver implements StreamableDriverInterface
     public function setFileContents($fileIdentifier, $contents)
     {
         throw new NotSupportedException('This driver does not support this operation yet.', 1626963332);
+    }
+
+    private function sendFlashMessageToUser(string $messageHeader, string $messageText, int $messageSeverity): void
+    {
+        $message = GeneralUtility::makeInstance(
+            FlashMessage::class,
+            $messageText,
+            $messageHeader,
+            $messageSeverity,
+            true
+        );
+        $flashMessageService = GeneralUtility::makeInstance(FlashMessageService::class);
+        $messageQueue = $flashMessageService->getMessageQueueByIdentifier();
+        $messageQueue->addMessage($message);
     }
 }

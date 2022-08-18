@@ -55,6 +55,9 @@ final class BeforeFileProcessingEventListener
         $properties['processing_url'] = $url;
         $processedFile->updateProperties($properties);
         $processedFile->setIdentifier(CantoUtility::identifierToProcessedIdentifier($identifier));
+        if (empty($processedFile->getName())) {
+            $processedFile->setName($processedFile->getOriginalFile()->getName());
+        }
         $event->setProcessedFile($processedFile);
         $this->processedFileRepository->add($processedFile);
     }

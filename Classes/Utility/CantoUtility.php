@@ -79,7 +79,7 @@ class CantoUtility
 
     public static function isMdcActivated(array $configuration): bool
     {
-        if (!($configuration['mdcDomainName']  && $configuration['mdcAwsAccountId'])) {
+        if (empty($configuration['mdcDomainName']) || empty($configuration['mdcAwsAccountId'])) {
             return false;
         }
         $mdc = SiteConfigurationResolver::get('canto_mdc_enabled') ?? false;

@@ -47,8 +47,10 @@ final class Exporter
 
         if (method_exists($result, 'fetchAssociative')) {
             $fileUid = $result->fetchAssociative()['file'] ?? null;
-        } else {
+        } elseif (method_exists($result, 'fetch')) {
             $fileUid = $result->fetch(FetchMode::ASSOCIATIVE)['file'] ?? null;
+        } else {
+            return false;
         }
 
         if ($fileUid === null) {

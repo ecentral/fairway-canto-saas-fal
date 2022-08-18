@@ -7,6 +7,10 @@ services:
   Ecentral\CantoSaasFal\:
     resource: '../Classes/*'
 
+  Ecentral\CantoSaasFal\Browser\CantoAssetBrowser:
+    shared: false
+    public: true
+
   Ecentral\CantoSaasFal\Hooks\DataHandlerHooks:
     public: true
     arguments:
