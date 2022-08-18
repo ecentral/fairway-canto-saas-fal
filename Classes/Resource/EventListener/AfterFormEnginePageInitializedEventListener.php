@@ -34,7 +34,7 @@ final class AfterFormEnginePageInitializedEventListener
     public function updateMetadataInCantoSlot(EditDocumentController $controller, ServerRequestInterface $request)
     {
         if ($request->getMethod() === 'POST' && $request->getQueryParams()['route'] === '/record/edit') {
-            $data = $controller->data;
+            $data = $this->accessProtectedDataProperty($controller);
             if (isset($data['sys_file_metadata'])) {
                 $exporter = GeneralUtility::getContainer()->get(Exporter::class);
                 assert($exporter instanceof Exporter);
@@ -43,5 +43,13 @@ final class AfterFormEnginePageInitializedEventListener
                 }
             }
         }
+    }
+
+    public function accessProtectedDataProperty(EditDocumentController $controller)
+    {
+        $reflection = new \ReflectionClass($controller);
+        $property = $reflection->getProperty('data');
+        $property->setAccessible(true);
+        return $property->getValue($controller);
     }
 }

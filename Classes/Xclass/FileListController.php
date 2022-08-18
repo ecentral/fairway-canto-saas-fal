@@ -12,6 +12,7 @@ namespace Ecentral\CantoSaasFal\Xclass;
 use TYPO3\CMS\Backend\Clipboard\Clipboard;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
 use TYPO3\CMS\Backend\Template\Components\ButtonBar;
+use TYPO3\CMS\Backend\View\BackendTemplateView;
 use TYPO3\CMS\Core\Imaging\Icon;
 use TYPO3\CMS\Core\Imaging\IconFactory;
 use TYPO3\CMS\Core\Resource\Folder;
@@ -28,11 +29,13 @@ class FileListController extends \TYPO3\CMS\Filelist\Controller\FileListControll
      */
     protected function registerButtons()
     {
+        /** @var BackendTemplateView $view */
+        $view = $this->view;
         /** @var ButtonBar $buttonBar */
-        $buttonBar = $this->view->getModuleTemplate()->getDocHeaderComponent()->getButtonBar();
+        $buttonBar = $view->getModuleTemplate()->getDocHeaderComponent()->getButtonBar();
 
         /** @var IconFactory $iconFactory */
-        $iconFactory = $this->view->getModuleTemplate()->getIconFactory();
+        $iconFactory = $view->getModuleTemplate()->getIconFactory();
 
         $resourceFactory = GeneralUtility::makeInstance(ResourceFactory::class);
 
@@ -83,9 +86,9 @@ class FileListController extends \TYPO3\CMS\Filelist\Controller\FileListControll
             'add',
             'File'
         ) && $this->folderObject->checkActionPermission('write')
-// START CHANGE IN XCLASS
+            // START CHANGE IN XCLASS
             && $this->folderObject->checkActionPermission('writeFolder')
-// END CHANGE IN XCLASS
+            // END CHANGE IN XCLASS
         ) {
             $uploadButton = $buttonBar->makeLinkButton()
                 ->setHref((string)$uriBuilder->buildUriFromRoute(

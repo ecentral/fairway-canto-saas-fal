@@ -17,11 +17,11 @@
     }
   ],
   "require": {
-    "php": "^7.4",
+    "php": "^7.4 || ^8.0",
     "ext-json": "*",
-    "typo3/cms-core": "^10.4",
-    "typo3/cms-filemetadata": "^10.4",
-    "typo3/cms-filelist": "^10.4",
+    "typo3/cms-core": "^10.4 || ^11.5",
+    "typo3/cms-filemetadata": "^10.4 || ^11.5",
+    "typo3/cms-filelist": "^10.4 || ^11.5",
     "guzzlehttp/guzzle": "^6.3 || ^7.3",
     "psr/log": "^1.1",
     "fairway/canto-saas-api": "@dev"

@@ -32,8 +32,8 @@ class FileNameViewHelper extends AbstractViewHelper
         $fileInfo = PathUtility::pathinfo($fileName);
         return sprintf(
             '%s.%s',
-            str_replace(['-', '_'], ' ', $fileInfo['filename']),
-            $fileInfo['extension']
+            str_replace(['-', '_'], ' ', ($fileInfo['filename'] ?? '')),
+            ($fileInfo['extension'] ?? '')
         );
     }
 }

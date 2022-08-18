@@ -91,17 +91,17 @@ final class MdcUrlGenerator
     public function addOperationToMdcUrl(array $configuration): string
     {
         // @todo are there alternatives than Area ?
-        $crop = $configuration['crop'] instanceof Area;
+        $crop = ($configuration['crop'] ?? null) instanceof Area;
         $scaleString = '';
         $formatString = '';
         $cropString = '';
-        if ($configuration['size']) {
+        if (isset($configuration['size'])) {
             $scaleString = self::BOXED . $configuration['size'];
         }
-        if (!$scaleString && $configuration['width'] && $configuration['height']) {
+        if (!$scaleString && isset($configuration['width']) && isset($configuration['height'])) {
             $scaleString = self::SCALED . (int)$configuration['width'] . 'x' . (int)$configuration['height'];
         }
-        if ($configuration['format']) {
+        if (isset($configuration['format'])) {
             $formatString = self::FORMATTED . $configuration['format'];
         }
         if ($crop) {
@@ -120,14 +120,14 @@ final class MdcUrlGenerator
     private function transformConfiguration(File $file, array $configuration): array
     {
         $imageDimension = $this->getMasterImageDimensions($file);
-        if ($configuration['width'] && $configuration['height']) {
+        if (!empty($configuration['width']) && !empty($configuration['height'])) {
             $configuration['height'] = (int)$configuration['height'];
             $configuration['width'] = (int)$configuration['width'];
             return $configuration;
         }
-        $configuration['height'] = $configuration['height'] ?? $configuration['maxHeight'] ?? $imageDimension['height'];
-        $configuration['width'] = $configuration['width'] ?? $configuration['maxWidth'] ?? $imageDimension['width'];
-        if ($configuration['crop'] instanceof Area) {
+        $configuration['height'] = $configuration['height'] ?? $configuration['maxHeight'] ?? $imageDimension['height'] ?? 0;
+        $configuration['width'] = $configuration['width'] ?? $configuration['maxWidth'] ?? $imageDimension['width'] ?? 0;
+        if (($configuration['crop'] ?? null) instanceof Area) {
             $configuration['height'] = min($configuration['height'], $configuration['crop']->getHeight());
             $configuration['width'] = min($configuration['width'], $configuration['crop']->getWidth());
             $configuration['resizedCropped'] = [

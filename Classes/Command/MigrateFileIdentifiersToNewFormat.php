@@ -26,6 +26,7 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
  * The old canto file identifier splitting scheme and id with a "#" did create problems with url requests.
  *      (especially visible in the file tree view, the "#" breaks the file context menu)
  * Due to this, a new splitting character has been introduced. This command migrates the old '#' to the new '||'.
+ * @deprecated
  */
 final class MigrateFileIdentifiersToNewFormat extends Command
 {
@@ -53,16 +54,25 @@ final class MigrateFileIdentifiersToNewFormat extends Command
                 ->from('sys_file')
                 ->where($builder->expr()->eq('storage', $uid))
                 ->execute();
-            $result = method_exists($statement, 'fetchAllAssociative') ?
-                $statement->fetchAllAssociative() :
-                $statement->fetchAll(FetchMode::ASSOCIATIVE);
+
+            if (method_exists($statement, 'fetchAllAssociative')) {
+                $result = $statement->fetchAllAssociative();
+            } elseif (method_exists($statement, 'fetchAll')) {
+                $result = $statement->fetchAll(FetchMode::ASSOCIATIVE);
+            } else {
+                continue;
+            }
+
             foreach ($result as $item) {
                 if (!str_contains($item['identifier'], '#')) {
                     continue;
                 }
                 $output->writeln('Updating File: ' . $item['identifier']);
+                $newIdentifier = str_replace('#', CantoUtility::SPLIT_CHARACTER, $item['identifier']);
                 $builder->update('sys_file')
-                    ->set('identifier', str_replace('#', CantoUtility::SPLIT_CHARACTER, $item['identifier']))
+                    ->set('identifier', $newIdentifier)
+                    ->set('identifier_hash', $storage->hashFileIdentifier($newIdentifier))
+                    ->set('sha1', $storage->hashFileByIdentifier($newIdentifier, 'sha1'))
                     ->where($builder->expr()->eq('uid', $item['uid']))
                     ->execute();
             }

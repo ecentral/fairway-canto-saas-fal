@@ -78,10 +78,10 @@ class Extractor implements ExtractorInterface
             [
                 'width' => (int)($fileData['width'] ?? 0),
                 'height' => (int)($fileData['height'] ?? 0),
-                'pages' => (int)$fileData['default']['Pages'],
-                'creator' => $fileData['default']['Author'],
-                'creator_tool' => $fileData['default']['Creation Tool'],
-                'copyright' => $fileData['default']['Copyright'],
+                'pages' => (int)($fileData['default']['Pages'] ?? 0),
+                'creator' => $fileData['default']['Author'] ?? '',
+                'creator_tool' => $fileData['default']['Creation Tool'] ?? '',
+                'copyright' => $fileData['default']['Copyright'] ?? '',
             ]
         );
         $mappedMetadata = [];
@@ -217,28 +217,39 @@ class Extractor implements ExtractorInterface
     {
         foreach ($metadataUids as $languageUid => $metadataUid) {
             $qb = $this->getQueryBuilder('sys_category_record_mm');
+            $result = $qb->select('uid_local', 'uid_foreign')
+                ->from('sys_category_record_mm')
+                ->where($qb->expr()->eq('uid_foreign', $metadataUid))
+                ->execute();
+            $data = [];
+            if (method_exists($result, 'fetchAll')) {
+                $data = $result->fetchAll(FetchMode::ASSOCIATIVE);
+            } elseif (method_exists($result, 'fetchAllAssociative')) {
+                $data = $result->fetchAllAssociative();
+            }
             $list = array_map(
                 static fn (array $item) => (int)$item['uid_local'],
-                $qb->select('uid_local', 'uid_foreign')
-                    ->from('sys_category_record_mm')
-                    ->where($qb->expr()->eq('uid_foreign', $metadataUid))
-                    ->execute()
-                    ->fetchAll(FetchMode::ASSOCIATIVE)
+                $data
             );
             $processedCategoryUids = [];
             foreach ($categoryUids as $categoryUid) {
                 $categoryUidForMetadata = $categoryUid;
                 if ($languageUid !== 0) {
                     $sysCategoryQB = $this->getQueryBuilder('sys_category');
-                    $translatedUid = $sysCategoryQB->select('uid')
+                    $translatedResult = $sysCategoryQB->select('uid')
                         ->from('sys_category')
                         ->where($sysCategoryQB->expr()->eq('l10n_parent', $categoryUid))
                         ->andWhere($sysCategoryQB->expr()->eq('sys_language_uid', $languageUid))
                         ->execute()
-                        ->fetchAll(FetchMode::ASSOCIATIVE)
                     ;
-                    if (!empty($translatedUid)) {
-                        $categoryUidForMetadata = (int)$translatedUid[0]['uid'];
+                    $translatedData = [];
+                    if (method_exists($translatedResult, 'fetchAllAssociative')) {
+                        $translatedData = $translatedResult->fetchAllAssociative();
+                    } elseif (method_exists($translatedResult, 'fetchAll')) {
+                        $translatedData = $translatedResult->fetchAll(FetchMode::ASSOCIATIVE);
+                    }
+                    if (!empty($translatedData)) {
+                        $categoryUidForMetadata = (int)$translatedData[0]['uid'];
                     }
                 }
                 if ($categoryUidForMetadata === 0) {

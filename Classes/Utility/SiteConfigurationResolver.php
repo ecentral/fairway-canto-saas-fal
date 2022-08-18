@@ -42,9 +42,9 @@ final class SiteConfigurationResolver
         if ($site instanceof Site) {
             return $site;
         }
-        $ajax = $request ? ($request->getParsedBody()['ajax'] ?? $request->getQueryParams()['ajax']) : null;
-        $url = '';
-        if ($ajax['context'] !== null) {
+        $ajax = $request ? ($request->getParsedBody()['ajax'] ?? $request->getQueryParams()['ajax'] ?? null) : null;
+        $returnUrl = '';
+        if (!empty($ajax['context'])) {
             $config = [];
             try {
                 $context = json_decode($ajax['context'], true, 512, JSON_THROW_ON_ERROR);
@@ -52,17 +52,16 @@ final class SiteConfigurationResolver
             } catch (\JsonException $exception) {
             }
             if ($config) {
-                $url = urldecode($config['originalReturnUrl'] ?? '');
+                $returnUrl = urldecode($config['originalReturnUrl'] ?? '');
             }
         }
         // should the site attribute not be set for a normal Request, them we fall back to the SiteFinder-Method way
-        $returnUrl = '';
-        if ($request && !$url) {
+        if ($request && !$returnUrl) {
             $returnUrl = $request->getQueryParams()['returnUrl'] ?? '';
         }
         $queryString = parse_url($returnUrl, PHP_URL_QUERY) ?? '';
         parse_str($queryString, $queryParams);
-        $pageId = (int)$queryParams['id'];
+        $pageId = (int)($queryParams['id'] ?? 0);
         if ($returnUrl === '' || $pageId === 0) {
             $allSites = $this->getSiteFinder()->getAllSites();
             if (count($allSites) === 1) {
