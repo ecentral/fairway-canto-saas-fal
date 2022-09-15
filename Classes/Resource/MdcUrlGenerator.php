@@ -9,11 +9,11 @@ declare(strict_types=1);
  * LICENSE file that was distributed with this source code.
  */
 
-namespace Ecentral\CantoSaasFal\Resource;
+namespace Fairway\CantoSaasFal\Resource;
 
-use Ecentral\CantoSaasFal\Resource\Event\BeforeMdcUrlGenerationEvent;
-use Ecentral\CantoSaasFal\Resource\Repository\CantoRepository;
-use Ecentral\CantoSaasFal\Utility\CantoUtility;
+use Fairway\CantoSaasFal\Resource\Event\BeforeMdcUrlGenerationEvent;
+use Fairway\CantoSaasFal\Resource\Repository\CantoRepository;
+use Fairway\CantoSaasFal\Utility\CantoUtility;
 use TYPO3\CMS\Core\EventDispatcher\EventDispatcher;
 use TYPO3\CMS\Core\Imaging\ImageManipulation\Area;
 use TYPO3\CMS\Core\Resource\File;

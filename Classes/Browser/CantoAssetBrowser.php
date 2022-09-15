@@ -9,10 +9,10 @@ declare(strict_types=1);
  * LICENSE file that was distributed with this source code.
  */
 
-namespace Ecentral\CantoSaasFal\Browser;
+namespace Fairway\CantoSaasFal\Browser;
 
-use Ecentral\CantoSaasFal\Resource\Driver\CantoDriver;
-use Ecentral\CantoSaasFal\Resource\NoCantoStorageException;
+use Fairway\CantoSaasFal\Resource\Driver\CantoDriver;
+use Fairway\CantoSaasFal\Resource\NoCantoStorageException;
 use TYPO3\CMS\Core\Resource\ResourceStorage;
 use TYPO3\CMS\Core\Resource\StorageRepository;
 use TYPO3\CMS\Core\Utility\GeneralUtility;

@@ -9,11 +9,11 @@ declare(strict_types=1);
  * LICENSE file that was distributed with this source code.
  */
 
-namespace Ecentral\CantoSaasFal\Utility;
+namespace Fairway\CantoSaasFal\Utility;
 
 use DateTime;
-use Ecentral\CantoSaasFal\Resource\Event\MdcEnabledCheckEvent;
-use Ecentral\CantoSaasFal\Resource\Repository\CantoRepository;
+use Fairway\CantoSaasFal\Resource\Event\MdcEnabledCheckEvent;
+use Fairway\CantoSaasFal\Resource\Repository\CantoRepository;
 use InvalidArgumentException;
 use TYPO3\CMS\Core\EventDispatcher\EventDispatcher;
 use TYPO3\CMS\Core\Utility\GeneralUtility;

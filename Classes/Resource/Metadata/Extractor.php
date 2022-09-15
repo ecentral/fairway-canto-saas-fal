@@ -9,15 +9,15 @@ declare(strict_types=1);
  * LICENSE file that was distributed with this source code.
  */
 
-namespace Ecentral\CantoSaasFal\Resource\Metadata;
+namespace Fairway\CantoSaasFal\Resource\Metadata;
 
 use Doctrine\DBAL\FetchMode;
-use Ecentral\CantoSaasFal\Resource\Driver\CantoDriver;
-use Ecentral\CantoSaasFal\Resource\Event\AfterMetaDataExtractionEvent;
-use Ecentral\CantoSaasFal\Resource\Metadata\MetadataRepository as CantoMetadataRepository;
-use Ecentral\CantoSaasFal\Resource\Repository\CantoRepository;
-use Ecentral\CantoSaasFal\Utility\CantoUtility;
 use Fairway\CantoSaasApi\Endpoint\Authorization\AuthorizationFailedException;
+use Fairway\CantoSaasFal\Resource\Driver\CantoDriver;
+use Fairway\CantoSaasFal\Resource\Event\AfterMetaDataExtractionEvent;
+use Fairway\CantoSaasFal\Resource\Metadata\MetadataRepository as CantoMetadataRepository;
+use Fairway\CantoSaasFal\Resource\Repository\CantoRepository;
+use Fairway\CantoSaasFal\Utility\CantoUtility;
 use JsonException;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;

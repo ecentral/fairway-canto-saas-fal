@@ -9,10 +9,10 @@ declare(strict_types=1);
  * LICENSE file that was distributed with this source code.
  */
 
-namespace Ecentral\CantoSaasFal\Command;
+namespace Fairway\CantoSaasFal\Command;
 
-use Ecentral\CantoSaasFal\Resource\Driver\CantoDriver;
-use Ecentral\CantoSaasFal\Resource\Metadata\Extractor;
+use Fairway\CantoSaasFal\Resource\Driver\CantoDriver;
+use Fairway\CantoSaasFal\Resource\Metadata\Extractor;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;

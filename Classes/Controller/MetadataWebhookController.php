@@ -9,10 +9,10 @@ declare(strict_types=1);
  * LICENSE file that was distributed with this source code.
  */
 
-namespace Ecentral\CantoSaasFal\Controller;
+namespace Fairway\CantoSaasFal\Controller;
 
-use Ecentral\CantoSaasFal\Exception;
-use Ecentral\CantoSaasFal\Resource\Event\IncomingWebhookEvent;
+use Fairway\CantoSaasFal\Exception;
+use Fairway\CantoSaasFal\Resource\Event\IncomingWebhookEvent;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Http\ServerRequest;
 use TYPO3\CMS\Extbase\Mvc\Controller\ActionController;

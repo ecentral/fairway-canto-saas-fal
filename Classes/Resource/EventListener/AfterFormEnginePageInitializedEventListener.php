@@ -9,9 +9,9 @@ declare(strict_types=1);
  * LICENSE file that was distributed with this source code.
  */
 
-namespace Ecentral\CantoSaasFal\Resource\EventListener;
+namespace Fairway\CantoSaasFal\Resource\EventListener;
 
-use Ecentral\CantoSaasFal\Resource\Metadata\Exporter;
+use Fairway\CantoSaasFal\Resource\Metadata\Exporter;
 use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Backend\Controller\EditDocumentController;
 use TYPO3\CMS\Backend\Controller\Event\AfterFormEnginePageInitializedEvent;

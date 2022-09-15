@@ -9,11 +9,11 @@ declare(strict_types=1);
  * LICENSE file that was distributed with this source code.
  */
 
-namespace Ecentral\CantoSaasFal\Command;
+namespace Fairway\CantoSaasFal\Command;
 
 use Doctrine\DBAL\FetchMode;
-use Ecentral\CantoSaasFal\Resource\Driver\CantoDriver;
-use Ecentral\CantoSaasFal\Utility\CantoUtility;
+use Fairway\CantoSaasFal\Resource\Driver\CantoDriver;
+use Fairway\CantoSaasFal\Utility\CantoUtility;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
