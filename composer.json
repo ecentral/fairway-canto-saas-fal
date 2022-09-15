@@ -1,5 +1,5 @@
 {
-  "name": "ecentral/canto-saas-fal",
+  "name": "fairway/canto-saas-fal",
   "type": "typo3-cms-extension",
   "description": "Adds Canto SaaS FAL driver.",
   "homepage": "https://gitlab.ecentral.de/canto-saas/ext-canto-saas-fal",
@@ -33,12 +33,12 @@
   },
   "autoload": {
     "psr-4": {
-      "Ecentral\\CantoSaasFal\\": "Classes"
+      "Fairway\\CantoSaasFal\\": "Classes"
     }
   },
   "autoload-dev": {
     "psr-4": {
-      "Ecentral\\CantoSaasFal\\Tests\\": "Tests"
+      "Fairway\\CantoSaasFal\\Tests\\": "Tests"
     }
   },
   "replace": {

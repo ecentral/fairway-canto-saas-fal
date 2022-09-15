@@ -8,53 +8,53 @@
  */
 
 // Register new fal driver
-$GLOBALS['TYPO3_CONF_VARS']['SYS']['fal']['registeredDrivers'][\Ecentral\CantoSaasFal\Resource\Driver\CantoDriver::DRIVER_NAME] = [
-    'class' => \Ecentral\CantoSaasFal\Resource\Driver\CantoDriver::class,
-    'shortName' => \Ecentral\CantoSaasFal\Resource\Driver\CantoDriver::DRIVER_NAME,
+$GLOBALS['TYPO3_CONF_VARS']['SYS']['fal']['registeredDrivers'][\Fairway\CantoSaasFal\Resource\Driver\CantoDriver::DRIVER_NAME] = [
+    'class' => \Fairway\CantoSaasFal\Resource\Driver\CantoDriver::class,
+    'shortName' => \Fairway\CantoSaasFal\Resource\Driver\CantoDriver::DRIVER_NAME,
     'flexFormDS' => 'FILE:EXT:canto_saas_fal/Configuration/FlexForm/CantoDriver.xml',
     'label' => 'Canto DAM',
 ];
 
 // Register canto specific file processors.
 $GLOBALS['TYPO3_CONF_VARS']['SYS']['fal']['processors']['CantoPreviewProcessor'] = [
-    'className' => \Ecentral\CantoSaasFal\Resource\Processing\CantoPreviewProcessor::class,
+    'className' => \Fairway\CantoSaasFal\Resource\Processing\CantoPreviewProcessor::class,
     'before' => [
         'SvgImageProcessor'
     ]
 ];
 
 $GLOBALS['TYPO3_CONF_VARS']['SYS']['fal']['processors']['CantoMdcProcessor'] = [
-    'className' => \Ecentral\CantoSaasFal\Resource\Processing\CantoMdcProcessor::class,
+    'className' => \Fairway\CantoSaasFal\Resource\Processing\CantoMdcProcessor::class,
     'before' => ['LocalImageProcessor'],
 ];
 
 // Register XClasses to handle multi folder assignments.
 $GLOBALS['TYPO3_CONF_VARS']['SYS']['Objects'][\TYPO3\CMS\Core\Resource\ResourceStorage::class] = [
-    'className' => \Ecentral\CantoSaasFal\Xclass\ResourceStorage::class,
+    'className' => \Fairway\CantoSaasFal\Xclass\ResourceStorage::class,
 ];
 $GLOBALS['TYPO3_CONF_VARS']['SYS']['Objects'][\TYPO3\CMS\Core\Resource\Index\Indexer::class] = [
-    'className' => \Ecentral\CantoSaasFal\Xclass\Indexer::class,
+    'className' => \Fairway\CantoSaasFal\Xclass\Indexer::class,
 ];
 $GLOBALS['TYPO3_CONF_VARS']['SYS']['Objects'][\TYPO3\CMS\Filelist\Controller\FileListController::class] = [
-    'className' => \Ecentral\CantoSaasFal\Xclass\FileListController::class,
+    'className' => \Fairway\CantoSaasFal\Xclass\FileListController::class,
 ];
 
 // Hooks
 $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processDatamapClass'][1627626213]
-    = \Ecentral\CantoSaasFal\Hooks\DataHandlerHooks::class;
+    = \Fairway\CantoSaasFal\Hooks\DataHandlerHooks::class;
 
 // Override Inline node type to add canto asset button.
 $GLOBALS['TYPO3_CONF_VARS']['SYS']['formEngine']['nodeRegistry'][1628070217] = [
     'nodeName' => 'inline',
     'priority' => 100,
-    'class' => \Ecentral\CantoSaasFal\Form\Container\InlineControlContainer::class,
+    'class' => \Fairway\CantoSaasFal\Form\Container\InlineControlContainer::class,
 ];
 
 $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['ElementBrowsers']['canto']
-    = \Ecentral\CantoSaasFal\Browser\CantoAssetBrowser::class;
+    = \Fairway\CantoSaasFal\Browser\CantoAssetBrowser::class;
 
 $extractorRegistry = \TYPO3\CMS\Core\Resource\Index\ExtractorRegistry::getInstance();
-$extractorRegistry->registerExtractionService(\Ecentral\CantoSaasFal\Resource\Metadata\Extractor::class);
+$extractorRegistry->registerExtractionService(\Fairway\CantoSaasFal\Resource\Metadata\Extractor::class);
 unset($extractorRegistry);
 
 // Register files and folder information cache
@@ -97,13 +97,13 @@ if ($GLOBALS['TYPO3_CONF_VARS']['GFX']['imagefile_ext']) {
 }
 
 \TYPO3\CMS\Extbase\Utility\ExtensionUtility::configurePlugin(
-    'Ecentral.CantoSaasFal',
+    'Fairway.CantoSaasFal',
     'metadataWebhook',
     [
-        \Ecentral\CantoSaasFal\Controller\MetadataWebhookController::class => 'index',
+        \Fairway\CantoSaasFal\Controller\MetadataWebhookController::class => 'index',
     ],
     [
-        \Ecentral\CantoSaasFal\Controller\MetadataWebhookController::class => 'index',
+        \Fairway\CantoSaasFal\Controller\MetadataWebhookController::class => 'index',
     ],
 );
 
@@ -111,6 +111,6 @@ $signalSlotDispatcher = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\TY
 $signalSlotDispatcher->connect(
     TYPO3\CMS\Backend\Controller\EditDocumentController::class,
     'initAfter',
-    Ecentral\CantoSaasFal\Resource\EventListener\AfterFormEnginePageInitializedEventListener::class,
+    Fairway\CantoSaasFal\Resource\EventListener\AfterFormEnginePageInitializedEventListener::class,
     'updateMetadataInCantoSlot'
 );

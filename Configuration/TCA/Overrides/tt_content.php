@@ -9,7 +9,7 @@
 
 (static function () {
     \TYPO3\CMS\Extbase\Utility\ExtensionUtility::registerPlugin(
-        'Ecentral.CantoSaasFal',
+        'Fairway.CantoSaasFal',
         'metadataWebhook',
         'Webhook Metadata Plugin',
     );
