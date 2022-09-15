@@ -9,9 +9,9 @@ declare(strict_types=1);
  * LICENSE file that was distributed with this source code.
  */
 
-namespace Ecentral\CantoSaasFal\Resource\EventListener;
+namespace Fairway\CantoSaasFal\Resource\EventListener;
 
-use Ecentral\CantoSaasFal\Resource\Repository\CantoAlbumRepository;
+use Fairway\CantoSaasFal\Resource\Repository\CantoAlbumRepository;
 use TYPO3\CMS\Core\Resource\Event\AfterFileAddedToIndexEvent;
 use TYPO3\CMS\Core\Resource\Event\AfterFileUpdatedInIndexEvent;
 use TYPO3\CMS\Core\Resource\File;

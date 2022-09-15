@@ -9,7 +9,7 @@ declare(strict_types=1);
  * LICENSE file that was distributed with this source code.
  */
 
-namespace Ecentral\CantoSaasFal\Resource\Driver;
+namespace Fairway\CantoSaasFal\Resource\Driver;
 
 use TYPO3\CMS\Core\Resource\Exception;
 

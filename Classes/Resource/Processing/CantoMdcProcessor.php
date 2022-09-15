@@ -9,12 +9,12 @@ declare(strict_types=1);
  * LICENSE file that was distributed with this source code.
  */
 
-namespace Ecentral\CantoSaasFal\Resource\Processing;
+namespace Fairway\CantoSaasFal\Resource\Processing;
 
-use Ecentral\CantoSaasFal\Resource\Driver\CantoDriver;
-use Ecentral\CantoSaasFal\Resource\MdcUrlGenerator;
-use Ecentral\CantoSaasFal\Resource\Repository\CantoRepository;
-use Ecentral\CantoSaasFal\Utility\CantoUtility;
+use Fairway\CantoSaasFal\Resource\Driver\CantoDriver;
+use Fairway\CantoSaasFal\Resource\MdcUrlGenerator;
+use Fairway\CantoSaasFal\Resource\Repository\CantoRepository;
+use Fairway\CantoSaasFal\Utility\CantoUtility;
 use TYPO3\CMS\Core\Resource\Processing\ProcessorInterface;
 use TYPO3\CMS\Core\Resource\Processing\TaskInterface;
 

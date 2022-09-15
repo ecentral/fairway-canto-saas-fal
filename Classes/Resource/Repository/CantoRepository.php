@@ -9,14 +9,8 @@ declare(strict_types=1);
  * LICENSE file that was distributed with this source code.
  */
 
-namespace Ecentral\CantoSaasFal\Resource\Repository;
+namespace Fairway\CantoSaasFal\Resource\Repository;
 
-use Ecentral\CantoSaasFal\Domain\Model\Dto\AssetSearch;
-use Ecentral\CantoSaasFal\Domain\Model\Dto\AssetSearchResponse;
-use Ecentral\CantoSaasFal\Resource\CantoClientFactory;
-use Ecentral\CantoSaasFal\Resource\Driver\CantoDriver;
-use Ecentral\CantoSaasFal\Resource\Event\BeforeLocalFileProcessingEvent;
-use Ecentral\CantoSaasFal\Utility\CantoUtility;
 use Fairway\CantoSaasApi\Client;
 use Fairway\CantoSaasApi\Endpoint\Authorization\AuthorizationFailedException;
 use Fairway\CantoSaasApi\Endpoint\Authorization\NotAuthorizedException;
@@ -27,6 +21,12 @@ use Fairway\CantoSaasApi\Http\InvalidResponseException;
 use Fairway\CantoSaasApi\Http\LibraryTree\GetDetailsRequest;
 use Fairway\CantoSaasApi\Http\LibraryTree\GetTreeRequest;
 use Fairway\CantoSaasApi\Http\LibraryTree\ListAlbumContentRequest;
+use Fairway\CantoSaasFal\Domain\Model\Dto\AssetSearch;
+use Fairway\CantoSaasFal\Domain\Model\Dto\AssetSearchResponse;
+use Fairway\CantoSaasFal\Resource\CantoClientFactory;
+use Fairway\CantoSaasFal\Resource\Driver\CantoDriver;
+use Fairway\CantoSaasFal\Resource\Event\BeforeLocalFileProcessingEvent;
+use Fairway\CantoSaasFal\Utility\CantoUtility;
 use TYPO3\CMS\Core\Cache\Frontend\FrontendInterface;
 use TYPO3\CMS\Core\EventDispatcher\EventDispatcher;
 use TYPO3\CMS\Core\Registry;

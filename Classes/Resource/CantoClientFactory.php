@@ -9,7 +9,7 @@ declare(strict_types=1);
  * LICENSE file that was distributed with this source code.
  */
 
-namespace Ecentral\CantoSaasFal\Resource;
+namespace Fairway\CantoSaasFal\Resource;
 
 use Fairway\CantoSaasApi\Client;
 use Fairway\CantoSaasApi\ClientOptions;

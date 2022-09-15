@@ -9,13 +9,13 @@ declare(strict_types=1);
  * LICENSE file that was distributed with this source code.
  */
 
-namespace Ecentral\CantoSaasFal\Pagination;
+namespace Fairway\CantoSaasFal\Pagination;
 
-use Ecentral\CantoSaasFal\Domain\Model\Dto\AssetSearch;
-use Ecentral\CantoSaasFal\Domain\Model\Dto\AssetSearchResponse;
-use Ecentral\CantoSaasFal\Resource\Repository\CantoRepository;
 use Fairway\CantoSaasApi\Endpoint\Authorization\NotAuthorizedException;
 use Fairway\CantoSaasApi\Http\InvalidResponseException;
+use Fairway\CantoSaasFal\Domain\Model\Dto\AssetSearch;
+use Fairway\CantoSaasFal\Domain\Model\Dto\AssetSearchResponse;
+use Fairway\CantoSaasFal\Resource\Repository\CantoRepository;
 use TYPO3\CMS\Core\Pagination\AbstractPaginator;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 

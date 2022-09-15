@@ -9,16 +9,16 @@ declare(strict_types=1);
  * LICENSE file that was distributed with this source code.
  */
 
-namespace Ecentral\CantoSaasFal\Controller\Backend;
+namespace Fairway\CantoSaasFal\Controller\Backend;
 
-use Ecentral\CantoSaasFal\Domain\Model\Dto\AssetSearch;
-use Ecentral\CantoSaasFal\Pagination\SearchResultPaginator;
-use Ecentral\CantoSaasFal\Resource\Driver\CantoDriver;
-use Ecentral\CantoSaasFal\Resource\NoCantoStorageException;
-use Ecentral\CantoSaasFal\Resource\Repository\CantoRepository;
-use Ecentral\CantoSaasFal\Resource\Repository\Exception\InvalidSearchTypeException;
-use Ecentral\CantoSaasFal\Utility\CantoUtility;
 use Fairway\CantoSaasApi\Endpoint\Authorization\AuthorizationFailedException;
+use Fairway\CantoSaasFal\Domain\Model\Dto\AssetSearch;
+use Fairway\CantoSaasFal\Pagination\SearchResultPaginator;
+use Fairway\CantoSaasFal\Resource\Driver\CantoDriver;
+use Fairway\CantoSaasFal\Resource\NoCantoStorageException;
+use Fairway\CantoSaasFal\Resource\Repository\CantoRepository;
+use Fairway\CantoSaasFal\Resource\Repository\Exception\InvalidSearchTypeException;
+use Fairway\CantoSaasFal\Utility\CantoUtility;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Core\Http\JsonResponse;

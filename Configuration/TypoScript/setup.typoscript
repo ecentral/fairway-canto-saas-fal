@@ -17,5 +17,5 @@ canto_saas_fal {
   10.userFunc = TYPO3\CMS\Extbase\Core\Bootstrap->run
   10.extensionName= CantoSaasFal
   10.pluginName = metadataWebhook
-  10.vendorName = Ecentral
+  10.vendorName = Fairway
 }

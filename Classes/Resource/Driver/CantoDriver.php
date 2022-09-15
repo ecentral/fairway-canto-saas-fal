@@ -9,11 +9,8 @@ declare(strict_types=1);
  * LICENSE file that was distributed with this source code.
  */
 
-namespace Ecentral\CantoSaasFal\Resource\Driver;
+namespace Fairway\CantoSaasFal\Resource\Driver;
 
-use Ecentral\CantoSaasFal\Resource\MdcUrlGenerator;
-use Ecentral\CantoSaasFal\Resource\Repository\CantoRepository;
-use Ecentral\CantoSaasFal\Utility\CantoUtility;
 use Fairway\CantoSaasApi\DTO\Status;
 use Fairway\CantoSaasApi\Endpoint\Authorization\AuthorizationFailedException;
 use Fairway\CantoSaasApi\Endpoint\Authorization\NotAuthorizedException;
@@ -28,6 +25,9 @@ use Fairway\CantoSaasApi\Http\LibraryTree\SearchFolderRequest;
 use Fairway\CantoSaasApi\Http\Upload\GetUploadSettingRequest;
 use Fairway\CantoSaasApi\Http\Upload\QueryUploadStatusRequest;
 use Fairway\CantoSaasApi\Http\Upload\UploadFileRequest;
+use Fairway\CantoSaasFal\Resource\MdcUrlGenerator;
+use Fairway\CantoSaasFal\Resource\Repository\CantoRepository;
+use Fairway\CantoSaasFal\Utility\CantoUtility;
 use GuzzleHttp\Exception\GuzzleException;
 use Psr\Http\Message\ResponseInterface;
 use RuntimeException;

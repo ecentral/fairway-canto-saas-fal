@@ -9,14 +9,14 @@ declare(strict_types=1);
  * LICENSE file that was distributed with this source code.
  */
 
-namespace Ecentral\CantoSaasFal\Resource\Metadata;
+namespace Fairway\CantoSaasFal\Resource\Metadata;
 
 use Doctrine\DBAL\FetchMode;
-use Ecentral\CantoSaasFal\Resource\Event\BeforeMetadataUploadEvent;
-use Ecentral\CantoSaasFal\Resource\Repository\CantoRepository;
-use Ecentral\CantoSaasFal\Utility\CantoUtility;
 use Fairway\CantoSaasApi\Http\Asset\BatchUpdatePropertiesRequest;
 use Fairway\CantoSaasApi\Http\InvalidResponseException;
+use Fairway\CantoSaasFal\Resource\Event\BeforeMetadataUploadEvent;
+use Fairway\CantoSaasFal\Resource\Repository\CantoRepository;
+use Fairway\CantoSaasFal\Utility\CantoUtility;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\EventDispatcher\EventDispatcher;
 use TYPO3\CMS\Core\Resource\File;
