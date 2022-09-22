@@ -762,10 +762,10 @@ class CantoDriver extends AbstractDriver implements StreamableDriverInterface
         $request->setParentFolder(CantoUtility::getIdFromCombinedIdentifier($parentFolderIdentifier));
         try {
             if ($createAlbum) {
-                return 'album#' . $this->cantoRepository->getClient()->libraryTree()->createAlbum($request)->getId();
+                return 'album<>' . $this->cantoRepository->getClient()->libraryTree()->createAlbum($request)->getId();
             }
             $folder = $this->cantoRepository->getClient()->libraryTree()->createFolder($request);
-            $id = 'folder#' . $folder->getId();
+            $id = 'folder<>' . $folder->getId();
             $this->cantoRepository->setFolderCache($id, $folder->getResponseData());
             return $id;
         } catch (NotAuthorizedException|InvalidResponseException $e) {
