@@ -11,14 +11,14 @@ $EM_CONF['canto_saas_fal'] = [
     'title' => 'Canto SaaS FAL',
     'description' => 'Adds Canto SaaS FAL driver.',
     'category' => 'misc',
-    'version' => '0.2.0',
+    'version' => '1.0.0',
     'constraints' => [
         'depends' => [
-            'typo3' => '10.4.0-10.4.99',
-            'filemetadata' => '10.4.0-10.4.99',
+            'typo3' => '10.4.0-11.5.99',
+            'filemetadata' => '10.4.0-11.5.99',
         ],
     ],
-    'state' => 'beta',
+    'state' => 'stable',
     'clearCacheOnLoad' => true,
     'author' => 'Tim Schreiner',
     'author_email' => 'tim.schreiner@km2.de',
