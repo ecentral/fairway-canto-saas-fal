@@ -181,8 +181,19 @@ class Extractor implements ExtractorInterface
             }
             $flippedMapping = array_flip($categoryConfiguration['mapping']);
             $uidList[] = $categoryUid;
+            /**
+             * Simple replace mechanism for typo3 category uid duplicates
+             * JSON has unique keys in objects, so we prefix the uids in case we need duplicates:
+             * Example:
+             * {
+             *   "mapping": {
+             *     "23": "category 1",
+             *     "_23": "category 2",
+             *     "__23": "category 2",
+             * }
+             */
             foreach ($data as $customFieldValue) {
-                $uidList[] = str_replace('_', '', $flippedMapping[$customFieldValue]);
+                $uidList[] = str_replace('_', '', (string)$flippedMapping[$customFieldValue]);
             }
         }
 
