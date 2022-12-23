@@ -123,13 +123,10 @@ services:
         event: TYPO3\CMS\Core\Resource\Event\BeforeFileProcessingEvent
 
   Fairway\CantoSaasFal\Resource\EventListener\AfterFormEnginePageInitializedEventListener:
-    arguments:
-      - "@Fairway\\CantoSaasFal\\Resource\\Repository\\CantoRepository"
     tags:
       - name: event.listener
         identifier: afterFormEnginePageInitializedEventListener
-        event: TYPO3\CMS\Core\Resource\Event\AfterFormEnginePageInitializedEvent
-        before: 'legacy-slot'
+        event: TYPO3\CMS\Backend\Controller\Event\AfterFormEnginePageInitializedEvent
 
   cache.canto_folder:
     class: TYPO3\CMS\Core\Cache\Frontend\FrontendInterface
