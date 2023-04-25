@@ -176,7 +176,7 @@ class Extractor implements ExtractorInterface
             [$collection, $customField] = explode('->', $categoryConfiguration['field']);
             if (isset($fileData[$collection])) {
                 if (isset($fileData[$collection][$customField])) {
-                    $data = $fileData[$collection][$customField];
+                    $data = $fileData[$collection][$customField] ?? null;
                     if ($data === null) {
                         continue;
                     }
