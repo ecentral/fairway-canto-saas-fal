@@ -174,26 +174,31 @@ class Extractor implements ExtractorInterface
         $uidList = [];
         foreach ($mapping as $categoryUid => $categoryConfiguration) {
             [$collection, $customField] = explode('->', $categoryConfiguration['field']);
-            [$collectionAlternative, $customFieldAlternative] = explode('->', $categoryConfiguration['alternative'] ?? '');
-            $data = $fileData[$collection][$customField] ?? $fileData[$collectionAlternative][$customFieldAlternative] ?? null;
-            if ($data === null) {
-                continue;
-            }
-            $flippedMapping = array_flip($categoryConfiguration['mapping']);
-            $uidList[] = $categoryUid;
-            /**
-             * Simple replace mechanism for typo3 category uid duplicates
-             * JSON has unique keys in objects, so we prefix the uids in case we need duplicates:
-             * Example:
-             * {
-             *   "mapping": {
-             *     "23": "category 1",
-             *     "_23": "category 2",
-             *     "__23": "category 2",
-             * }
-             */
-            foreach ($data as $customFieldValue) {
-                $uidList[] = str_replace('_', '', (string)$flippedMapping[$customFieldValue]);
+            if (isset($fileData[$collection])) {
+                if (isset($fileData[$collection][$customField])) {
+                    $data = $fileData[$collection][$customField];
+                    if ($data === null) {
+                        continue;
+                    }
+                    $flippedMapping = array_flip($categoryConfiguration['mapping']);
+                    $uidList[] = $categoryUid;
+                    /**
+                     * Simple replace mechanism for typo3 category uid duplicates
+                     * JSON has unique keys in objects, so we prefix the uids in case we need duplicates:
+                     * Example:
+                     * {
+                     *   "mapping": {
+                     *     "23": "category 1",
+                     *     "_23": "category 2",
+                     *     "__23": "category 2",
+                     * }
+                     */
+                    foreach ($data as $customFieldValue) {
+                        if (isset($flippedMapping[$customFieldValue])) {
+                            $uidList[] = str_replace('_', '', (string)$flippedMapping[$customFieldValue]);
+                        }
+                    }
+                }
             }
         }
 
