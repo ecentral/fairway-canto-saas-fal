@@ -63,7 +63,7 @@ final class Exporter
         }
         $driveType = $file->getStorage()->getDriverType();
         if (empty($configuration['metadataExportMapping'] ?? [])
-            || $driveType != "Canto") {
+            || $driveType != 'Canto') {
             return false;
         }
 
