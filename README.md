@@ -14,4 +14,4 @@ or `permissions.file.storage.[storageUID].cantoAssetPicker = 1`.
 
 ### Update
 
-1.0.1 - Fix missing check of file source and append filedriver check
+1.0.5 - Fix missing check of file source and append filedriver check
