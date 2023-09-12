@@ -26,7 +26,7 @@ final class Exporter
 {
     private ConnectionPool $connection;
     private CantoRepository $cantoRepository;
-    private FileRepository $fileRepository;
+    protected FileRepository $fileRepository;
     private EventDispatcher $dispatcher;
 
     public function __construct(ConnectionPool $connection, CantoRepository $cantoRepository, FileRepository $fileRepository, EventDispatcher $dispatcher)
@@ -61,12 +61,14 @@ final class Exporter
         } catch (\Exception $e) {
             return false;
         }
+        $driveType = $file->getStorage()->getDriverType();
+        if (empty($configuration['metadataExportMapping'] ?? []) || $driveType != "Canto") {
+            return false;
+        }
         assert($file instanceof File);
         ['scheme' => $scheme, 'identifier' => $identifier] = CantoUtility::splitCombinedIdentifier($file->getIdentifier());
         $configuration = $file->getStorage()->getConfiguration();
-        if (empty($configuration['metadataExportMapping'] ?? [])) {
-            return false;
-        }
+
         $mapping = json_decode($configuration['metadataExportMapping'], true);
         $language = (int)$metadata['sys_language_uid'];
         $this->transformMetadataAndMappingArray($metadata, $mapping, $language);
