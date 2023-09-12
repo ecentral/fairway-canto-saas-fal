@@ -61,10 +61,12 @@ final class Exporter
         } catch (\Exception $e) {
             return false;
         }
+
         $driveType = $file->getStorage()->getDriverType();
         if (empty($configuration['metadataExportMapping'] ?? []) || $driveType != "Canto") {
             return false;
         }
+
         assert($file instanceof File);
         ['scheme' => $scheme, 'identifier' => $identifier] = CantoUtility::splitCombinedIdentifier($file->getIdentifier());
         $configuration = $file->getStorage()->getConfiguration();
