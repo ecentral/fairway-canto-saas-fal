@@ -23,7 +23,7 @@
     "typo3/cms-filemetadata": "^10.4 || ^11.5|| ^12.4",
     "typo3/cms-filelist": "^10.4 || ^11.5|| ^12.4",
     "guzzlehttp/guzzle": "^6.3 || ^7.3",
-    "psr/log": "^3.0",
+    "psr/log": "^1.1 || ^3.0",
     "fairway/canto-saas-api": "@dev"
   },
   "require-dev": {
