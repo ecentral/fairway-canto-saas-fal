@@ -1,12 +1,12 @@
 <?php
-use TYPO3\CMS\Core\Resource\Index\ExtractorRegistry;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
 /*
  * This file is part of the "canto_saas_fal" Extension for TYPO3 CMS.
  *
  * For the full copyright and license information, please read the
  * LICENSE file that was distributed with this source code.
  */
+use TYPO3\CMS\Core\Resource\Index\ExtractorRegistry;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 // Register new fal driver
 $GLOBALS['TYPO3_CONF_VARS']['SYS']['fal']['registeredDrivers'][\Fairway\CantoSaasFal\Resource\Driver\CantoDriver::DRIVER_NAME] = [
