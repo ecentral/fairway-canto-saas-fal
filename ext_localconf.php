@@ -1,5 +1,6 @@
 <?php
-
+use TYPO3\CMS\Core\Resource\Index\ExtractorRegistry;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 /*
  * This file is part of the "canto_saas_fal" Extension for TYPO3 CMS.
  *
@@ -53,7 +54,7 @@ $GLOBALS['TYPO3_CONF_VARS']['SYS']['formEngine']['nodeRegistry'][1628070217] = [
 $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['ElementBrowsers']['canto']
     = \Fairway\CantoSaasFal\Browser\CantoAssetBrowser::class;
 
-$extractorRegistry = \TYPO3\CMS\Core\Resource\Index\ExtractorRegistry::getInstance();
+$extractorRegistry = GeneralUtility::makeInstance(ExtractorRegistry::class);
 $extractorRegistry->registerExtractionService(\Fairway\CantoSaasFal\Resource\Metadata\Extractor::class);
 unset($extractorRegistry);
 
@@ -97,7 +98,7 @@ if ($GLOBALS['TYPO3_CONF_VARS']['GFX']['imagefile_ext']) {
 }
 
 \TYPO3\CMS\Extbase\Utility\ExtensionUtility::configurePlugin(
-    'Fairway.CantoSaasFal',
+    'canto_saas_fal',
     'metadataWebhook',
     [
         \Fairway\CantoSaasFal\Controller\MetadataWebhookController::class => 'index',
@@ -106,11 +107,11 @@ if ($GLOBALS['TYPO3_CONF_VARS']['GFX']['imagefile_ext']) {
         \Fairway\CantoSaasFal\Controller\MetadataWebhookController::class => 'index',
     ],
 );
-
-$signalSlotDispatcher = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\TYPO3\CMS\Extbase\SignalSlot\Dispatcher::class);
+/*
+$signalSlotDispatcher = GeneralUtility::makeInstance(\TYPO3\CMS\Extbase\SignalSlot\Dispatcher::class);
 $signalSlotDispatcher->connect(
     TYPO3\CMS\Backend\Controller\EditDocumentController::class,
     'initAfter',
     Fairway\CantoSaasFal\Resource\EventListener\AfterFormEnginePageInitializedEventListener::class,
     'updateMetadataInCantoSlot'
-);
+);*/

@@ -9,7 +9,7 @@
 
 (static function () {
     \TYPO3\CMS\Extbase\Utility\ExtensionUtility::registerPlugin(
-        'Fairway.CantoSaasFal',
+        'canto_saas_fal',
         'metadataWebhook',
         'Webhook Metadata Plugin',
     );

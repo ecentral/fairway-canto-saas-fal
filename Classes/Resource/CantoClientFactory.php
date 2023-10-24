@@ -16,7 +16,9 @@ use Fairway\CantoSaasApi\ClientOptions;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 use TYPO3\CMS\Core\Http\Client\GuzzleClientFactory;
+use TYPO3\CMS\Core\Information\Typo3Version;
 use TYPO3\CMS\Core\SingletonInterface;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class CantoClientFactory implements LoggerAwareInterface, SingletonInterface
 {
@@ -24,12 +26,18 @@ class CantoClientFactory implements LoggerAwareInterface, SingletonInterface
 
     public function createClientFromDriverConfiguration(array $configuration): Client
     {
+        $typo3Version = GeneralUtility::makeInstance(Typo3Version::class);
+        if($typo3Version->getMajorVersion()>11)
+            $gizzleClient = GeneralUtility::makeInstance(GuzzleClientFactory::class)->getClient();
+        else
+            $gizzleClient = GuzzleClientFactory::getClient();
+
         $clientOptions = new ClientOptions([
             'cantoName' => $configuration['cantoName'],
             'cantoDomain' => $configuration['cantoDomain'],
             'appId' => $configuration['appId'],
             'appSecret' => $configuration['appSecret'],
-            'httpClient' => GuzzleClientFactory::getClient(),
+            'httpClient' => $gizzleClient,
             'logger' => $this->logger,
         ]);
         return new Client($clientOptions);

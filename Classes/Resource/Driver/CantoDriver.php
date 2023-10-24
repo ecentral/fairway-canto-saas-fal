@@ -87,7 +87,7 @@ class CantoDriver extends AbstractDriver implements StreamableDriverInterface
             try {
                 $this->cantoRepository->initialize($this->storageUid, $this->configuration);
             } catch (AuthorizationFailedException $e) {
-                // TODO Show error message in TYPO3 Backend.
+                echo "Append Canto Fal Driver configuration.";
             }
         }
         $this->mdcUrlGenerator = GeneralUtility::makeInstance(MdcUrlGenerator::class);
