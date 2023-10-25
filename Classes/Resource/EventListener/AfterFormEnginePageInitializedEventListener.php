@@ -33,13 +33,17 @@ final class AfterFormEnginePageInitializedEventListener
 
     public function updateMetadataInCantoSlot(EditDocumentController $controller, ServerRequestInterface $request)
     {
-        if ($request->getMethod() === 'POST' && $request->getQueryParams()['route'] === '/record/edit') {
-            $data = $this->accessProtectedDataProperty($controller);
-            if (isset($data['sys_file_metadata'])) {
-                $exporter = GeneralUtility::getContainer()->get(Exporter::class);
-                assert($exporter instanceof Exporter);
-                foreach ($data['sys_file_metadata'] as $uid => $metadata) {
-                    $exporter->exportToCanto($uid, $metadata);
+        $pageArguments = $request->getAttribute('routing');
+        if ($pageArguments != null) {
+            $router = $pageArguments->getRoute();
+            if ($request->getMethod() === 'POST' && $router->getPath() === '/record/edit') {
+                $data = $this->accessProtectedDataProperty($controller);
+                if (isset($data['sys_file_metadata'])) {
+                    $exporter = GeneralUtility::getContainer()->get(Exporter::class);
+                    assert($exporter instanceof Exporter);
+                    foreach ($data['sys_file_metadata'] as $uid => $metadata) {
+                        $exporter->exportToCanto($uid, $metadata);
+                    }
                 }
             }
         }
