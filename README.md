@@ -14,4 +14,6 @@ or `permissions.file.storage.[storageUID].cantoAssetPicker = 1`.
 
 ### Update
 
+1.0.6 - Update for TYPO3 v12
+
 1.0.5 - Fix missing check of file source and append filedriver check

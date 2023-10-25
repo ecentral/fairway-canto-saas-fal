@@ -24,6 +24,9 @@ class CantoAssetBrowser extends AbstractElementBrowser implements ElementBrowser
 {
     protected ResourceStorage $storage;
 
+    public const IDENTIFIER = 'cantosaas';
+    protected string $identifier = self::IDENTIFIER;
+
     /**
      * @throws NoCantoStorageException
      */
