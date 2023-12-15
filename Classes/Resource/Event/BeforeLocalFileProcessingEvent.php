@@ -61,7 +61,7 @@ final class BeforeLocalFileProcessingEvent
         }
         if ($this->scheme === 'image' && !in_array($this->getFileExtension(), $GLOBALS['CANTO_SAAS_FAL']['IMAGE_TYPES'], true)) {
             $this->setFileExtension(self::DEFAULT_IMAGE_FILE_EXTENSION);
-            return $this->fileData['url']['PNG'] ?? null;
+            return $this->fileData['url']['detail'] ?? null;
         }
         return $this->fileData['url']['directUrlOriginal'] ?? null;
     }
