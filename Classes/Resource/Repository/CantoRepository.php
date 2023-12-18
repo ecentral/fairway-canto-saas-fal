@@ -203,7 +203,7 @@ class CantoRepository
         $identifier = CantoUtility::getIdFromCombinedIdentifier($fileIdentifier);
         $useMdc = CantoUtility::isMdcActivated($this->driverConfiguration);
         $fileData = $this->getFileDetails($scheme, $identifier);
-        if(ApplicationType::fromRequest($GLOBALS['TYPO3_REQUEST'])->isFrontend()) {
+        if (ApplicationType::fromRequest($GLOBALS['TYPO3_REQUEST'])->isFrontend()) {
             $preview = false;
         }
         $event = new BeforeLocalFileProcessingEvent($fileData, $scheme, $preview);
