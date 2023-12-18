@@ -29,6 +29,7 @@ use Fairway\CantoSaasFal\Resource\Event\BeforeLocalFileProcessingEvent;
 use Fairway\CantoSaasFal\Utility\CantoUtility;
 use TYPO3\CMS\Core\Cache\Frontend\FrontendInterface;
 use TYPO3\CMS\Core\EventDispatcher\EventDispatcher;
+use TYPO3\CMS\Core\Http\ApplicationType;
 use TYPO3\CMS\Core\Registry;
 use TYPO3\CMS\Core\Resource\Exception\FolderDoesNotExistException;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -196,12 +197,14 @@ class CantoRepository
         }
     }
 
-    public function getFileForLocalProcessing(string $fileIdentifier, bool $preview = false): string
+    public function getFileForLocalProcessing(string $fileIdentifier, bool $preview = true): string
     {
         $scheme = CantoUtility::getSchemeFromCombinedIdentifier($fileIdentifier);
         $identifier = CantoUtility::getIdFromCombinedIdentifier($fileIdentifier);
         $useMdc = CantoUtility::isMdcActivated($this->driverConfiguration);
         $fileData = $this->getFileDetails($scheme, $identifier);
+        if(ApplicationType::fromRequest($GLOBALS['TYPO3_REQUEST'])->isFrontend())
+            $preview = false;
         $event = new BeforeLocalFileProcessingEvent($fileData, $scheme, $preview);
         $this->dispatcher->dispatch($event);
         $sourcePath = $event->getSourcePath();
