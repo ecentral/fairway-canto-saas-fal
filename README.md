@@ -14,6 +14,8 @@ or `permissions.file.storage.[storageUID].cantoAssetPicker = 1`.
 
 ### Update
 
+1.0.6.2 - Fix performace on backend and fronted filelisting
+
 1.0.6.1 - Fix router handling of AfterFormEnginePageInitializedEventListener
 
 1.0.6 - Update for TYPO3 v12
