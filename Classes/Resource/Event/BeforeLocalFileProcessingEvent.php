@@ -57,7 +57,7 @@ final class BeforeLocalFileProcessingEvent
             return $this->sourcePath;
         }
         if ($this->isForPreview()) {
-            return $this->fileData['url']['preview'] ?? null;
+            return $this->fileData['url']['directUrlPreview'] ?? null;
         }
         if ($this->scheme === 'image' && !in_array($this->getFileExtension(), $GLOBALS['CANTO_SAAS_FAL']['IMAGE_TYPES'], true)) {
             $this->setFileExtension(self::DEFAULT_IMAGE_FILE_EXTENSION);
