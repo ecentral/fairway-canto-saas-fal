@@ -11,6 +11,7 @@ declare(strict_types=1);
 
 namespace Fairway\CantoSaasFal\Command;
 
+use Fairway\CantoSaasFal\Domain\Repository\FileReferenceRepository;
 use Fairway\CantoSaasFal\Resource\Driver\CantoDriver;
 use Fairway\CantoSaasFal\Resource\Metadata\Extractor;
 use Fairway\CantoSaasFal\Utility\CantoUtility;
@@ -19,15 +20,18 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use TYPO3\CMS\Core\Cache\Frontend\FrontendInterface;
 use TYPO3\CMS\Core\Resource\File;
+use TYPO3\CMS\Core\Resource\FileReference;
 use TYPO3\CMS\Core\Resource\FileRepository;
 use TYPO3\CMS\Core\Resource\ProcessedFileRepository;
+use TYPO3\CMS\Core\Resource\ResourceFactory;
 use TYPO3\CMS\Core\Resource\StorageRepository;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
-final class UpdateMetadataAssetsCommand extends Command
+final class UpdateImageAssetsUsedInFrontendCommand extends Command
 {
     private Extractor $metadataExtractor;
     private StorageRepository $storageRepository;
+
     protected FrontendInterface $cantoFileCache;
     public function __construct(Extractor $metadataExtractor, StorageRepository $storageRepository)
     {
@@ -35,15 +39,13 @@ final class UpdateMetadataAssetsCommand extends Command
         $this->storageRepository = $storageRepository;
         parent::__construct();
     }
-
     public function injectCantoFileCache(FrontendInterface $cantoFileCache): void
     {
         $this->cantoFileCache = $cantoFileCache;
     }
-
     protected function configure(): void
     {
-        $this->setDescription('Update Metadata for all integrated canto assets.');
+        $this->setDescription('Update Referenced Metadata Files for all used canto assets.');
         $this->setHelp(
             <<<'EOF'
 This command will pull down all metadata and override it analog to the definition in the backend.
@@ -55,15 +57,24 @@ EOF
     public function execute(InputInterface $input, OutputInterface $output): int
     {
         $fileRepository = GeneralUtility::makeInstance(FileRepository::class);
+        $fileReferenceRepositry = GeneralUtility::makeInstance(FileReferenceRepository::class);
         assert($fileRepository instanceof FileRepository);
+
         $files = $fileRepository->findAll();
         $counter = 0;
+
         foreach ($files as $file) {
+
             assert($file instanceof File);
             $output->writeln('Working on File: ' . $file->getIdentifier() . ' - ' . $file->getName());
-            if ($file->getStorage()->getDriverType() !== CantoDriver::DRIVER_NAME) {
+
+            //Check file references
+            $fileReference = $fileReferenceRepositry->getFileReferenzesByFileUid($file->getUid());
+
+            if ($file->getStorage()->getDriverType() !== CantoDriver::DRIVER_NAME || count($fileReference) == 0) {
                 continue;
             }
+            //We delete only referenced files
             try {
                 //First delete cache
                 $scheme = CantoUtility::getSchemeFromCombinedIdentifier($file->getIdentifier());

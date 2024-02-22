@@ -169,6 +169,7 @@ class CantoRepository
     {
         $combinedIdentifier = CantoUtility::buildCombinedIdentifier($scheme, $fileIdentifier);
         $cacheIdentifier = $this->buildValidCacheIdentifier($combinedIdentifier);
+
         if ($this->cantoFileCache->has($cacheIdentifier)) {
             return $this->cantoFileCache->get($cacheIdentifier);
         }

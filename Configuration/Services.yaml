@@ -57,9 +57,18 @@ services:
         command: 'canto:warmupcache'
 
   Fairway\CantoSaasFal\Command\UpdateMetadataAssetsCommand:
+    calls:
+      - injectCantoFileCache: [ '@cache.canto_file' ]
     tags:
       - name: 'console.command'
         command: 'canto:updatemetadataassets'
+
+  Fairway\CantoSaasFal\Command\UpdateImageAssetsUsedInFrontendCommand:
+    calls:
+      - injectCantoFileCache: ['@cache.canto_file']
+    tags:
+      - name: 'console.command'
+        command: 'canto:updateusedmetadataassets'
 
   Fairway\CantoSaasFal\Command\RemoveMdcPrefixForFilesCommand:
     tags:
