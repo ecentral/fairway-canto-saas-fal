@@ -14,6 +14,7 @@ or `permissions.file.storage.[storageUID].cantoAssetPicker = 1`.
 
 ### Update
 
+1.0.6.4 - Append new Command job for clear the canto file cache and delete frontend processed images
 1.0.6.3 - Change preview image size for typo3 backend
 1.0.6.2 - Fix performace on backend and fronted filelisting
 1.0.6.1 - Fix router handling of AfterFormEnginePageInitializedEventListener
