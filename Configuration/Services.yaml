@@ -137,6 +137,30 @@ services:
         identifier: afterFormEnginePageInitializedEventListener
         event: TYPO3\CMS\Backend\Controller\Event\AfterFormEnginePageInitializedEvent
 
+
+  Ecentral\CantoSaasFal\Resource\EventListener\SyncMetaDataCategoriesEventListener:
+    tags:
+      - name: event.listener
+        identifier: 'synchronizeFileMetaDataCategoriesAfterCreation'
+        method: 'afterFileMetaDataCreated'
+        event: TYPO3\CMS\Core\Resource\Event\AfterFileMetaDataCreatedEvent
+      - name: event.listener
+        identifier: 'synchronizeFileMetaDataCategoriesAfterUpdate'
+        method: 'afterFileMetaDataUpdated'
+        event: TYPO3\CMS\Core\Resource\Event\AfterFileMetaDataUpdatedEvent
+
+  Ecentral\CantoSaasFal\Resource\EventListener\SyncMetaDataTranslationsEventListener:
+    tags:
+      - name: event.listener
+        identifier: 'synchronizeFileMetaDataTranslationsAfterCreation'
+        method: 'afterFileMetaDataCreated'
+        event: TYPO3\CMS\Core\Resource\Event\AfterFileMetaDataCreatedEvent
+      - name: event.listener
+        identifier: 'synchronizeFileMetaDataTranslationsAfterUpdate'
+        method: 'afterFileMetaDataUpdated'
+        event: TYPO3\CMS\Core\Resource\Event\AfterFileMetaDataUpdatedEvent
+
+
   cache.canto_folder:
     class: TYPO3\CMS\Core\Cache\Frontend\FrontendInterface
     public: true

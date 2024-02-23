@@ -20,10 +20,8 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use TYPO3\CMS\Core\Cache\Frontend\FrontendInterface;
 use TYPO3\CMS\Core\Resource\File;
-use TYPO3\CMS\Core\Resource\FileReference;
 use TYPO3\CMS\Core\Resource\FileRepository;
 use TYPO3\CMS\Core\Resource\ProcessedFileRepository;
-use TYPO3\CMS\Core\Resource\ResourceFactory;
 use TYPO3\CMS\Core\Resource\StorageRepository;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
@@ -64,7 +62,6 @@ EOF
         $counter = 0;
 
         foreach ($files as $file) {
-
             assert($file instanceof File);
             $output->writeln('Working on File: ' . $file->getIdentifier() . ' - ' . $file->getName());
 
@@ -81,8 +78,7 @@ EOF
                 $identifier = CantoUtility::getIdFromCombinedIdentifier($file->getIdentifier());
                 $combinedIdentifier = CantoUtility::buildCombinedIdentifier($scheme, $identifier);
                 $cacheIdentifier = sha1($combinedIdentifier);
-                if ($this->cantoFileCache->has($cacheIdentifier))
-                {
+                if ($this->cantoFileCache->has($cacheIdentifier)) {
                     //Clear old cache
                     $this->cantoFileCache->remove($cacheIdentifier);
                 }

@@ -14,13 +14,11 @@ namespace Fairway\CantoSaasFal\Resource\Event;
 final class AfterMetaDataExtractionEvent
 {
     private array $metadata;
-    private array $mapping;
     private array $fileData;
 
-    public function __construct(array $metadata, array $mapping, array $fileData)
+    public function __construct(array $metadata, array $fileData)
     {
         $this->metadata = $metadata;
-        $this->mapping = $mapping;
         $this->fileData = $fileData;
     }
 
@@ -33,11 +31,6 @@ final class AfterMetaDataExtractionEvent
     {
         $this->metadata = $metadata;
         return $this;
-    }
-
-    public function getMapping(): array
-    {
-        return $this->mapping;
     }
 
     public function getFileData(): array
