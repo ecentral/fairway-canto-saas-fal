@@ -70,8 +70,7 @@ EOF
                 $identifier = CantoUtility::getIdFromCombinedIdentifier($file->getIdentifier());
                 $combinedIdentifier = CantoUtility::buildCombinedIdentifier($scheme, $identifier);
                 $cacheIdentifier = sha1($combinedIdentifier);
-                if ($this->cantoFileCache->has($cacheIdentifier))
-                {
+                if ($this->cantoFileCache->has($cacheIdentifier)) {
                     //Clear old cache
                     $this->cantoFileCache->remove($cacheIdentifier);
                 }
