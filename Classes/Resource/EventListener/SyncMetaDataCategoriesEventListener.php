@@ -9,10 +9,9 @@ declare(strict_types=1);
  * LICENSE file that was distributed with this source code.
  */
 
-namespace Ecentral\CantoSaasFal\Resource\EventListener;
+namespace Fairway\CantoSaasFal\Resource\EventListener;
 
-use Ecentral\CantoSaasFal\Resource\Metadata\Extractor;
-use Ecentral\CantoSaasFal\Resource\Metadata\MetadataRepository;
+use Fairway\CantoSaasFal\Resource\Metadata\MetadataRepository;
 use TYPO3\CMS\Core\Category\Collection\CategoryCollection;
 use TYPO3\CMS\Core\Resource\Event\AfterFileMetaDataCreatedEvent;
 use TYPO3\CMS\Core\Resource\Event\AfterFileMetaDataUpdatedEvent;

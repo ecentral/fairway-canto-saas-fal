@@ -138,7 +138,7 @@ services:
         event: TYPO3\CMS\Backend\Controller\Event\AfterFormEnginePageInitializedEvent
 
 
-  Ecentral\CantoSaasFal\Resource\EventListener\SyncMetaDataCategoriesEventListener:
+  Fairway\CantoSaasFal\Resource\EventListener\SyncMetaDataCategoriesEventListener:
     tags:
       - name: event.listener
         identifier: 'synchronizeFileMetaDataCategoriesAfterCreation'
@@ -149,7 +149,7 @@ services:
         method: 'afterFileMetaDataUpdated'
         event: TYPO3\CMS\Core\Resource\Event\AfterFileMetaDataUpdatedEvent
 
-  Ecentral\CantoSaasFal\Resource\EventListener\SyncMetaDataTranslationsEventListener:
+  Fairway\CantoSaasFal\Resource\EventListener\SyncMetaDataTranslationsEventListener:
     tags:
       - name: event.listener
         identifier: 'synchronizeFileMetaDataTranslationsAfterCreation'

@@ -75,7 +75,7 @@ class Extractor implements ExtractorInterface
 
         return $this->dispatcher->dispatch($event)->getMetadata();
     }
-    public function getMappedCategories(File $file): array
+    public function getMappedCategories(File $file): arrayfv
     {
         $fileData = $this->fetchDataForFile($file);
 
@@ -124,10 +124,10 @@ class Extractor implements ExtractorInterface
             'creator' => $fileData['default']['Author'],
             'copyright' => $fileData['default']['Copyright'],
         ];
-        if(isset($fileData['default']['Creation Tool'])) {
+        if (isset($fileData['default']['Creation Tool'])) {
             $array_filedata['creator_tool'] = $fileData['default']['Creation Tool'];
         }
-        if(isset($fileData['default']['Pages'])) {
+        if (isset($fileData['default']['Pages'])) {
             $array_filedata['pages'] = $fileData['default']['Pages'];
         }
         return array_replace(
@@ -227,6 +227,49 @@ class Extractor implements ExtractorInterface
             }
         }
         return $this->extractFromMetadata($metadata[$key] ?? [], $fileKey);
+    }
+
+    /**
+     * @param array $mappedCategoryConfiguration
+     * @param Category|null $parent
+     * @param CategoryRepository|null $categoryRepository
+     * @return Category[]
+     */
+    private function buildCategoryTree(array $mappedCategoryConfiguration, Category $parent = null, CategoryRepository $categoryRepository = null): array
+    {
+        $categoryRepository ??= GeneralUtility::makeInstance(CategoryRepository::class);
+        assert($categoryRepository instanceof CategoryRepository);
+        $categories = [];
+        foreach ($mappedCategoryConfiguration as $title => $children) {
+            $category = $parent;
+            if (is_string($title)) {
+                $category = $this->addCategory($title, $parent, $categoryRepository);
+                $categories[] = $category;
+            }
+            if (is_array($children) && $category !== null) {
+                $categories = [...$categories, ...$this->buildCategoryTree($children, $category, $categoryRepository)];
+            }
+            if (is_string($children)) {
+                $categories[] = $this->addCategory($children, $category, $categoryRepository);
+            }
+        }
+        return $categories;
+    }
+
+    private function addCategory(string $title, ?Category $parent, CategoryRepository $repository): Category
+    {
+        assert(is_callable([$repository, 'findByTitle']));
+        $category = $repository->findByTitle($title)->toArray()[0] ?? null;
+        if ($category === null) {
+            $category = new Category();
+            $category->setDescription('Canto generated category');
+            $category->setTitle($title);
+            if ($parent) {
+                $category->setParent($parent);
+            }
+            $repository->add($category);
+        }
+        return $category;
     }
 
     private function getQueryBuilder(string $forTable): QueryBuilder
