@@ -11,6 +11,8 @@ declare(strict_types=1);
 
 namespace Fairway\CantoSaasFal\Resource\EventListener;
 
+use Fairway\CantoSaasFal\Resource\Driver\CantoDriver;
+use Fairway\CantoSaasFal\Resource\Metadata\Extractor;
 use Fairway\CantoSaasFal\Resource\Metadata\MetadataRepository;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Resource\Event\AfterFileMetaDataCreatedEvent;
@@ -52,7 +54,7 @@ final class SyncMetaDataTranslationsEventListener
     protected function synchronizeMetaData(int $fileUid, int $metaDataUid): void
     {
         $file = $this->resourceFactory->getFileObject($fileUid);
-        if (!$file instanceof File) {
+        if (!$file instanceof File || $file->getStorage()->getDriverType() != CantoDriver::DRIVER_NAME) {
             return;
         }
 
