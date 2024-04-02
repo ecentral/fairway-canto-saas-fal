@@ -75,7 +75,7 @@ class Extractor implements ExtractorInterface
 
         return $this->dispatcher->dispatch($event)->getMetadata();
     }
-    public function getMappedCategories(File $file): arrayfv
+    public function getMappedCategories(File $file): array
     {
         $fileData = $this->fetchDataForFile($file);
 
