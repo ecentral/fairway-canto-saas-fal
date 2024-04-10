@@ -14,6 +14,7 @@ or `permissions.file.storage.[storageUID].cantoAssetPicker = 1`.
 
 ### Update
 
+1.0.6.7 - Fix wrong cli handling in combintaion with scheduler commands
 1.0.6.6 - Fix wrong driver SyncMetaDataCategoriesEventListener Handling
 1.0.6.5 - New handle category mapping in EventListener
 1.0.6.4 - Append new Command job for clear the canto file cache and delete frontend processed images
