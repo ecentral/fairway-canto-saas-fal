@@ -87,7 +87,7 @@ EOF
 
                 if ($metaData) {
                     $file->getMetaData()->add($metaData)->save();
-                    $file->getForLocalProcessing(false);
+                    $file->getForLocalProcessing(true);
                     $processedFileRepository = GeneralUtility::makeInstance(ProcessedFileRepository::class);
                     foreach ($processedFileRepository->findAllByOriginalFile($file) as $processedFile) {
                         $processedFile->delete(true);
