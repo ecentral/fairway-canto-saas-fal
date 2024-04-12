@@ -43,6 +43,7 @@ use TYPO3\CMS\Core\Utility\ArrayUtility;
 use TYPO3\CMS\Core\Utility\Exception\MissingArrayPathException;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\PathUtility;
+use TYPO3\CMS\Core\Resource\ResourceFactory;
 
 class CantoDriver extends AbstractDriver implements StreamableDriverInterface
 {
@@ -361,10 +362,27 @@ class CantoDriver extends AbstractDriver implements StreamableDriverInterface
             $scheme,
             $explicitFileIdentifier
         );
+        if($result == null){
+            $data = [
+                'size' => 1000,
+                'atime' => time(),
+                'mtime' => 0,
+                'ctime' =>  0,
+                'mimetype' => '',
+                'name' => 'fallbackimage.jpg',
+                'extension' => 'jpg',
+                'identifier' => $fileIdentifier,
+                'identifier_hash' => $this->hashIdentifier($fileIdentifier),
+                'storage' => $this->storageUid,
+                'folder_hash' => '',
+                'folder_identifiers' => '',
+            ];
+
+            return $data;
+        }
         foreach ($result['relatedAlbums'] ?? [] as $album) {
             $folders[] = CantoUtility::buildCombinedIdentifier($album['scheme'], $album['id']);
         }
-
         $data = [
             'size' => $result['default']['Size'],
             'atime' => time(),
