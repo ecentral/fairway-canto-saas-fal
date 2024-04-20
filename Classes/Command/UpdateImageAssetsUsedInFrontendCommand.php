@@ -13,6 +13,7 @@ namespace Fairway\CantoSaasFal\Command;
 
 use Fairway\CantoSaasFal\Domain\Repository\FileReferenceRepository;
 use Fairway\CantoSaasFal\Resource\Driver\CantoDriver;
+use TYPO3\CMS\Core\Cache\CacheManager;
 use Fairway\CantoSaasFal\Resource\Metadata\Extractor;
 use Fairway\CantoSaasFal\Utility\CantoUtility;
 use Symfony\Component\Console\Command\Command;
@@ -23,7 +24,9 @@ use TYPO3\CMS\Core\Resource\File;
 use TYPO3\CMS\Core\Resource\FileRepository;
 use TYPO3\CMS\Core\Resource\ProcessedFileRepository;
 use TYPO3\CMS\Core\Resource\StorageRepository;
+use TYPO3\CMS\Core\SysLog\Action\Cache;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Extbase\Persistence\Generic\PersistenceManager;
 
 final class UpdateImageAssetsUsedInFrontendCommand extends Command
 {
@@ -56,6 +59,10 @@ EOF
     {
         $fileRepository = GeneralUtility::makeInstance(FileRepository::class);
         $fileReferenceRepositry = GeneralUtility::makeInstance(FileReferenceRepository::class);
+        $cacheManager = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(CacheManager::class);
+        $cantoFileRepository = GeneralUtility::makeInstance(\Fairway\CantoSaasFal\Domain\Repository\FileRepository::class);
+
+
         assert($fileRepository instanceof FileRepository);
 
         $files = $fileRepository->findAll();
@@ -84,13 +91,20 @@ EOF
                 }
 
                 $metaData = $this->metadataExtractor->extractMetaData($file);
+                $fetchedDataForFile = $this->metadataExtractor->fetchDataForFile($file);
+                if(isset($fetchedDataForFile['default'])) {
+                    $newmtime = CantoUtility::buildTimestampFromCantoDate($fetchedDataForFile['default']['Date modified']);
+                    if ($fetchedDataForFile && $newmtime > $file->getModificationTime()) {
+                        $cantoFileRepository->updateModificationDate($file->getUid(),$newmtime);
 
-                if ($metaData) {
-                    $file->getMetaData()->add($metaData)->save();
-                    $file->getForLocalProcessing(true);
-                    $processedFileRepository = GeneralUtility::makeInstance(ProcessedFileRepository::class);
-                    foreach ($processedFileRepository->findAllByOriginalFile($file) as $processedFile) {
-                        $processedFile->delete(true);
+                        $file->getMetaData()->add($metaData)->save();
+                        $file->getForLocalProcessing(false);
+                        $processedFileRepository = GeneralUtility::makeInstance(ProcessedFileRepository::class);
+
+                        foreach ($processedFileRepository->findAllByOriginalFile($file) as $processedFile) {
+                            $processedFile->delete(true);
+                        }
+
                     }
                 }
             } catch (\Exception $e) {
@@ -102,6 +116,12 @@ EOF
                 // to circumvent API limits we need to pause for 60s after processing a thousand requests
                 sleep(60);
             }
+        }
+        //Clear frontend cache
+        $cache = $cacheManager->getCache("pages");
+        // Cache leeren
+        if ($cache !== null) {
+            $cache->flush();
         }
         return self::SUCCESS;
     }
