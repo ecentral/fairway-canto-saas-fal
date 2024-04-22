@@ -96,15 +96,12 @@ EOF
                     $newmtime = CantoUtility::buildTimestampFromCantoDate($fetchedDataForFile['default']['Date modified']);
                     if ($fetchedDataForFile && $newmtime > $file->getModificationTime()) {
                         $cantoFileRepository->updateModificationDate($file->getUid(),$newmtime);
-
                         $file->getMetaData()->add($metaData)->save();
                         $file->getForLocalProcessing(false);
                         $processedFileRepository = GeneralUtility::makeInstance(ProcessedFileRepository::class);
-
                         foreach ($processedFileRepository->findAllByOriginalFile($file) as $processedFile) {
                             $processedFile->delete(true);
                         }
-
                     }
                 }
             } catch (\Exception $e) {

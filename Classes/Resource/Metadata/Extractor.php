@@ -138,7 +138,7 @@ class Extractor implements ExtractorInterface
         );
     }
 
-    protected function fetchDataForFile(File $file): ?array
+    public function fetchDataForFile(File $file): ?array
     {
         $configuration = $file->getStorage()->getConfiguration();
         $this->cantoRepository->initialize($file->getStorage()->getUid(), $configuration);
