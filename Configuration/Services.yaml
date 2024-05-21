@@ -10,6 +10,8 @@ services:
   Fairway\CantoSaasFal\Browser\CantoAssetBrowser:
     shared: false
     public: true
+    tags:
+      - name: recordlist.elementbrowser
 
   Fairway\CantoSaasFal\Hooks\DataHandlerHooks:
     public: true

@@ -153,7 +153,7 @@ class CantoAssetBrowserController
     protected function getCantoRepository(ResourceStorage $storage): CantoRepository
     {
         $cantoRepository = GeneralUtility::makeInstance(CantoRepository::class);
-        $cantoRepository->initialize($storage->getUid(), $storage->getConfiguration());
+        $cantoRepository->initialize((string)$storage->getUid(), $storage->getConfiguration());
         return $cantoRepository;
     }
 
