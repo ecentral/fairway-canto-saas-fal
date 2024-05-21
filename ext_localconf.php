@@ -47,11 +47,21 @@ $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['proc
     = \Fairway\CantoSaasFal\Hooks\DataHandlerHooks::class;
 
 // Override Inline node type to add canto asset button.
-$GLOBALS['TYPO3_CONF_VARS']['SYS']['formEngine']['nodeRegistry'][1628070217] = [
-    'nodeName' => 'inline',
-    'priority' => 100,
-    'class' => \Fairway\CantoSaasFal\Form\Container\InlineControlContainer::class,
-];
+if (\TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\TYPO3\CMS\Core\Information\Typo3Version::class)->getMajorVersion() < 12) {
+    $GLOBALS['TYPO3_CONF_VARS']['SYS']['formEngine']['nodeRegistry'][1628070217] = [
+        'nodeName' => 'inline',
+        'priority' => 100,
+        'class' => \Fairway\CantoSaasFal\Form\Container\InlineControlContainer::class,
+    ];/**/
+} else {
+    $GLOBALS['TYPO3_CONF_VARS']['SYS']['formEngine']['nodeRegistry'][1628070217] = [
+        'nodeName' => \TYPO3\CMS\Backend\Form\Container\FilesControlContainer::NODE_TYPE_IDENTIFIER,
+        'priority' => 100,
+        'class' => \Fairway\CantoSaasFal\Form\Container\FileControlContainer::class,
+    ];
+}
+
+
 
 $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['ElementBrowsers']['canto']
     = \Fairway\CantoSaasFal\Browser\CantoAssetBrowser::class;
