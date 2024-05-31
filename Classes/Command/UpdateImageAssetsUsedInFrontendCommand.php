@@ -104,6 +104,10 @@ EOF
                         }
                     }
                 }
+                elseif($fetchedDataForFile == null)
+                {
+                    //Set deleted images in Canto on deleted in typo3
+                }
             } catch (\Exception $e) {
                 $output->writeln('File ' . $file->getIdentifier() . ' failed: ' . $e->getMessage());
                 continue;

@@ -8,6 +8,7 @@
  */
 
 use TYPO3\CMS\Core\Resource\Index\ExtractorRegistry;
+use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 // Register new fal driver
@@ -25,6 +26,12 @@ $GLOBALS['TYPO3_CONF_VARS']['SYS']['fal']['processors']['CantoPreviewProcessor']
         'SvgImageProcessor'
     ]
 ];
+
+ExtensionManagementUtility::addTypoScript(
+    'canto_saas_fal',
+    'setup',
+    "@import 'EXT:canto_saas_fal/Configuration/TypoScript/setup.typoscript'",
+);
 
 $GLOBALS['TYPO3_CONF_VARS']['SYS']['fal']['processors']['CantoMdcProcessor'] = [
     'className' => \Fairway\CantoSaasFal\Resource\Processing\CantoMdcProcessor::class,
