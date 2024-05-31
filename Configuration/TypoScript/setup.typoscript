@@ -19,3 +19,27 @@ canto_saas_fal {
   10.pluginName = metadataWebhook
   10.vendorName = Fairway
 }
+module.canto_asset_browser{
+  view{
+    templateRootPaths{
+      100 = EXT:canto_saas_fal/Resources/Private/Templates/CantoAssetBrowser/
+    }
+  }
+}
+
+module.canto_saas_fal{
+  view{
+    templateRootPaths{
+      100 = EXT:canto_saas_fal/Resources/Private/Templates/CantoAssetBrowser/
+    }
+  }
+}
+
+
+module.canto_saas_fal_browser{
+  view{
+    templateRootPaths{
+      100 = EXT:canto_saas_fal/Resources/Private/Templates/CantoAssetBrowser/
+    }
+  }
+}

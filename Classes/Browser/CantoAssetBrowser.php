@@ -11,20 +11,21 @@ declare(strict_types=1);
 
 namespace Fairway\CantoSaasFal\Browser;
 
+use Fairway\CantoSaasFal\Resource\CantoClientFactory;
 use Fairway\CantoSaasFal\Resource\Driver\CantoDriver;
 use Fairway\CantoSaasFal\Resource\NoCantoStorageException;
 use TYPO3\CMS\Core\Resource\ResourceStorage;
 use TYPO3\CMS\Core\Resource\StorageRepository;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Information\Typo3Version;
-use TYPO3\CMS\Recordlist\Browser\AbstractElementBrowser;
-use TYPO3\CMS\Recordlist\Browser\ElementBrowserInterface;
-use TYPO3\CMS\Recordlist\Tree\View\LinkParameterProviderInterface;
+use TYPO3\CMS\Backend\ElementBrowser\AbstractElementBrowser;
+use TYPO3\CMS\Backend\ElementBrowser\ElementBrowserInterface;
+use TYPO3\CMS\Backend\Tree\View\LinkParameterProviderInterface;
 use TYPO3\CMS\Core\View\FluidViewAdapter;
 use TYPO3\CMS\Backend\Template\ModuleTemplate;
+use TYPO3\CMS\Backend\View\BackendTemplateView;
 
-
-class CantoAssetBrowser extends AbstractElementBrowser implements ElementBrowserInterface, LinkParameterProviderInterface
+final class CantoAssetBrowser extends AbstractElementBrowser implements ElementBrowserInterface, LinkParameterProviderInterface
 {
     protected ResourceStorage $storage;
 
@@ -40,6 +41,8 @@ class CantoAssetBrowser extends AbstractElementBrowser implements ElementBrowser
         if ((new Typo3Version())->getMajorVersion() < 12) {
             $this->initializeView();
         }
+
+
         $this->initializeStorage();
         if ((new Typo3Version())->getMajorVersion() >= 12) {
             $this->pageRenderer->loadJavaScriptModule('@fairway/canto-saas-fal/BrowseCantoAssets.js');
@@ -65,7 +68,7 @@ class CantoAssetBrowser extends AbstractElementBrowser implements ElementBrowser
 
     public function render(): string
     {
-        if ((new Typo3Version())->getMajorVersion() >= 12) {
+        if ((new Typo3Version())->getMajorVersion() < 12) {
             $this->setBodyTagParameters();
             $this->moduleTemplate->setTitle(
                 $this->getLanguageService()->sL(
@@ -80,19 +83,38 @@ class CantoAssetBrowser extends AbstractElementBrowser implements ElementBrowser
         }
         else
         {
-            $templateView = $this->view;
+            $templateView = GeneralUtility::makeInstance(StandaloneView::class);
             // Make sure that the base initialization creates an FluidView within an FluidViewAdapter
-            $templateView = (fn($templateView): FluidViewAdapter => $templateView) ($templateView);
+            //$templateView = (fn($templateView): FluidViewAdapter => $templateView) ($templateView);
 
 
             $contentOnly = (bool)($this->getRequest()->getQueryParams()['contentOnly'] ?? false);
             $this->pageRenderer->setTitle($this->getLanguageService()->sL('LLL:EXT:canto_saas_fal/Resources/Private/Language/locallang_be.xlf:canto_asset_browser.title'));
+
+            $domain = $this->getAssetPickerDomain();
+
+
+            /** @var CantoClientFactory $cantoClientFactory */
+            $cantoClientFactory = GeneralUtility::makeInstance(CantoClientFactory::class);
+            $client = $cantoClientFactory->createClientFromDriverConfiguration($this->storage->getConfiguration());
+
+
+            //$client = Client::createWithDomain($this->storage->getConfiguration()['cantoDomain'])
+            //    ->authenticate($this->storage->getConfiguration()['userName'], $this->storage->getConfiguration()['userPassword']);
 
             $templateView->assignMultiple([
                 'storage' => $this->storage,
                 'assetPickerDomain' => $domain,
                 'token' => $client->getAccessToken(),
             ]);
+
+            $content = $this->view->render('Search');
+            if ($contentOnly) {
+                return $content;
+            }
+
+            $this->pageRenderer->setBodyContent('<body ' . $this->getBodyTagParameters() . '>' . $content);
+            return $this->pageRenderer->render();
 
         }
     }
@@ -164,4 +186,15 @@ class CantoAssetBrowser extends AbstractElementBrowser implements ElementBrowser
     {
         return GeneralUtility::makeInstance(StorageRepository::class);
     }
+
+
+    public function getAssetPickerDomain(): string
+    {
+        $domain = $this->storage->getConfiguration()['cantoDomain'] ?? '';
+        if (!is_string($domain) || $domain === '') {
+            throw new \Exception('Pixelboxx-Domain does not seem to be configured for %d', $this->storage->getUid());
+        }
+        return $domain;
+    }
+
 }
