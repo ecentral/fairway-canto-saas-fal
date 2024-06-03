@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 /*
- * This file is part of the "pixelboxx_saas_fal" Extension for TYPO3 CMS.
+ * This file is part of the "canto_saas_fal" Extension for TYPO3 CMS.
  *
  * For the full copyright and license information, please read the
  * LICENSE file that was distributed with this source code.
@@ -28,11 +28,9 @@ final class FileControlContainer extends FilesControlContainerCore
         $storageIds = [8];//$service->getAssetPickerStorageIds();
 
         foreach ($storageIds as $storageId) {
-
             if ($storageId > 0) {
                 $newbuttonData = $this->renderPixelboxxAssetPickerButton($inlineConfiguration, $storageId, count($storageIds) > 1);
                 $rval[count($rval)] = $newbuttonData;
-
             }
         }
         return $rval;
@@ -69,5 +67,4 @@ $icon $title
 </button>
 HTML;
     }
-
 }

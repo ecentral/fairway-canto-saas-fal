@@ -13,26 +13,23 @@ namespace Fairway\CantoSaasFal\Command;
 
 use Fairway\CantoSaasFal\Domain\Repository\FileReferenceRepository;
 use Fairway\CantoSaasFal\Resource\Driver\CantoDriver;
-use TYPO3\CMS\Core\Cache\CacheManager;
 use Fairway\CantoSaasFal\Resource\Metadata\Extractor;
 use Fairway\CantoSaasFal\Utility\CantoUtility;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use TYPO3\CMS\Core\Cache\CacheManager;
 use TYPO3\CMS\Core\Cache\Frontend\FrontendInterface;
 use TYPO3\CMS\Core\Resource\File;
 use TYPO3\CMS\Core\Resource\FileRepository;
 use TYPO3\CMS\Core\Resource\ProcessedFileRepository;
 use TYPO3\CMS\Core\Resource\StorageRepository;
-use TYPO3\CMS\Core\SysLog\Action\Cache;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Extbase\Persistence\Generic\PersistenceManager;
 
 final class UpdateImageAssetsUsedInFrontendCommand extends Command
 {
     private Extractor $metadataExtractor;
     private StorageRepository $storageRepository;
-
     protected FrontendInterface $cantoFileCache;
     public function __construct(Extractor $metadataExtractor, StorageRepository $storageRepository)
     {
@@ -61,7 +58,6 @@ EOF
         $fileReferenceRepositry = GeneralUtility::makeInstance(FileReferenceRepository::class);
         $cacheManager = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(CacheManager::class);
         $cantoFileRepository = GeneralUtility::makeInstance(\Fairway\CantoSaasFal\Domain\Repository\FileRepository::class);
-
 
         assert($fileRepository instanceof FileRepository);
 
@@ -92,10 +88,10 @@ EOF
 
                 $metaData = $this->metadataExtractor->extractMetaData($file);
                 $fetchedDataForFile = $this->metadataExtractor->fetchDataForFile($file);
-                if(isset($fetchedDataForFile['default'])) {
+                if (isset($fetchedDataForFile['default'])) {
                     $newmtime = CantoUtility::buildTimestampFromCantoDate($fetchedDataForFile['default']['Date modified']);
                     if ($fetchedDataForFile && $newmtime > $file->getModificationTime()) {
-                        $cantoFileRepository->updateModificationDate($file->getUid(),$newmtime);
+                        $cantoFileRepository->updateModificationDate($file->getUid(), $newmtime);
                         $file->getMetaData()->add($metaData)->save();
                         $file->getForLocalProcessing(false);
                         $processedFileRepository = GeneralUtility::makeInstance(ProcessedFileRepository::class);
@@ -103,9 +99,7 @@ EOF
                             $processedFile->delete(true);
                         }
                     }
-                }
-                elseif($fetchedDataForFile == null)
-                {
+                } elseif ($fetchedDataForFile == null) {
                     //Set deleted images in Canto on deleted in typo3
                 }
             } catch (\Exception $e) {
@@ -119,7 +113,7 @@ EOF
             }
         }
         //Clear frontend cache
-        $cache = $cacheManager->getCache("pages");
+        $cache = $cacheManager->getCache('pages');
         // Cache leeren
         if ($cache !== null) {
             $cache->flush();

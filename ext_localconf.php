@@ -68,8 +68,6 @@ if (\TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\TYPO3\CMS\Core\Informa
     ];
 }
 
-
-
 $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['ElementBrowsers']['canto']
     = \Fairway\CantoSaasFal\Browser\CantoAssetBrowser::class;
 

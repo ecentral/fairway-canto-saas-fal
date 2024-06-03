@@ -11,8 +11,8 @@ declare(strict_types=1);
 
 namespace Fairway\CantoSaasFal\Resource\EventListener;
 
-use Fairway\CantoSaasFal\Resource\Metadata\Extractor;
 use Fairway\CantoSaasFal\Resource\Driver\CantoDriver;
+use Fairway\CantoSaasFal\Resource\Metadata\Extractor;
 use Fairway\CantoSaasFal\Resource\Metadata\MetadataRepository;
 use TYPO3\CMS\Core\Category\Collection\CategoryCollection;
 use TYPO3\CMS\Core\Resource\Event\AfterFileMetaDataCreatedEvent;

@@ -1,0 +1,3 @@
+#For cantoassetbrowser "Templates/CantoAssetBrowser/Search.html" template,
+#override typo3 base assets templates with custom timestamp as index
+templates.typo3/cms-backend.1644483408 = fairway/canto-saas-fal:Resources/Private
