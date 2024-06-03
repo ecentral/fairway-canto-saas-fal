@@ -33,9 +33,7 @@ use TYPO3\CMS\Core\EventDispatcher\EventDispatcher;
 use TYPO3\CMS\Core\Http\ApplicationType;
 use TYPO3\CMS\Core\Registry;
 use TYPO3\CMS\Core\Resource\Exception\FolderDoesNotExistException;
-use TYPO3\CMS\Core\Resource\StorageRepository;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use function Symfony\Component\Clock\now;
 
 class CantoRepository
 {
@@ -208,7 +206,7 @@ class CantoRepository
         $useMdc = CantoUtility::isMdcActivated($this->driverConfiguration);
         $fileData = $this->getFileDetails($scheme, $identifier);
 
-        if($fileData == null) {
+        if ($fileData == null) {
             $extensionPath = \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::extPath('canto_saas_fal');
 
             // Relativer Pfad zum Bild innerhalb der Extension
