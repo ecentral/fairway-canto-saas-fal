@@ -28,6 +28,7 @@ use Fairway\CantoSaasFal\Resource\Driver\CantoDriver;
 use Fairway\CantoSaasFal\Resource\Event\BeforeLocalFileProcessingEvent;
 use Fairway\CantoSaasFal\Utility\CantoUtility;
 use TYPO3\CMS\Core\Cache\Frontend\FrontendInterface;
+use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\EventDispatcher\EventDispatcher;
 use TYPO3\CMS\Core\Http\ApplicationType;
 use TYPO3\CMS\Core\Registry;
@@ -169,6 +170,7 @@ class CantoRepository
     {
         $combinedIdentifier = CantoUtility::buildCombinedIdentifier($scheme, $fileIdentifier);
         $cacheIdentifier = $this->buildValidCacheIdentifier($combinedIdentifier);
+
         if ($this->cantoFileCache->has($cacheIdentifier)) {
             return $this->cantoFileCache->get($cacheIdentifier);
         }
@@ -203,7 +205,20 @@ class CantoRepository
         $identifier = CantoUtility::getIdFromCombinedIdentifier($fileIdentifier);
         $useMdc = CantoUtility::isMdcActivated($this->driverConfiguration);
         $fileData = $this->getFileDetails($scheme, $identifier);
-        if (ApplicationType::fromRequest($GLOBALS['TYPO3_REQUEST'])->isFrontend()) {
+
+        if ($fileData == null) {
+            $extensionPath = \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::extPath('canto_saas_fal');
+
+            // Relativer Pfad zum Bild innerhalb der Extension
+            $imagePath = 'Resources/Public/Images/fallback.png';
+
+            // Vollständiger Pfad zum Bild
+            $fullImagePath = $extensionPath . $imagePath;
+
+            CantoDriver::$transientCachedFiles[] = $fullImagePath;
+            return $fullImagePath;
+        }
+        if (Environment::isCli() || ApplicationType::fromRequest($GLOBALS['TYPO3_REQUEST'])->isFrontend()) {
             $preview = false;
         }
         $event = new BeforeLocalFileProcessingEvent($fileData, $scheme, $preview);
