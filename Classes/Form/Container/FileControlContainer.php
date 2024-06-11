@@ -13,6 +13,8 @@ namespace Fairway\CantoSaasFal\Form\Container;
 
 use TYPO3\CMS\Backend\Form\Container\FilesControlContainer as FilesControlContainerCore;
 use TYPO3\CMS\Core\Resource\Filter\FileExtensionFilter;
+use TYPO3\CMS\Core\Resource\StorageRepository;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 final class FileControlContainer extends FilesControlContainerCore
 {
@@ -23,14 +25,16 @@ final class FileControlContainer extends FilesControlContainerCore
     {
         $rval = parent::getFileSelectors($inlineConfiguration, $fileExtensionFilter);
 
-        /** @var  DomainConfigurationService $service */
-        //$service = GeneralUtility::makeInstance(DomainConfigurationServiceFactory::class)();
-        $storageIds = [8];//$service->getAssetPickerStorageIds();
+        /** @var  StorageRepository $service */
+        $storageReporitory = GeneralUtility::makeInstance(StorageRepository::class);
+        $storages = $storageReporitory->findAll();
 
-        foreach ($storageIds as $storageId) {
-            if ($storageId > 0) {
-                $newbuttonData = $this->renderPixelboxxAssetPickerButton($inlineConfiguration, $storageId, count($storageIds) > 1);
-                $rval[count($rval)] = $newbuttonData;
+        foreach ($storages as $storage) {
+            if($storage->getDriverType() == 'Canto') {
+                if ($storage->getUid() > 0) {
+                    $newbuttonData = $this->renderAssetPickerButton($inlineConfiguration, $storage->getUid(), $storage->getName());
+                    $rval[count($rval)] = $newbuttonData;
+                }
             }
         }
         return $rval;
@@ -41,7 +45,7 @@ final class FileControlContainer extends FilesControlContainerCore
      * @param int $storageId
      * @return string
      */
-    private function renderPixelboxxAssetPickerButton(array $inlineConfiguration, int $storageId, bool $renderStorageId = false): string
+    private function renderAssetPickerButton(array $inlineConfiguration, int $storageId, string $storageName): string
     {
         $buttonStyle = '';
         if (isset($inlineConfiguration['inline']['inlineNewRelationButtonStyle'])) {
@@ -49,16 +53,18 @@ final class FileControlContainer extends FilesControlContainerCore
         }
 
         $foreign_table = $inlineConfiguration['foreign_table'];
-        $allowed = $inlineConfiguration['allowed'];
+        $allowed = '';
+        if(isset($inlineConfiguration['allowed'])) {
+            $allowed = $inlineConfiguration['allowed'];
+        }
         $currentStructureDomObjectIdPrefix = $this->inlineStackProcessor->getCurrentStructureDomObjectIdPrefix(
             $this->data['inlineFirstPid']
         );
         $objectPrefix = $currentStructureDomObjectIdPrefix . '-' . $foreign_table;
 
-        $title = 'Add Pixelboxx file';
-        if ($renderStorageId) { // multiple storage configurations present, result in rendering ids behind buttton
-            $title .= ' [' . $storageId . ']';
-        }
+        $title = 'Add file';
+        $title .= ' [' . $storageName . ']';
+
         $browserParams = '|||' . $allowed . '|' . $objectPrefix . '|' . $storageId;
         $icon = '';
         return <<<HTML
