@@ -14,6 +14,7 @@ or `permissions.file.storage.[storageUID].cantoAssetPicker = 1`.
 
 ### Update
 
+1.0.7.2 - Fixed the problem of missing height and width after attaching to a content element without calling the file tree in the side menu
 1.0.7.1 - Fix wrong storageUid handling and warnings
 1.0.7.0 - Implementation of a new file browser for the V12
 1.0.6.73 - A check for the modified timestamp has been added. Only processed images modified in Canto are now deleted

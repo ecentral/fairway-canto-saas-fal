@@ -74,9 +74,7 @@ final class CantoAssetBrowser extends AbstractElementBrowser implements ElementB
                 'storage' => $this->storage,
             ]);
             return $this->moduleTemplate->renderContent();
-        }
-        else
-        {
+        } else {
             $templateView = $this->view;
             // Make sure that the base initialization creates an FluidView within an FluidViewAdapter
             $templateView = (fn($templateView): FluidViewAdapter => $templateView) ($templateView);
