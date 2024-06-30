@@ -361,7 +361,7 @@ class CantoDriver extends AbstractDriver implements StreamableDriverInterface
             $scheme,
             $explicitFileIdentifier
         );
-        if($result == null) {
+        if ($result == null) {
             $data = [
                 'size' => 1000,
                 'atime' => time(),
@@ -395,6 +395,8 @@ class CantoDriver extends AbstractDriver implements StreamableDriverInterface
             'storage' => $this->storageUid,
             'folder_hash' => '',
             'folder_identifiers' => $folders,
+            'width' =>$result['height'],
+            'height' =>$result['width']
         ];
         if (!$propertiesToExtract) {
             return $data;
