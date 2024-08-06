@@ -138,4 +138,3 @@ $signalSlotDispatcher->connect(
  * Ignored in V12 service.yaml
 */
 $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['ElementBrowsers']['canto'] = \Fairway\CantoSaasFal\Browser\CantoAssetBrowserV11AndV10::class;
-

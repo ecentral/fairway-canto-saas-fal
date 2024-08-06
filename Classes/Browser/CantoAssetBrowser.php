@@ -57,7 +57,7 @@ final class CantoAssetBrowser extends AbstractElementBrowser implements ElementB
     {
         $templateView = $this->view;
         // Make sure that the base initialization creates an FluidView within an FluidViewAdapter
-        $templateView = (fn($templateView): FluidViewAdapter => $templateView) ($templateView);
+        $templateView = (fn ($templateView): FluidViewAdapter => $templateView)($templateView);
 
         $contentOnly = (bool)($this->getRequest()->getQueryParams()['contentOnly'] ?? false);
         $this->pageRenderer->setTitle($this->getLanguageService()->sL('LLL:EXT:canto_saas_fal/Resources/Private/Language/locallang_be.xlf:canto_asset_browser.title'));
