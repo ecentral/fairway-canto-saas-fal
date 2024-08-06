@@ -13,6 +13,12 @@ services:
     tags:
       - name: recordlist.elementbrowser
 
+  Fairway\CantoSaasFal\Browser\CantoAssetBrowserV11AndV10:
+    shared: false
+    public: true
+    tags:
+      - name: recordlist.elementbrowser
+
   Fairway\CantoSaasFal\Hooks\DataHandlerHooks:
     public: true
     arguments:
