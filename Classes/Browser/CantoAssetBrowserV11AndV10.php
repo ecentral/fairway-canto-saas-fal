@@ -13,19 +13,18 @@ namespace Fairway\CantoSaasFal\Browser;
 
 use Fairway\CantoSaasFal\Resource\Driver\CantoDriver;
 use Fairway\CantoSaasFal\Resource\NoCantoStorageException;
-use TYPO3\CMS\Recordlist\Browser\AbstractElementBrowser;
-use TYPO3\CMS\Recordlist\Browser\ElementBrowserInterface;
-use TYPO3\CMS\Recordlist\Tree\View\LinkParameterProviderInterface;
 use TYPO3\CMS\Core\Resource\ResourceStorage;
 use TYPO3\CMS\Core\Resource\StorageRepository;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Core\View\FluidViewAdapter;
+use TYPO3\CMS\Recordlist\Browser\AbstractElementBrowser;
+use TYPO3\CMS\Recordlist\Browser\ElementBrowserInterface;
+use TYPO3\CMS\Recordlist\Tree\View\LinkParameterProviderInterface;
 
 final class CantoAssetBrowserV11AndV10 extends AbstractElementBrowser implements ElementBrowserInterface, LinkParameterProviderInterface
 {
     protected ResourceStorage $storage;
 
-    public const IDENTIFIER = 'cantosaas';
+    public const IDENTIFIER = 'cantosaasv11andv12';
     protected string $identifier = self::IDENTIFIER;
 
     /**

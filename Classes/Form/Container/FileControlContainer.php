@@ -28,7 +28,7 @@ final class FileControlContainer extends FilesControlContainerCore
         $storageReporitory = GeneralUtility::makeInstance(StorageRepository::class);
         $storages = $storageReporitory->findAll();
 
-        if($inlineConfiguration['maxitems'] > count($this->data["parameterArray"]["fieldConf"]["children"])) {
+        if ($inlineConfiguration['maxitems'] > count($this->data['parameterArray']['fieldConf']['children'])) {
             foreach ($storages as $storage) {
                 if ($storage->getDriverType() == 'Canto') {
                     if ($storage->getUid() > 0) {
@@ -55,7 +55,7 @@ final class FileControlContainer extends FilesControlContainerCore
 
         $foreign_table = $inlineConfiguration['foreign_table'];
         $allowed = '';
-        if(isset($inlineConfiguration['allowed'])) {
+        if (isset($inlineConfiguration['allowed'])) {
             $allowed = $inlineConfiguration['allowed'];
         }
         $currentStructureDomObjectIdPrefix = $this->inlineStackProcessor->getCurrentStructureDomObjectIdPrefix(
