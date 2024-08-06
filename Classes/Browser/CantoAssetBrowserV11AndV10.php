@@ -11,18 +11,17 @@ declare(strict_types=1);
 
 namespace Fairway\CantoSaasFal\Browser;
 
-use Fairway\CantoSaasFal\Resource\CantoClientFactory;
 use Fairway\CantoSaasFal\Resource\Driver\CantoDriver;
 use Fairway\CantoSaasFal\Resource\NoCantoStorageException;
-use TYPO3\CMS\Backend\ElementBrowser\AbstractElementBrowser;
-use TYPO3\CMS\Backend\ElementBrowser\ElementBrowserInterface;
-use TYPO3\CMS\Backend\Tree\View\LinkParameterProviderInterface;
+use TYPO3\CMS\Recordlist\Browser\AbstractElementBrowser;
+use TYPO3\CMS\Recordlist\Browser\ElementBrowserInterface;
+use TYPO3\CMS\Recordlist\Tree\View\LinkParameterProviderInterface;
 use TYPO3\CMS\Core\Resource\ResourceStorage;
 use TYPO3\CMS\Core\Resource\StorageRepository;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\View\FluidViewAdapter;
 
-final class CantoAssetBrowser extends AbstractElementBrowser implements ElementBrowserInterface, LinkParameterProviderInterface
+final class CantoAssetBrowserV11AndV10 extends AbstractElementBrowser implements ElementBrowserInterface, LinkParameterProviderInterface
 {
     protected ResourceStorage $storage;
 
@@ -35,9 +34,10 @@ final class CantoAssetBrowser extends AbstractElementBrowser implements ElementB
     protected function initialize(): void
     {
         parent::initialize();
+        $this->initializeView();
 
         $this->initializeStorage();
-        $this->pageRenderer->loadJavaScriptModule('@fairway/canto-saas-fal/BrowseCantoAssetsV12.js');
+        $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/CantoSaasFal/BrowseCantoAssets');
 
         $this->pageRenderer->addCssFile(
             'EXT:canto_saas_fal/Resources/Public/Css/CantoAssetBrowser.css'
@@ -55,32 +55,17 @@ final class CantoAssetBrowser extends AbstractElementBrowser implements ElementB
 
     public function render(): string
     {
-        $templateView = $this->view;
-        // Make sure that the base initialization creates an FluidView within an FluidViewAdapter
-        $templateView = (fn($templateView): FluidViewAdapter => $templateView) ($templateView);
-
-        $contentOnly = (bool)($this->getRequest()->getQueryParams()['contentOnly'] ?? false);
-        $this->pageRenderer->setTitle($this->getLanguageService()->sL('LLL:EXT:canto_saas_fal/Resources/Private/Language/locallang_be.xlf:canto_asset_browser.title'));
-
-        $domain = $this->getAssetPickerDomain();
-
-        /** @var CantoClientFactory $cantoClientFactory */
-        $cantoClientFactory = GeneralUtility::makeInstance(CantoClientFactory::class);
-        $client = $cantoClientFactory->createClientFromDriverConfiguration($this->storage->getConfiguration());
-
-        $templateView->assignMultiple([
+        $this->setBodyTagParameters();
+        $this->moduleTemplate->setTitle(
+            $this->getLanguageService()->sL(
+                'LLL:EXT:canto_saas_fal/Resources/Private/Language/locallang_be.xlf:canto_asset_browser.title'
+            )
+        );
+        $this->moduleTemplate->getView()->setTemplate('Search');
+        $this->moduleTemplate->getView()->assignMultiple([
             'storage' => $this->storage,
-            'assetPickerDomain' => $domain,
-            'token' => $client->getAccessToken(),
         ]);
-
-        $content = $this->view->render('CantoAssetBrowser/Search');
-        if ($contentOnly) {
-            return $content;
-        }
-
-        $this->pageRenderer->setBodyContent('<body ' . $this->getBodyTagParameters() . '>' . $content);
-        return $this->pageRenderer->render();
+        return $this->moduleTemplate->renderContent();
     }
 
     /**
