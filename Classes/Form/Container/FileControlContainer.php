@@ -24,16 +24,17 @@ final class FileControlContainer extends FilesControlContainerCore
     protected function getFileSelectors(array $inlineConfiguration, FileExtensionFilter $fileExtensionFilter): array
     {
         $rval = parent::getFileSelectors($inlineConfiguration, $fileExtensionFilter);
-
         /** @var  StorageRepository $service */
         $storageReporitory = GeneralUtility::makeInstance(StorageRepository::class);
         $storages = $storageReporitory->findAll();
 
-        foreach ($storages as $storage) {
-            if($storage->getDriverType() == 'Canto') {
-                if ($storage->getUid() > 0) {
-                    $newbuttonData = $this->renderAssetPickerButton($inlineConfiguration, $storage->getUid(), $storage->getName());
-                    $rval[count($rval)] = $newbuttonData;
+        if ($inlineConfiguration['maxitems'] > count($this->data['parameterArray']['fieldConf']['children'])) {
+            foreach ($storages as $storage) {
+                if ($storage->getDriverType() == 'Canto') {
+                    if ($storage->getUid() > 0) {
+                        $newbuttonData = $this->renderAssetPickerButton($inlineConfiguration, $storage->getUid(), $storage->getName());
+                        $rval[count($rval)] = $newbuttonData;
+                    }
                 }
             }
         }
@@ -54,7 +55,7 @@ final class FileControlContainer extends FilesControlContainerCore
 
         $foreign_table = $inlineConfiguration['foreign_table'];
         $allowed = '';
-        if(isset($inlineConfiguration['allowed'])) {
+        if (isset($inlineConfiguration['allowed'])) {
             $allowed = $inlineConfiguration['allowed'];
         }
         $currentStructureDomObjectIdPrefix = $this->inlineStackProcessor->getCurrentStructureDomObjectIdPrefix(
