@@ -28,6 +28,7 @@ use Fairway\CantoSaasFal\Resource\Driver\CantoDriver;
 use Fairway\CantoSaasFal\Resource\Event\BeforeLocalFileProcessingEvent;
 use Fairway\CantoSaasFal\Utility\CantoUtility;
 use TYPO3\CMS\Core\Cache\Frontend\FrontendInterface;
+use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\EventDispatcher\EventDispatcher;
 use TYPO3\CMS\Core\Http\ApplicationType;
@@ -63,6 +64,8 @@ class CantoRepository
 
     protected EventDispatcher $dispatcher;
 
+    protected ExtensionConfiguration $extensionConfiguration;
+
     public function __construct(
         Registry $registry,
         FrontendInterface $cantoFolderCache,
@@ -73,6 +76,8 @@ class CantoRepository
         $this->cantoFolderCache = $cantoFolderCache;
         $this->cantoFileCache = $cantoFileCache;
         $this->dispatcher = $dispatcher;
+
+        $this->extensionConfiguration = new ExtensionConfiguration();
     }
 
     /**
@@ -266,11 +271,16 @@ class CantoRepository
         }
     }
 
-    public function generateMdcUrl(string $assetId): string
+    public function generateMdcUrl(string $assetId,string $mdcDocumentType): string
     {
         $domain = $this->driverConfiguration['mdcDomainName'];
         $awsAccountId = $this->driverConfiguration['mdcAwsAccountId'];
-        return sprintf('https://%s/rendition/%s/image_%s/', $domain, $awsAccountId, $assetId);
+
+        if($mdcDocumentType == 'image') {
+            return sprintf('https://%s/rendition/%s/image_%s/', $domain, $awsAccountId, $assetId);
+        } else {//document etc...
+            return sprintf('https://%s/asset/%s/document_%s/', $domain, $awsAccountId, $assetId);
+        }
     }
 
     public function getFilesInFolder(

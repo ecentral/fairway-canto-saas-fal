@@ -45,7 +45,8 @@ final class MdcUrlGenerator
     {
         $assetId = CantoUtility::getIdFromCombinedIdentifier($file->getIdentifier());
         $transformedConfiguration = $this->transformConfiguration($file, $configuration);
-        return $this->cantoRepository->generateMdcUrl($assetId) . $this->addOperationToMdcUrl($transformedConfiguration);
+        $mdcDocumentType = $this->getDocumentType($file);
+        return $this->cantoRepository->generateMdcUrl($assetId, $mdcDocumentType) . $this->addOperationToMdcUrl($transformedConfiguration);
     }
 
     /**
@@ -146,5 +147,11 @@ final class MdcUrlGenerator
             $configuration['format'] = strtoupper($configuration['fileExtension']);
         }
         return $configuration;
+    }
+
+    public function getDocumentType(File|string $file): string
+    {
+        [$mdcFileType,$mdcIdentifiere] = explode("<>", is_string($file)?$file:$file->getIdentifier());
+        return $mdcFileType;
     }
 }
