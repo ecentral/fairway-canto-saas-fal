@@ -86,6 +86,7 @@ class CantoUtility
         if (isset($GLOBALS['CANTO_SAAS_FAL']['OVERRIDE_MDC_IS_ENABLED'])) {
             $mdc = $GLOBALS['CANTO_SAAS_FAL']['OVERRIDE_MDC_IS_ENABLED'] ?? false;
         }
+        $mdc = true;//ONLY TEST
         $event = new MdcEnabledCheckEvent($mdc);
         /** @var MdcEnabledCheckEvent $dispatchedEvent */
         $dispatchedEvent = GeneralUtility::makeInstance(EventDispatcher::class)->dispatch($event);
