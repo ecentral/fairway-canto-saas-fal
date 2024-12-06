@@ -41,12 +41,12 @@ final class MdcUrlGenerator
         $this->eventDispatcher = $eventDispatcher;
     }
 
-    public function generateMdcUrl(File $file, array $configuration): string
+    public function generateMdcUrl(File $file, array $configuration, bool $srcForImage = false): string
     {
         $assetId = CantoUtility::getIdFromCombinedIdentifier($file->getIdentifier());
         $transformedConfiguration = $this->transformConfiguration($file, $configuration);
         $mdcDocumentType = $this->getDocumentType($file);
-        return $this->cantoRepository->generateMdcUrl($assetId, $mdcDocumentType) . $this->addOperationToMdcUrl($transformedConfiguration);
+        return $this->cantoRepository->generateMdcUrl($assetId, $mdcDocumentType, $srcForImage) . $this->addOperationToMdcUrl($transformedConfiguration);
     }
 
     /**

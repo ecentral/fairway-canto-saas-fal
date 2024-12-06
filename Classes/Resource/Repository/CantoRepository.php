@@ -271,16 +271,14 @@ class CantoRepository
         }
     }
 
-    public function generateMdcUrl(string $assetId,string $mdcDocumentType): string
+    public function generateMdcUrl(string $assetId, string $mdcDocumentType, bool $srcForImage = false): string
     {
         $domain = $this->driverConfiguration['mdcDomainName'];
         $awsAccountId = $this->driverConfiguration['mdcAwsAccountId'];
-
-        if($mdcDocumentType == 'image') {
+        if (($mdcDocumentType == 'image' && $srcForImage == true) || ($mdcDocumentType != 'image' && $srcForImage == true)) {
             return sprintf('https://%s/rendition/%s/image_%s/', $domain, $awsAccountId, $assetId);
-        } else {//document etc...
-            return sprintf('https://%s/asset/%s/document_%s/', $domain, $awsAccountId, $assetId);
         }
+        return sprintf('https://%s/asset/%s/document_%s/', $domain, $awsAccountId, $assetId);
     }
 
     public function getFilesInFolder(
