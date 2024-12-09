@@ -14,6 +14,7 @@ or `permissions.file.storage.[storageUID].cantoAssetPicker = 1`.
 
 ### Update
 
+1.0.7.4-alpha - Append frontend output for mdc assets url and append handling for different content elements
 1.0.7.3 - Fix ElementAssestBrowser for Typo3 11 and 10 and append a fallback class ElementAssetBrowserV11AndV10 and append maxitems for canto asset browser button
 1.0.7.2 - Fixed the problem of missing height and width after attaching to a content element without calling the file tree in the side menu
 1.0.7.1 - Fix wrong storageUid handling and warnings
