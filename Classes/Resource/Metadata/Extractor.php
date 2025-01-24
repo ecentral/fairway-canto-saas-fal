@@ -86,7 +86,7 @@ class Extractor implements ExtractorInterface
 
         $categories = [];
         $configuration = $file->getStorage()->getConfiguration();
-        if (array_key_exists('categoryMapping', $configuration)) {
+        if (array_key_exists('categoryMapping', $configuration) && $configuration['categoryMapping'] != null) {
             try {
                 $mapping = json_decode($configuration['categoryMapping'], true, 512, JSON_THROW_ON_ERROR);
                 // we currently do not support translating sys_categories
@@ -110,7 +110,7 @@ class Extractor implements ExtractorInterface
 
         $metadata = [];
         $configuration = $file->getStorage()->getConfiguration();
-        if (array_key_exists('metadataMapping', $configuration)) {
+        if (array_key_exists('metadataMapping', $configuration) && $configuration['metadataMapping'] != null) {
             try {
                 $mapping = json_decode($configuration['metadataMapping'], true, 512, JSON_THROW_ON_ERROR);
                 $metadata = $this->applyMappedMetaData($mapping, $fileData);
