@@ -99,8 +99,12 @@ final class MdcUrlGenerator
         if (isset($configuration['size'])) {
             $scaleString = self::BOXED . $configuration['size'];
         }
-        if (!$scaleString && isset($configuration['width']) && isset($configuration['height'])) {
+        if (!$scaleString && isset($configuration['width']) && isset($configuration['height']) && $configuration['width'] > 0) {
             $scaleString = self::SCALED . (int)$configuration['width'] . 'x' . (int)$configuration['height'];
+        }
+        if($scaleString == '' && isset($configuration['maxHeight']) && $configuration['maxHeight'] >= 0 && !isset($configuration['size']))
+        {
+            $scaleString = self::BOXED . $configuration['maxHeight'];
         }
         if (isset($configuration['format'])) {
             $formatString = self::FORMATTED . $configuration['format'];
@@ -126,8 +130,25 @@ final class MdcUrlGenerator
             $configuration['width'] = (int)$configuration['width'];
             return $configuration;
         }
-        $configuration['height'] = $configuration['height'] ?? $configuration['maxHeight'] ?? $imageDimension['height'] ?? 0;
-        $configuration['width'] = $configuration['width'] ?? $configuration['maxWidth'] ?? $imageDimension['width'] ?? 0;
+        if($configuration['maxWidth'] >  $imageDimension['width'])
+        {
+            $configuration['width'] = $configuration['width'] ?? $configuration['maxWidth'] ?? $imageDimension['width'] ?? 0;
+        }
+        else
+        {
+            $configuration['width'] = $configuration['maxWidth'];
+        }
+        if($configuration['maxHeight'] >  $imageDimension['height'])
+        {
+            $configuration['height'] = $configuration['height'] ?? $configuration['maxHeight'] ?? $imageDimension['height'] ?? 0;
+        }
+        else
+        {
+            $configuration['height'] = $configuration['maxHeight'];
+        }
+
+
+
         if (($configuration['crop'] ?? null) instanceof Area) {
             $configuration['height'] = min($configuration['height'], $configuration['crop']->getHeight());
             $configuration['width'] = min($configuration['width'], $configuration['crop']->getWidth());

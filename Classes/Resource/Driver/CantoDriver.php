@@ -384,6 +384,9 @@ class CantoDriver extends AbstractDriver implements StreamableDriverInterface
         foreach ($result['relatedAlbums'] ?? [] as $album) {
             $folders[] = CantoUtility::buildCombinedIdentifier($album['scheme'], $album['id']);
         }
+        $width = (int)$result['width'];
+        $height = (int)$result['height'];
+
         $data = [
             'size' => $result['default']['Size'],
             'atime' => time(),
@@ -396,9 +399,7 @@ class CantoDriver extends AbstractDriver implements StreamableDriverInterface
             'identifier_hash' => $this->hashIdentifier($fileIdentifier),
             'storage' => $this->storageUid,
             'folder_hash' => '',
-            'folder_identifiers' => $folders,
-            'width' =>$result['height'],
-            'height' =>$result['width']
+            'folder_identifiers' => $folders
         ];
         if (!$propertiesToExtract) {
             return $data;
