@@ -275,7 +275,7 @@ class CantoRepository
     {
         $domain = $this->driverConfiguration['mdcDomainName'];
         $awsAccountId = $this->driverConfiguration['mdcAwsAccountId'];
-        if (($mdcDocumentType == 'image' && $srcForImage == true) || ($mdcDocumentType != 'image' && $srcForImage == true)) {
+        if (($mdcDocumentType == 'image' && $srcForImage == true) || ($mdcDocumentType != 'image' && $srcForImage == true) || ($mdcDocumentType == 'image' && $srcForImage == false)) {
             return sprintf('https://%s/rendition/%s/image_%s/', $domain, $awsAccountId, $assetId);
         }
         return sprintf('https://%s/asset/%s/document_%s/', $domain, $awsAccountId, $assetId);
