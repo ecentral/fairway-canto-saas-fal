@@ -29,30 +29,14 @@ php-cs-fixer:
     paths:
       - .composer/cache
 
-phpstan-v10:
-  image: registry.gitlab.com/codemonkey1988/docker-composer-image:2-php7.4
-  stage: test
-  before_script:
-    - mkdir -p .composer/cache
-    - composer require --no-interaction --no-ansi --no-progress --no-install typo3/cms-core:^10.4
-    - composer require --no-interaction --no-ansi --no-progress --no-install typo3/cms-filemetadata:^10.4
-    - composer require --no-interaction --no-ansi --no-progress --no-install typo3/cms-filelist:^10.4
-    - COMPOSER_CACHE_DIR=.composer/cache composer install
-  script:
-    - composer phpstan
-  cache:
-    key: composer-cache
-    paths:
-      - .composer/cache
-
 phpstan-v11:
   image: registry.gitlab.com/codemonkey1988/docker-composer-image:2-php$PHP_VERSION
   stage: test
   before_script:
     - mkdir -p .composer/cache
-    - composer require --no-interaction --no-ansi --no-progress --no-install typo3/cms-core:^11.5
-    - composer require --no-interaction --no-ansi --no-progress --no-install typo3/cms-filemetadata:^11.5
-    - composer require --no-interaction --no-ansi --no-progress --no-install typo3/cms-filelist:^11.5
+    - composer require --no-interaction --no-ansi --no-progress --no-install typo3/cms-core:^12.4
+    - composer require --no-interaction --no-ansi --no-progress --no-install typo3/cms-filemetadata:^12.4
+    - composer require --no-interaction --no-ansi --no-progress --no-install typo3/cms-filelist:^12.4
     - COMPOSER_CACHE_DIR=.composer/cache composer install
   script:
     - composer phpstan
