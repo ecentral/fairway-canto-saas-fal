@@ -14,11 +14,11 @@ lint-php:
     - find . -name \*.php ! -path "./.Build/*" -exec php -d display_errors=stderr -l {} > /dev/null \;
   parallel:
     matrix:
-      - PHP_VERSION: [ '7.4', '8.0' ]
+      - PHP_VERSION: [ '8.1' ]
 
 php-cs-fixer:
   stage: test
-  image: registry.gitlab.com/codemonkey1988/docker-composer-image:2-php7.4
+  image: registry.gitlab.com/codemonkey1988/docker-composer-image:2-php8.1
   before_script:
     - mkdir -p .composer/cache
     - COMPOSER_CACHE_DIR=.composer/cache composer install
@@ -42,7 +42,7 @@ phpstan-v11:
     - composer phpstan
   parallel:
     matrix:
-      - PHP_VERSION: [ '7.4', '8.0' ]
+      - PHP_VERSION: [ '8.1' ]
   cache:
     key: composer-cache
     paths:
