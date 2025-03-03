@@ -11,20 +11,17 @@ declare(strict_types=1);
 
 namespace Fairway\CantoSaasFal\Resource\Metadata;
 
-use Doctrine\DBAL\FetchMode;
 use Fairway\CantoSaasApi\Endpoint\Authorization\AuthorizationFailedException;
 use Fairway\CantoSaasFal\Resource\Driver\CantoDriver;
 use Fairway\CantoSaasFal\Resource\Event\AfterMetaDataExtractionEvent;
-use Fairway\CantoSaasFal\Resource\Metadata\MetadataRepository as CantoMetadataRepository;
 use Fairway\CantoSaasFal\Resource\Repository\CantoRepository;
 use Fairway\CantoSaasFal\Utility\CantoUtility;
 use JsonException;
-use TYPO3\CMS\Core\Database\ConnectionPool;
-use TYPO3\CMS\Core\Database\Query\QueryBuilder;
 use TYPO3\CMS\Core\EventDispatcher\EventDispatcher;
 use TYPO3\CMS\Core\Resource\File;
 use TYPO3\CMS\Core\Resource\Index\ExtractorInterface;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Extbase\Persistence\PersistenceManagerInterface;
 
 class Extractor implements ExtractorInterface
 {
@@ -67,92 +64,104 @@ class Extractor implements ExtractorInterface
      */
     public function extractMetaData(File $file, array $previousExtractedData = []): array
     {
-        $configuration = $file->getStorage()->getConfiguration();
-        $this->cantoRepository->initialize($file->getStorage()->getUid(), $configuration);
         $fileData = $this->fetchDataForFile($file);
         if ($fileData === null) {
             return $previousExtractedData;
         }
-        $metadata = array_replace(
-            $previousExtractedData,
-            [
-                'width' => (int)($fileData['width'] ?? 0),
-                'height' => (int)($fileData['height'] ?? 0),
-                'pages' => (int)($fileData['default']['Pages'] ?? 0),
-                'creator' => $fileData['default']['Author'] ?? '',
-                'creator_tool' => $fileData['default']['Creation Tool'] ?? '',
-                'copyright' => $fileData['default']['Copyright'] ?? '',
-            ]
-        );
-        $mappedMetadata = [];
-        $mapping = [];
-        if (array_key_exists('metadataMapping', $configuration)) {
-            try {
-                $mapping = json_decode($configuration['metadataMapping'], true, 512, JSON_THROW_ON_ERROR);
-                $mappedMetadata = $this->applyMappedMetaData($mapping, [], $fileData);
-            } catch (JsonException $exception) {
-                # todo: add mapping logging
-            }
-        }
 
-        $metadataObjects = [];
-        $metadataRepository = GeneralUtility::makeInstance(CantoMetadataRepository::class);
-        assert($metadataRepository instanceof CantoMetadataRepository);
-        $metadataParentUid = null;
-        $parentMetadataArray = $metadataRepository->findByFileUid($file->getUid());
-        if (isset($parentMetadataArray['uid'])) {
-            $metadataParentUid = $parentMetadataArray['uid'];
-        }
-        foreach ($mappedMetadata as $languageUid => $metadataArray) {
-            $languageUid = (int)$languageUid;
-            $result = $metadataRepository->findByFileUidAndLanguageUid($file->getUid(), $languageUid);
-            $updatedUid = null;
-            if ($result) {
-                $result = array_replace($result, $metadataArray);
-                $metadataRepository->updateByFileUidAndLanguageUid($file->getUid(), $languageUid, $result);
-                $updatedUid = $result['uid'];
-            } elseif (empty($result) && $languageUid === 0 && $metadataParentUid === null) {
-                $metadataParentUid = $metadataRepository->createMetaDataRecord($file->getUid(), $metadataArray)['uid'];
-                $updatedUid = $metadataParentUid;
-            } elseif (empty($result) && $languageUid !== 0 && $metadataParentUid !== null) {
-                $result = $metadataRepository->createMetaDataRecord($file->getUid(), array_merge(
-                    [
-                        'sys_language_uid' => $languageUid,
-                        'l10n_parent' => $metadataParentUid,
-                    ],
-                    $metadataArray
-                ));
-                $updatedUid = $result['uid'];
-            }
-            $metadataObjects[$languageUid] = $updatedUid;
-        }
+        $mappedMetaData = $this->getMappedMetaData($file);
 
-        if (array_key_exists('categoryMapping', $configuration)) {
-            try {
-                $mapping = json_decode($configuration['categoryMapping'], true, 512, JSON_THROW_ON_ERROR);
-                $this->saveMetadataCategories(
-                    $metadataObjects,
-                    $this->applyMappedCategoryData($mapping, $fileData)
-                );
-            } catch (JsonException $exception) {
-                # todo: add mapping logging
-            }
-        }
+        $metadata = array_replace($previousExtractedData, ($mappedMetaData[0] ?? []));
+        $event = new AfterMetaDataExtractionEvent($metadata, $fileData);
 
-        $metadata = array_merge($metadata, $mappedMetadata[0] ?? []);
-        $event = new AfterMetaDataExtractionEvent($metadata, $mapping, $fileData);
         return $this->dispatcher->dispatch($event)->getMetadata();
     }
-
-    protected function fetchDataForFile(File $file): ?array
+    public function getMappedCategories(File $file): array
     {
+        $fileData = $this->fetchDataForFile($file);
+
+        if ($fileData === null) {
+            return [];
+        }
+
+        $categories = [];
+        $configuration = $file->getStorage()->getConfiguration();
+        if (array_key_exists('categoryMapping', $configuration) && $configuration['categoryMapping'] != null) {
+            try {
+                $mapping = json_decode($configuration['categoryMapping'], true, 512, JSON_THROW_ON_ERROR);
+                // we currently do not support translating sys_categories
+                $categoryData = $this->applyMappedMetaData($mapping, [], $fileData)[0] ?? [];
+                $categories = $this->buildCategoryTree($categoryData);
+            } catch (JsonException $exception) {
+                # todo: add mapping logging
+            }
+        }
+
+        return $categories;
+    }
+
+    public function getMappedMetaData(File $file): array
+    {
+        $fileData = $this->fetchDataForFile($file);
+
+        if ($fileData === null) {
+            return [];
+        }
+
+        $metadata = [];
+        $configuration = $file->getStorage()->getConfiguration();
+        if (array_key_exists('metadataMapping', $configuration) && $configuration['metadataMapping'] != null) {
+            try {
+                $mapping = json_decode($configuration['metadataMapping'], true, 512, JSON_THROW_ON_ERROR);
+                $metadata = $this->applyMappedMetaData($mapping, $fileData);
+            } catch (JsonException $exception) {
+                # todo: add mapping logging
+            }
+            //$metadataObjects[] = $metadata['uid'];
+        }
+
+        $array_filedata = [
+            'width' => (int)($fileData['width'] ?? 0),
+            'height' => (int)($fileData['height'] ?? 0),
+            'creator' => $fileData['default']['Author'],
+            'copyright' => $fileData['default']['Copyright'],
+        ];
+        if (isset($fileData['default']['Creation Tool'])) {
+            $array_filedata['creator_tool'] = $fileData['default']['Creation Tool'];
+        }
+        if (isset($fileData['default']['Pages'])) {
+            $array_filedata['pages'] = $fileData['default']['Pages'];
+        }
+        //Refresh sizes after append(for first add a new canto image, before call main filetree in site menu)
+        $file->updateProperties($array_filedata);
+        $persistenceManager = GeneralUtility::makeInstance(PersistenceManagerInterface::class);
+        $metaData = $file->getMetaData();
+        $metaData->add($array_filedata);
+        $metaData->save();
+        $persistenceManager->persistAll();
+
+        return array_replace(
+            [
+                $array_filedata
+            ],
+            $metadata
+        );
+    }
+
+    public function fetchDataForFile(File $file): ?array
+    {
+        $configuration = $file->getStorage()->getConfiguration();
+        $this->cantoRepository->initialize($file->getStorage()->getUid(), $configuration);
+
         $scheme = CantoUtility::getSchemeFromCombinedIdentifier($file->getIdentifier());
         $identifier = CantoUtility::getIdFromCombinedIdentifier($file->getIdentifier());
         return $this->cantoRepository->getFileDetails($scheme, $identifier);
     }
 
-    private function applyMappedMetaData(array $mapping, array $metadata, array $fileData): array
+    private function applyMappedMetaData(array $mapping, array $fileData): array
     {
+        $metadata = [];
+
         foreach ($mapping as $metadataKey => $fileDataKey) {
             if (is_string($fileDataKey)) {
                 $fileDataKey = [0 => $fileDataKey];
@@ -231,79 +240,46 @@ class Extractor implements ExtractorInterface
     }
 
     /**
-     * @param array<string|int> $metadataUids
-     * @param int[] $categoryUids
+     * @param array $mappedCategoryConfiguration
+     * @param Category|null $parent
+     * @param CategoryRepository|null $categoryRepository
+     * @return Category[]
      */
-    private function saveMetadataCategories(array $metadataUids, array $categoryUids): void
+    private function buildCategoryTree(array $mappedCategoryConfiguration, Category $parent = null, CategoryRepository $categoryRepository = null): array
     {
-        foreach ($metadataUids as $languageUid => $metadataUid) {
-            $qb = $this->getQueryBuilder('sys_category_record_mm');
-            $result = $qb->select('uid_local', 'uid_foreign')
-                ->from('sys_category_record_mm')
-                ->where($qb->expr()->eq('uid_foreign', $metadataUid))
-                ->execute();
-            $data = [];
-            if (method_exists($result, 'fetchAll')) {
-                $data = $result->fetchAll(FetchMode::ASSOCIATIVE);
-            } elseif (method_exists($result, 'fetchAllAssociative')) {
-                $data = $result->fetchAllAssociative();
+        $categoryRepository ??= GeneralUtility::makeInstance(CategoryRepository::class);
+        assert($categoryRepository instanceof CategoryRepository);
+        $categories = [];
+        foreach ($mappedCategoryConfiguration as $title => $children) {
+            $category = $parent;
+            if (is_string($title)) {
+                $category = $this->addCategory($title, $parent, $categoryRepository);
+                $categories[] = $category;
             }
-            $list = array_map(
-                static fn (array $item) => (int)$item['uid_local'],
-                $data
-            );
-            $processedCategoryUids = [];
-            foreach ($categoryUids as $categoryUid) {
-                $categoryUidForMetadata = $categoryUid;
-                if ($languageUid !== 0) {
-                    $sysCategoryQB = $this->getQueryBuilder('sys_category');
-                    $translatedResult = $sysCategoryQB->select('uid')
-                        ->from('sys_category')
-                        ->where($sysCategoryQB->expr()->eq('l10n_parent', $categoryUid))
-                        ->andWhere($sysCategoryQB->expr()->eq('sys_language_uid', $languageUid))
-                        ->execute()
-                    ;
-                    $translatedData = [];
-                    if (method_exists($translatedResult, 'fetchAllAssociative')) {
-                        $translatedData = $translatedResult->fetchAllAssociative();
-                    } elseif (method_exists($translatedResult, 'fetchAll')) {
-                        $translatedData = $translatedResult->fetchAll(FetchMode::ASSOCIATIVE);
-                    }
-                    if (!empty($translatedData)) {
-                        $categoryUidForMetadata = (int)$translatedData[0]['uid'];
-                    }
-                }
-                if ($categoryUidForMetadata === 0) {
-                    continue;
-                }
-                $processedCategoryUids[] = $categoryUidForMetadata;
-                if (in_array($categoryUidForMetadata, $list, true)) {
-                    continue;
-                }
-                $qb
-                    ->insert('sys_category_record_mm')
-                    ->values([
-                        'uid_local' => $categoryUidForMetadata,
-                        'uid_foreign' => $metadataUid,
-                        'tablenames' => 'sys_file_metadata',
-                        'fieldname' => 'categories',
-                        'sorting' => 0,
-                        'sorting_foreign' => 0,
-                    ])
-                    ->execute()
-                ;
+            if (is_array($children) && $category !== null) {
+                $categories = [...$categories, ...$this->buildCategoryTree($children, $category, $categoryRepository)];
             }
-            $diff = array_diff($list, $processedCategoryUids);
-            if (!empty($diff)) {
-                $qb->delete('sys_category_record_mm')
-                    ->where($qb->expr()->eq('uid_foreign', $metadataUid))
-                    ->andWhere($qb->expr()->in('uid_local', $diff))
-                    ->andWhere($qb->expr()->eq('tablenames', $qb->quote('sys_file_metadata')))
-                    ->andWhere($qb->expr()->eq('fieldname', $qb->quote('categories')))
-                    ->execute()
-                ;
+            if (is_string($children)) {
+                $categories[] = $this->addCategory($children, $category, $categoryRepository);
             }
         }
+        return $categories;
+    }
+
+    private function addCategory(string $title, ?Category $parent, CategoryRepository $repository): Category
+    {
+        assert(is_callable([$repository, 'findByTitle']));
+        $category = $repository->findByTitle($title)->toArray()[0] ?? null;
+        if ($category === null) {
+            $category = new Category();
+            $category->setDescription('Canto generated category');
+            $category->setTitle($title);
+            if ($parent) {
+                $category->setParent($parent);
+            }
+            $repository->add($category);
+        }
+        return $category;
     }
 
     private function getQueryBuilder(string $forTable): QueryBuilder

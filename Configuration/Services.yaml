@@ -10,6 +10,14 @@ services:
   Fairway\CantoSaasFal\Browser\CantoAssetBrowser:
     shared: false
     public: true
+    tags:
+      - name: recordlist.elementbrowser
+
+  Fairway\CantoSaasFal\Browser\CantoAssetBrowserV11AndV10:
+    shared: false
+    public: true
+    tags:
+      - name: recordlist.elementbrowser
 
   Fairway\CantoSaasFal\Hooks\DataHandlerHooks:
     public: true
@@ -57,9 +65,18 @@ services:
         command: 'canto:warmupcache'
 
   Fairway\CantoSaasFal\Command\UpdateMetadataAssetsCommand:
+    calls:
+      - injectCantoFileCache: [ '@cache.canto_file' ]
     tags:
       - name: 'console.command'
         command: 'canto:updatemetadataassets'
+
+  Fairway\CantoSaasFal\Command\UpdateImageAssetsUsedInFrontendCommand:
+    calls:
+      - injectCantoFileCache: ['@cache.canto_file']
+    tags:
+      - name: 'console.command'
+        command: 'canto:updateusedmetadataassets'
 
   Fairway\CantoSaasFal\Command\RemoveMdcPrefixForFilesCommand:
     tags:
@@ -127,6 +144,30 @@ services:
       - name: event.listener
         identifier: afterFormEnginePageInitializedEventListener
         event: TYPO3\CMS\Backend\Controller\Event\AfterFormEnginePageInitializedEvent
+
+
+  Fairway\CantoSaasFal\Resource\EventListener\SyncMetaDataCategoriesEventListener:
+    tags:
+      - name: event.listener
+        identifier: 'synchronizeFileMetaDataCategoriesAfterCreation'
+        method: 'afterFileMetaDataCreated'
+        event: TYPO3\CMS\Core\Resource\Event\AfterFileMetaDataCreatedEvent
+      - name: event.listener
+        identifier: 'synchronizeFileMetaDataCategoriesAfterUpdate'
+        method: 'afterFileMetaDataUpdated'
+        event: TYPO3\CMS\Core\Resource\Event\AfterFileMetaDataUpdatedEvent
+
+  Fairway\CantoSaasFal\Resource\EventListener\SyncMetaDataTranslationsEventListener:
+    tags:
+      - name: event.listener
+        identifier: 'synchronizeFileMetaDataTranslationsAfterCreation'
+        method: 'afterFileMetaDataCreated'
+        event: TYPO3\CMS\Core\Resource\Event\AfterFileMetaDataCreatedEvent
+      - name: event.listener
+        identifier: 'synchronizeFileMetaDataTranslationsAfterUpdate'
+        method: 'afterFileMetaDataUpdated'
+        event: TYPO3\CMS\Core\Resource\Event\AfterFileMetaDataUpdatedEvent
+
 
   cache.canto_folder:
     class: TYPO3\CMS\Core\Cache\Frontend\FrontendInterface

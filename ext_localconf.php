@@ -8,6 +8,7 @@
  */
 
 use TYPO3\CMS\Core\Resource\Index\ExtractorRegistry;
+use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 // Register new fal driver
@@ -25,6 +26,12 @@ $GLOBALS['TYPO3_CONF_VARS']['SYS']['fal']['processors']['CantoPreviewProcessor']
         'SvgImageProcessor'
     ]
 ];
+
+ExtensionManagementUtility::addTypoScript(
+    'canto_saas_fal',
+    'setup',
+    "@import 'EXT:canto_saas_fal/Configuration/TypoScript/setup.typoscript'",
+);
 
 $GLOBALS['TYPO3_CONF_VARS']['SYS']['fal']['processors']['CantoMdcProcessor'] = [
     'className' => \Fairway\CantoSaasFal\Resource\Processing\CantoMdcProcessor::class,
@@ -47,11 +54,19 @@ $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['proc
     = \Fairway\CantoSaasFal\Hooks\DataHandlerHooks::class;
 
 // Override Inline node type to add canto asset button.
-$GLOBALS['TYPO3_CONF_VARS']['SYS']['formEngine']['nodeRegistry'][1628070217] = [
-    'nodeName' => 'inline',
-    'priority' => 100,
-    'class' => \Fairway\CantoSaasFal\Form\Container\InlineControlContainer::class,
-];
+if (\TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\TYPO3\CMS\Core\Information\Typo3Version::class)->getMajorVersion() < 12) {
+    $GLOBALS['TYPO3_CONF_VARS']['SYS']['formEngine']['nodeRegistry'][1628070217] = [
+        'nodeName' => 'inline',
+        'priority' => 100,
+        'class' => \Fairway\CantoSaasFal\Form\Container\InlineControlContainer::class,
+    ];/**/
+} else {
+    $GLOBALS['TYPO3_CONF_VARS']['SYS']['formEngine']['nodeRegistry'][1628070217] = [
+        'nodeName' => \TYPO3\CMS\Backend\Form\Container\FilesControlContainer::NODE_TYPE_IDENTIFIER,
+        'priority' => 100,
+        'class' => \Fairway\CantoSaasFal\Form\Container\FileControlContainer::class,
+    ];
+}
 
 $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['ElementBrowsers']['canto']
     = \Fairway\CantoSaasFal\Browser\CantoAssetBrowser::class;
@@ -117,3 +132,9 @@ $signalSlotDispatcher->connect(
     Fairway\CantoSaasFal\Resource\EventListener\AfterFormEnginePageInitializedEventListener::class,
     'updateMetadataInCantoSlot'
 );*/
+
+/*
+ * Only for TYPO3 11+10
+ * Ignored in V12 service.yaml
+*/
+$GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['ElementBrowsers']['canto'] = \Fairway\CantoSaasFal\Browser\CantoAssetBrowserV11AndV10::class;
