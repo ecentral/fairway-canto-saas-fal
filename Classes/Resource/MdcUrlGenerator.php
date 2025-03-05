@@ -102,7 +102,7 @@ final class MdcUrlGenerator
         if (!$scaleString && isset($configuration['width']) && isset($configuration['height']) && $configuration['width'] > 0) {
             $scaleString = self::SCALED . (int)$configuration['width'] . 'x' . (int)$configuration['height'];
         }
-        if($scaleString == '' && isset($configuration['maxHeight']) && $configuration['maxHeight'] >= 0 && !isset($configuration['size']))
+        if($scaleString == '' && isset($configuration['maxHeight']) && $configuration['maxHeight'] > 0 && !isset($configuration['size']))
         {
             $scaleString = self::BOXED . $configuration['maxHeight'];
         }
