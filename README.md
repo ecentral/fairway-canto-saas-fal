@@ -14,6 +14,7 @@ or `permissions.file.storage.[storageUID].cantoAssetPicker = 1`.
 
 ### Update
 
+1.0.7.6.2 - Fix images height greater 0 for frontend
 1.0.7.6.1 - Fix images size greater 0 for frontend
 1.0.7.6 - Fix image dimension in backend and file preview link with wrong asset type link
 1.0.7.5 - Fixing the ‘out of memory’ exception in the extractor for category mapping

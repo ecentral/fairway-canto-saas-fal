@@ -96,11 +96,14 @@ final class MdcUrlGenerator
         $scaleString = '';
         $formatString = '';
         $cropString = '';
-        if (isset($configuration['size'])) {
+        if (isset($configuration['size']) && $configuration['size'] > 0) {
             $scaleString = self::BOXED . $configuration['size'];
         }
         if (!$scaleString && isset($configuration['width']) && isset($configuration['height']) && $configuration['width'] > 0) {
-            $scaleString = self::SCALED . (int)$configuration['width'] . 'x' . (int)$configuration['height'];
+            $scaleString = self::SCALED . (int)$configuration['width'];
+            if($configuration['height'] > 0) {
+                $scaleString.= 'x' . (int)$configuration['height'];
+            }
         }
         if($scaleString == '' && isset($configuration['maxHeight']) && $configuration['maxHeight'] > 0 && !isset($configuration['size']))
         {
