@@ -38,6 +38,7 @@ final class BeforeFileProcessingEventListener
             return;
         }
         $processedFile = $event->getProcessedFile();
+
         $identifier = $processedFile->getOriginalFile()->getIdentifier();
         if (!CantoUtility::isMdcActivated($event->getFile()->getStorage()->getConfiguration())) {
             return;
@@ -46,7 +47,8 @@ final class BeforeFileProcessingEventListener
         if ($event->getTaskType() === ProcessedFile::CONTEXT_IMAGEPREVIEW) {
             $configuration['fileExtension'] = 'jpg';
         }
-        $url = $this->mdcUrlGenerator->generateMdcUrl($processedFile->getOriginalFile(), $configuration);
+
+        $url = $this->mdcUrlGenerator->generateMdcUrl($processedFile->getOriginalFile(), $configuration, true);
         $properties = $processedFile->getProperties() ?? [];
         $properties = array_merge($properties, $this->mdcUrlGenerator->resolveImageWidthHeight(
             $processedFile->getOriginalFile(),

@@ -151,9 +151,10 @@ class CantoDriver extends AbstractDriver implements StreamableDriverInterface
         $scheme = CantoUtility::getSchemeFromCombinedIdentifier($identifier);
         $fileIdentifier = CantoUtility::getIdFromCombinedIdentifier($identifier);
         $useMdc = CantoUtility::isMdcActivated($this->configuration);
+
         $fileData = $this->cantoRepository->getFileDetails($scheme, $fileIdentifier);
         if ($useMdc && $this->mdcUrlGenerator) {
-            $url = $this->cantoRepository->generateMdcUrl($fileIdentifier);
+            $url = $this->cantoRepository->generateMdcUrl($fileIdentifier, $this->mdcUrlGenerator->getDocumentType($identifier), false);
             $url .= $this->mdcUrlGenerator->addOperationToMdcUrl([
                 'width' => (int)$fileData['width'],
                 'height' => (int)$fileData['height'],
@@ -161,6 +162,7 @@ class CantoDriver extends AbstractDriver implements StreamableDriverInterface
             return rawurldecode($url);
         }
         // todo: add FAIRCANTO-72 here
+        // todo: dd
         if (!empty($fileData['url']['directUrlOriginal'])) {
             return rawurldecode($fileData['url']['directUrlOriginal']);
         }
@@ -382,6 +384,9 @@ class CantoDriver extends AbstractDriver implements StreamableDriverInterface
         foreach ($result['relatedAlbums'] ?? [] as $album) {
             $folders[] = CantoUtility::buildCombinedIdentifier($album['scheme'], $album['id']);
         }
+        $width = (int)$result['width'];
+        $height = (int)$result['height'];
+
         $data = [
             'size' => $result['default']['Size'],
             'atime' => time(),
@@ -394,9 +399,7 @@ class CantoDriver extends AbstractDriver implements StreamableDriverInterface
             'identifier_hash' => $this->hashIdentifier($fileIdentifier),
             'storage' => $this->storageUid,
             'folder_hash' => '',
-            'folder_identifiers' => $folders,
-            'width' =>$result['height'],
-            'height' =>$result['width']
+            'folder_identifiers' => $folders
         ];
         if (!$propertiesToExtract) {
             return $data;

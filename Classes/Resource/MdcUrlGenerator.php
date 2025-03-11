@@ -41,11 +41,12 @@ final class MdcUrlGenerator
         $this->eventDispatcher = $eventDispatcher;
     }
 
-    public function generateMdcUrl(File $file, array $configuration): string
+    public function generateMdcUrl(File $file, array $configuration, bool $srcForImage = false): string
     {
         $assetId = CantoUtility::getIdFromCombinedIdentifier($file->getIdentifier());
         $transformedConfiguration = $this->transformConfiguration($file, $configuration);
-        return $this->cantoRepository->generateMdcUrl($assetId) . $this->addOperationToMdcUrl($transformedConfiguration);
+        $mdcDocumentType = $this->getDocumentType($file);
+        return $this->cantoRepository->generateMdcUrl($assetId, $mdcDocumentType, $srcForImage) . $this->addOperationToMdcUrl($transformedConfiguration);
     }
 
     /**
@@ -95,11 +96,18 @@ final class MdcUrlGenerator
         $scaleString = '';
         $formatString = '';
         $cropString = '';
-        if (isset($configuration['size'])) {
+        if (isset($configuration['size']) && $configuration['size'] > 0) {
             $scaleString = self::BOXED . $configuration['size'];
         }
-        if (!$scaleString && isset($configuration['width']) && isset($configuration['height'])) {
-            $scaleString = self::SCALED . (int)$configuration['width'] . 'x' . (int)$configuration['height'];
+        if (!$scaleString && isset($configuration['width']) && isset($configuration['height']) && $configuration['width'] > 0) {
+            $scaleString = self::SCALED . (int)$configuration['width'];
+            if($configuration['height'] > 0) {
+                $scaleString.= 'x' . (int)$configuration['height'];
+            }
+        }
+        if($scaleString == '' && isset($configuration['maxHeight']) && $configuration['maxHeight'] > 0 && !isset($configuration['size']))
+        {
+            $scaleString = self::BOXED . $configuration['maxHeight'];
         }
         if (isset($configuration['format'])) {
             $formatString = self::FORMATTED . $configuration['format'];
@@ -125,8 +133,25 @@ final class MdcUrlGenerator
             $configuration['width'] = (int)$configuration['width'];
             return $configuration;
         }
-        $configuration['height'] = $configuration['height'] ?? $configuration['maxHeight'] ?? $imageDimension['height'] ?? 0;
-        $configuration['width'] = $configuration['width'] ?? $configuration['maxWidth'] ?? $imageDimension['width'] ?? 0;
+        if($configuration['maxWidth'] >  $imageDimension['width'])
+        {
+            $configuration['width'] = $configuration['width'] ?? $configuration['maxWidth'] ?? $imageDimension['width'] ?? 0;
+        }
+        else
+        {
+            $configuration['width'] = $configuration['maxWidth'];
+        }
+        if($configuration['maxHeight'] >  $imageDimension['height'])
+        {
+            $configuration['height'] = $configuration['height'] ?? $configuration['maxHeight'] ?? $imageDimension['height'] ?? 0;
+        }
+        else
+        {
+            $configuration['height'] = $configuration['maxHeight'];
+        }
+
+
+
         if (($configuration['crop'] ?? null) instanceof Area) {
             $configuration['height'] = min($configuration['height'], $configuration['crop']->getHeight());
             $configuration['width'] = min($configuration['width'], $configuration['crop']->getWidth());
@@ -146,5 +171,11 @@ final class MdcUrlGenerator
             $configuration['format'] = strtoupper($configuration['fileExtension']);
         }
         return $configuration;
+    }
+
+    public function getDocumentType(File|string $file): string
+    {
+        [$mdcFileType,$mdcIdentifiere] = explode("<>", is_string($file)?$file:$file->getIdentifier());
+        return $mdcFileType;
     }
 }

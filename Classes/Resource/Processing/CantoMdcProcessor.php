@@ -51,7 +51,7 @@ final class CantoMdcProcessor implements ProcessorInterface
             $task->getSourceFile()->getStorage()->getConfiguration()
         );
         $fullFileIdentifier = $task->getTargetFile()->getIdentifier();
-        $url = $this->mdcUrlGenerator->generateMdcUrl($task->getSourceFile(), $task->getConfiguration());
+        $url = $this->mdcUrlGenerator->generateMdcUrl($task->getSourceFile(), $task->getConfiguration(), true);
         $task->getTargetFile()->setName($task->getTargetFileName());
         $task->getTargetFile()->updateProcessingUrl($url);
         $task->getTargetFile()->setIdentifier(CantoUtility::identifierToProcessedIdentifier($fullFileIdentifier));
