@@ -2,83 +2,131 @@
       xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers"
       xmlns:be="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers">
 
+
 <div class="element-browser-panel element-browser-main">
     <div class="element-browser-main-content">
-        <div class="canto-search-form-container">
-            <div class="container">
-                <div class="row">
-                    <div class="col-md-8 col-md-offset-2">
-                        <form action="#" method="POST" name="canto-asset-search-form" class="canto-asset-search-form">
-                            <div class="form-group">
-                                Search in:
-                                <label class="canto-radio-label">
-                                    <input type="radio" name="type" value="identifier" data-canto-search="type" />
-                                    {f:translate(id: 'LLL:EXT:canto_saas_fal/Resources/Private/Language/locallang_be.xlf:canto_asset_browser.searchForm.searchInField.identifier')}
-                                </label>
-                                <label class="canto-radio-label">
-                                    <input type="radio" name="type" value="tags" data-canto-search="type" />
-                                    {f:translate(id: 'LLL:EXT:canto_saas_fal/Resources/Private/Language/locallang_be.xlf:canto_asset_browser.searchForm.searchInField.tags')}
-                                </label>
-                                <label class="canto-radio-label">
-                                    <input type="radio" name="type" value="categories" data-canto-search="type" />
-                                    {f:translate(id: 'LLL:EXT:canto_saas_fal/Resources/Private/Language/locallang_be.xlf:canto_asset_browser.searchForm.searchInField.categories')}
-                                </label>
+        <div class="canto-container">
+            <div class="canto-sidebar">
+                <div class="canto-folder-tree">
+                    <h3>Canto Library</h3>
+                    <f:render partial="FolderTreeChildren" arguments="{tree: tree}" />
+                </div>
+            </div>
+
+            <div class="canto-main">
+                <div class="canto-search-form-container">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-md-8 col-md-offset-2">
+                                <form action="#" method="POST" name="canto-asset-search-form" class="canto-asset-search-form">
+                                    <div class="form-group">
+                                        Search in:
+                                        <label class="canto-radio-label">
+                                            <input type="radio" name="type" value="identifier" data-canto-search="type" />
+                                            {f:translate(id: 'LLL:EXT:canto_saas_fal/Resources/Private/Language/locallang_be.xlf:canto_asset_browser.searchForm.searchInField.identifier')}
+                                        </label>
+                                        <label class="canto-radio-label">
+                                            <input type="radio" name="type" value="tags" data-canto-search="type" />
+                                            {f:translate(id: 'LLL:EXT:canto_saas_fal/Resources/Private/Language/locallang_be.xlf:canto_asset_browser.searchForm.searchInField.tags')}
+                                        </label>
+                                        <label class="canto-radio-label">
+                                            <input type="radio" name="type" value="categories" data-canto-search="type" />
+                                            {f:translate(id: 'LLL:EXT:canto_saas_fal/Resources/Private/Language/locallang_be.xlf:canto_asset_browser.searchForm.searchInField.categories')}
+                                        </label>
+                                    </div>
+                                    <div class="form-group hidden" data-canto-show-by-types="tags,categories">
+                                        <input class="canto-input-search-query"
+                                               type="text"
+                                               name="query"
+                                               data-canto-search="query"
+                                               maxlength="100"
+                                               placeholder="{f:translate(id: 'LLL:EXT:canto_saas_fal/Resources/Private/Language/locallang_be.xlf:canto_asset_browser.searchForm.query.placeholder')}"
+                                        />
+                                    </div>
+                                    <div class="form-inline form-group canto-identifier-search-container hidden" data-canto-show-by-types="identifier">
+                                        <div class="form-group">
+                                            <select class="canto-input-scheme" name="scheme" data-canto-search="scheme">
+                                                <option value="image">
+                                                    {f:translate(id: 'LLL:EXT:canto_saas_fal/Resources/Private/Language/locallang_be.xlf:canto_asset_browser.searchForm.scheme.image')}
+                                                </option>
+                                                <option value="video">
+                                                    {f:translate(id: 'LLL:EXT:canto_saas_fal/Resources/Private/Language/locallang_be.xlf:canto_asset_browser.searchForm.scheme.video')}
+                                                </option>
+                                                <option value="audio">
+                                                    {f:translate(id: 'LLL:EXT:canto_saas_fal/Resources/Private/Language/locallang_be.xlf:canto_asset_browser.searchForm.scheme.audio')}
+                                                </option>
+                                                <option value="document">
+                                                    {f:translate(id: 'LLL:EXT:canto_saas_fal/Resources/Private/Language/locallang_be.xlf:canto_asset_browser.searchForm.scheme.document')}
+                                                </option>
+                                                <option value="presentation">
+                                                    {f:translate(id: 'LLL:EXT:canto_saas_fal/Resources/Private/Language/locallang_be.xlf:canto_asset_browser.searchForm.scheme.presentation')}
+                                                </option>
+                                                <option value="other">
+                                                    {f:translate(id: 'LLL:EXT:canto_saas_fal/Resources/Private/Language/locallang_be.xlf:canto_asset_browser.searchForm.scheme.other')}
+                                                </option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <input class="canto-input-search-query"
+                                                   type="text"
+                                                   name="identifier"
+                                                   data-canto-search="identifier"
+                                                   maxlength="100"
+                                                   placeholder="{f:translate(id: 'LLL:EXT:canto_saas_fal/Resources/Private/Language/locallang_be.xlf:canto_asset_browser.searchForm.identifier.placeholder')}"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <button type="submit" class="btn btn-default" data-canto-search-submit="1">
+                                            {f:translate(id: 'LLL:EXT:canto_saas_fal/Resources/Private/Language/locallang_be.xlf:canto_asset_browser.searchForm.button.submit')}
+                                        </button>
+                                    </div>
+                                </form>
                             </div>
-                            <div class="form-group hidden" data-canto-show-by-types="tags,categories">
-                                <input class="canto-input-search-query"
-                                       type="text"
-                                       name="query"
-                                       data-canto-search="query"
-                                       maxlength="100"
-                                       placeholder="{f:translate(id: 'LLL:EXT:canto_saas_fal/Resources/Private/Language/locallang_be.xlf:canto_asset_browser.searchForm.query.placeholder')}"
-                                />
-                            </div>
-                            <div class="form-inline form-group canto-identifier-search-container hidden" data-canto-show-by-types="identifier">
-                                <div class="form-group">
-                                    <select class="canto-input-scheme" name="scheme" data-canto-search="scheme">
-                                        <option value="image">
-                                            {f:translate(id: 'LLL:EXT:canto_saas_fal/Resources/Private/Language/locallang_be.xlf:canto_asset_browser.searchForm.scheme.image')}
-                                        </option>
-                                        <option value="video">
-                                            {f:translate(id: 'LLL:EXT:canto_saas_fal/Resources/Private/Language/locallang_be.xlf:canto_asset_browser.searchForm.scheme.video')}
-                                        </option>
-                                        <option value="audio">
-                                            {f:translate(id: 'LLL:EXT:canto_saas_fal/Resources/Private/Language/locallang_be.xlf:canto_asset_browser.searchForm.scheme.audio')}
-                                        </option>
-                                        <option value="document">
-                                            {f:translate(id: 'LLL:EXT:canto_saas_fal/Resources/Private/Language/locallang_be.xlf:canto_asset_browser.searchForm.scheme.document')}
-                                        </option>
-                                        <option value="presentation">
-                                            {f:translate(id: 'LLL:EXT:canto_saas_fal/Resources/Private/Language/locallang_be.xlf:canto_asset_browser.searchForm.scheme.presentation')}
-                                        </option>
-                                        <option value="other">
-                                            {f:translate(id: 'LLL:EXT:canto_saas_fal/Resources/Private/Language/locallang_be.xlf:canto_asset_browser.searchForm.scheme.other')}
-                                        </option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <input class="canto-input-search-query"
-                                           type="text"
-                                           name="identifier"
-                                           data-canto-search="identifier"
-                                           maxlength="100"
-                                           placeholder="{f:translate(id: 'LLL:EXT:canto_saas_fal/Resources/Private/Language/locallang_be.xlf:canto_asset_browser.searchForm.identifier.placeholder')}"
-                                    />
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <button type="submit" class="btn btn-default" data-canto-search-submit="1">
-                                    {f:translate(id: 'LLL:EXT:canto_saas_fal/Resources/Private/Language/locallang_be.xlf:canto_asset_browser.searchForm.button.submit')}
-                                </button>
-                            </div>
-                        </form>
+                        </div>
                     </div>
+                </div>
+
+                <div class="container canto-asset-search-result-container">
+                    <f:if condition="{albumContents}">
+                        <f:then>
+                            <div class="album-header">
+                                <h3>Album-Inhalte</h3>
+                                <div class="album-count">{albumContents -> f:count()} Assets</div>
+                            </div>
+                            <div class="canto-asset-grid">
+                                <f:for each="{albumContents}" as="asset">
+                                    <div class="canto-asset-item" data-asset-id="{asset.id}">
+                                        <div class="asset-preview-container">
+                                            <f:if condition="{asset.previewUrl}">
+                                                <f:then>
+                                                    <img src="{asset.previewUrl}" alt="{asset.name}" class="asset-preview">
+                                                </f:then>
+                                                <f:else>
+                                                    <div class="asset-type-icon {asset.type}">{asset.type}</div>
+                                                </f:else>
+                                            </f:if>
+                                        </div>
+                                        <div class="asset-name">{asset.name}</div>
+                                    </div>
+                                </f:for>
+                            </div>
+
+                        </f:then>
+                        <f:else>
+                            <div class="no-assets-message">
+                                <f:if condition="{selectedAlbumId}">
+                                    <f:then>Keine Assets in diesem Album gefunden.</f:then>
+                                    <f:else>Bitte wähle ein Album, um dessen Inhalt anzuzeigen.</f:else>
+                                </f:if>
+                            </div>
+                        </f:else>
+                    </f:if>
                 </div>
             </div>
         </div>
-
-        <div class="container canto-asset-search-result-container"> </div>
     </div>
 </div>
 
 </html>
+
