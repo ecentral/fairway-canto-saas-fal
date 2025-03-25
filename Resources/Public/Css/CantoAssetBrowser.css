@@ -6,11 +6,11 @@
 .col-canto-search-result-item {
     position: relative;
     margin: 10px;
-    padding:0px;
+    padding: 0;
     min-height: 1px;
     min-width: 150px;
     text-align: center;
-    width:220px;
+    width: 220px;
     flex: 0 0 auto;
     max-height: 120px;
 }
@@ -44,15 +44,16 @@
 
 .canto-result-item-info > .canto-action-button {
     background-color: rgba(0, 0, 0, 0.7);
-    color:white;
+    color: white;
     width: 80%;
     max-width: 150px;
     margin: 0 auto;
     border-radius: 6px;
 }
-.canto-result-item-info > .canto-action-button:hover{
-    background-color: rgba(255, 255, 255, 1);
-    color:black;
+
+.canto-result-item-info > .canto-action-button:hover {
+    background-color: #fff;
+    color: black;
 }
 
 .canto-search-form-container {
@@ -89,4 +90,199 @@
     padding: 7px 10px 10px;
     font-size: 16px;
     border: 1px solid #888;
+}
+
+.canto-tree-list {
+    list-style: none;
+    padding-left: 15px;
+    margin: 0;
+}
+
+.canto-tree-item {
+    margin-bottom: 5px;
+    position: relative;
+}
+
+.canto-folder-item {
+    display: flex;
+    align-items: center;
+    padding: 5px 0;
+    cursor: pointer;
+}
+
+.folder-hover-bg:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.canto-folder-item:hover,
+.folder-label:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.folder-toggle {
+    margin-right: 5px;
+    cursor: pointer;
+    transform-origin: center;
+    transition: transform 0.2s ease;
+}
+
+.folder-toggle.open {
+    transform: rotate(90deg);
+}
+
+.folder-label {
+    cursor: pointer;
+    padding: 3px 5px;
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.folder-label i {
+    margin-right: 5px;
+}
+
+.folder-label.selected {
+    background-color: rgba(255, 152, 0, 0.1);
+    color: #FF9800;
+    font-weight: bold;
+}
+
+.subtree {
+    transition: height 0.3s ease;
+}
+
+.subtree::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 8px;
+    width: 1px;
+    background-color: #ddd;
+}
+
+.canto-tree-list .canto-tree-list .canto-tree-item::before {
+    content: "";
+    position: absolute;
+    left: -15px;
+    top: 15px;
+    width: 15px;
+    height: 1px;
+    background-color: #ddd;
+}
+
+.folder-loading {
+    display: none;
+    width: 20px;
+    height: 20px;
+    background-image: url('../Icons/cantoloading.gif');
+    background-repeat: no-repeat;
+    background-position: center;
+    margin-left: 5px;
+}
+
+.canto-container {
+    display: flex;
+    height: 100%;
+}
+
+.canto-sidebar {
+    width: 250px;
+    border-right: 1px solid #ccc;
+    padding: 10px;
+    overflow-y: auto;
+    max-height: calc(100vh - 150px);
+}
+
+.canto-main {
+    flex: 1;
+    padding: 10px;
+    overflow-y: auto;
+}
+
+.canto-asset-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.canto-asset-item {
+    border: 1px solid #eee;
+    border-radius: 4px;
+    padding: 5px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.canto-asset-item:hover {
+    border-color: #999;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.asset-preview-container {
+    height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.asset-preview {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+.asset-name, .album-count {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.asset-name {
+    margin-top: 5px;
+    font-size: 12px;
+    text-align: center;
+}
+
+.album-count {
+    color: #666;
+    font-size: 14px;
+}
+
+.asset-type-icon {
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f5f5f5;
+    border-radius: 4px;
+    font-size: 12px;
+    text-transform: uppercase;
+    color: #777;
+}
+
+.album-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+.album-header h3 {
+    margin: 0;
+}
+
+.no-assets-message {
+    padding: 20px;
+    text-align: center;
+    color: #666;
 }
