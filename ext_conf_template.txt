@@ -4,3 +4,5 @@
     newversion_hook_token =
 # cat=basic//; type=string; label=Secure Token for the 'Delete Asset' webhook
     deletion_hook_token =
+# cat=basic//; type=string; label=Secure Token for the 'Access Token' webhook
+    access_token =
