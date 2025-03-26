@@ -18,7 +18,6 @@ use Fairway\CantoSaasFal\Resource\Repository\CantoRepository;
 use TYPO3\CMS\Backend\ElementBrowser\AbstractElementBrowser;
 use TYPO3\CMS\Backend\ElementBrowser\ElementBrowserInterface;
 use TYPO3\CMS\Backend\Tree\View\LinkParameterProviderInterface;
-use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Resource\ResourceStorage;
 use TYPO3\CMS\Core\Resource\StorageRepository;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -42,7 +41,7 @@ final class CantoAssetBrowser extends AbstractElementBrowser implements ElementB
         $this->pageRenderer->loadJavaScriptModule('@fairway/canto-saas-fal/BrowseCantoAssetsV12.js');
 
         $this->pageRenderer->addCssFile('EXT:canto_saas_fal/Resources/Public/Css/CantoAssetBrowser.css');
-        $this->pageRenderer->addCssFile('EXT:canto_saas_fal/Resources/Public/Css/CantoFonts.css',);
+        $this->pageRenderer->addCssFile('EXT:canto_saas_fal/Resources/Public/Css/CantoFonts.css');
     }
 
     protected function getBodyTagAttributes(): array

@@ -101,12 +101,11 @@ final class MdcUrlGenerator
         }
         if (!$scaleString && isset($configuration['width']) && isset($configuration['height']) && $configuration['width'] > 0) {
             $scaleString = self::SCALED . (int)$configuration['width'];
-            if($configuration['height'] > 0) {
+            if ($configuration['height'] > 0) {
                 $scaleString.= 'x' . (int)$configuration['height'];
             }
         }
-        if($scaleString == '' && isset($configuration['maxHeight']) && $configuration['maxHeight'] > 0 && !isset($configuration['size']))
-        {
+        if ($scaleString == '' && isset($configuration['maxHeight']) && $configuration['maxHeight'] > 0 && !isset($configuration['size'])) {
             $scaleString = self::BOXED . $configuration['maxHeight'];
         }
         if (isset($configuration['format'])) {
@@ -133,24 +132,16 @@ final class MdcUrlGenerator
             $configuration['width'] = (int)$configuration['width'];
             return $configuration;
         }
-        if($configuration['maxWidth'] >  $imageDimension['width'])
-        {
+        if ($configuration['maxWidth'] >  $imageDimension['width']) {
             $configuration['width'] = $configuration['width'] ?? $configuration['maxWidth'] ?? $imageDimension['width'] ?? 0;
-        }
-        else
-        {
+        } else {
             $configuration['width'] = $configuration['maxWidth'];
         }
-        if($configuration['maxHeight'] >  $imageDimension['height'])
-        {
+        if ($configuration['maxHeight'] >  $imageDimension['height']) {
             $configuration['height'] = $configuration['height'] ?? $configuration['maxHeight'] ?? $imageDimension['height'] ?? 0;
-        }
-        else
-        {
+        } else {
             $configuration['height'] = $configuration['maxHeight'];
         }
-
-
 
         if (($configuration['crop'] ?? null) instanceof Area) {
             $configuration['height'] = min($configuration['height'], $configuration['crop']->getHeight());
@@ -175,7 +166,7 @@ final class MdcUrlGenerator
 
     public function getDocumentType(File|string $file): string
     {
-        [$mdcFileType,$mdcIdentifiere] = explode("<>", is_string($file)?$file:$file->getIdentifier());
+        [$mdcFileType,$mdcIdentifiere] = explode('<>', is_string($file)?$file:$file->getIdentifier());
         return $mdcFileType;
     }
 }

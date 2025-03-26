@@ -15,11 +15,11 @@ use Fairway\CantoSaasApi\Client;
 use Fairway\CantoSaasApi\ClientOptions;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
+use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Http\Client\GuzzleClientFactory;
 use TYPO3\CMS\Core\Information\Typo3Version;
 use TYPO3\CMS\Core\SingletonInterface;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 
 class CantoClientFactory implements LoggerAwareInterface, SingletonInterface
 {
@@ -124,14 +124,10 @@ class CantoClientFactory implements LoggerAwareInterface, SingletonInterface
 
                     if (isset($item['scheme']) && $item['scheme'] === 'image') {
                         $isImage = true;
-                    }
-
-                    elseif (isset($item['default']['Content Type']) &&
+                    } elseif (isset($item['default']['Content Type']) &&
                         strpos($item['default']['Content Type'], 'image/') === 0) {
                         $isImage = true;
-                    }
-
-                    elseif (isset($item['name']) && preg_match('/\.(jpe?g|png|gif|bmp|svg|webp|tiff?)$/i', $item['name'])) {
+                    } elseif (isset($item['name']) && preg_match('/\.(jpe?g|png|gif|bmp|svg|webp|tiff?)$/i', $item['name'])) {
                         $isImage = true;
                     }
 
