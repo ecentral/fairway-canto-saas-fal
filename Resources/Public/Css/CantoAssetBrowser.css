@@ -127,7 +127,7 @@
 }
 
 .folder-toggle.open {
-    transform: rotate(90deg);
+    transform: rotate(-90deg);
 }
 
 .folder-label {

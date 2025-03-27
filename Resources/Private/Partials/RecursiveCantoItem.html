@@ -1,11 +1,12 @@
 <li class="canto-tree-item">
     <div class="canto-folder-item" data-folder-id="{item.scheme}<>{item.id}">
         <f:if condition="{item.children -> f:count()}">
-            <i class="icon-s-Dropdown_16 folder-toggle" onclick="CantoTree.toggleFolder(this)"></i>
+            <i class="icon-s-Dropdown_16 folder-toggle"></i>
         </f:if>
         <span class="folder-label"
               data-id="{item.id}"
-              onclick="CantoTree.selectFolder('', '{item.scheme}<>{item.id}', this)">
+              data-scheme="{item.scheme}"
+              data-info="{item.scheme}<>{item.id}">
             <f:if condition="{item.scheme} == 'folder'">
                 <f:then><i class="icon-s-Folder_open-20px"></i></f:then>
             </f:if>
