@@ -284,6 +284,12 @@ class BrowseCantoAssets {
     new RegularEvent('click', (event, target) => {
       this.toggleFolder(target);
     }).delegateTo(document, Selectors.folderToggle);
+
+    new RegularEvent('click', (event, target) => {
+      const parentId = '';
+      const folderId = target.dataset.info || `${target.dataset.scheme}<>${target.dataset.id}`;
+      this.selectFolder(parentId, folderId, target);
+    }).delegateTo(document, Selectors.folderLabel);
   }
 
   isBetweenNumbers(number, a, b) {
