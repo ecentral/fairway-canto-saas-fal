@@ -14,9 +14,11 @@ namespace Fairway\CantoSaasFal\Browser;
 use Fairway\CantoSaasFal\Resource\CantoClientFactory;
 use Fairway\CantoSaasFal\Resource\Driver\CantoDriver;
 use Fairway\CantoSaasFal\Resource\NoCantoStorageException;
+use Fairway\CantoSaasFal\Resource\Repository\CantoRepository;
 use TYPO3\CMS\Backend\ElementBrowser\AbstractElementBrowser;
 use TYPO3\CMS\Backend\ElementBrowser\ElementBrowserInterface;
 use TYPO3\CMS\Backend\Tree\View\LinkParameterProviderInterface;
+use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Resource\ResourceStorage;
 use TYPO3\CMS\Core\Resource\StorageRepository;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -39,9 +41,8 @@ final class CantoAssetBrowser extends AbstractElementBrowser implements ElementB
         $this->initializeStorage();
         $this->pageRenderer->loadJavaScriptModule('@fairway/canto-saas-fal/BrowseCantoAssetsV12.js');
 
-        $this->pageRenderer->addCssFile(
-            'EXT:canto_saas_fal/Resources/Public/Css/CantoAssetBrowser.css'
-        );
+        $this->pageRenderer->addCssFile('EXT:canto_saas_fal/Resources/Public/Css/CantoAssetBrowser.css');
+        $this->pageRenderer->addCssFile('EXT:canto_saas_fal/Resources/Public/Css/CantoFonts.css');
     }
 
     protected function getBodyTagAttributes(): array
@@ -56,7 +57,6 @@ final class CantoAssetBrowser extends AbstractElementBrowser implements ElementB
     public function render(): string
     {
         $templateView = $this->view;
-        // Make sure that the base initialization creates an FluidView within an FluidViewAdapter
         $templateView = (fn ($templateView): FluidViewAdapter => $templateView)($templateView);
 
         $contentOnly = (bool)($this->getRequest()->getQueryParams()['contentOnly'] ?? false);
@@ -68,10 +68,35 @@ final class CantoAssetBrowser extends AbstractElementBrowser implements ElementB
         $cantoClientFactory = GeneralUtility::makeInstance(CantoClientFactory::class);
         $client = $cantoClientFactory->createClientFromDriverConfiguration($this->storage->getConfiguration());
 
+        $extensionConfiguration = GeneralUtility::makeInstance(ExtensionConfiguration::class);
+        $accessToken = $extensionConfiguration->get('canto_saas_fal', 'access_token');
+        $getApiUrl = $extensionConfiguration->get('canto_saas_fal', 'api_url');
+        $apiUrl = $getApiUrl . 'tree/';
+
+        $cantoHierarchy = $cantoClientFactory->getCantoHierarchy($apiUrl, $accessToken);
+
+        $albumId = $this->getRequest()->getQueryParams()['albumId'] ?? '';
+        $albumContents = [];
+        $selectedAlbumId = '';
+
+        if (!empty($albumId)) {
+            $selectedAlbumId = $albumId;
+            $albumContents = $cantoClientFactory->getCantoAlbumContents($albumId);
+        }
+
+        /** @var CantoRepository $cantoRepository */
+        $cantoRepository = GeneralUtility::makeInstance(CantoRepository::class);
+        $cantoRepository->initialize($this->storage->getUid(), $this->storage->getConfiguration());
+        $folderTree = $cantoRepository->getFolderIdentifierTree('name', 'ascending');
+
         $templateView->assignMultiple([
             'storage' => $this->storage,
             'assetPickerDomain' => $domain,
             'token' => $client->getAccessToken(),
+            'folderTree' => $folderTree,
+            'tree' => $cantoHierarchy,
+            'albumContents' => $albumContents,
+            'selectedAlbumId' => $selectedAlbumId
         ]);
 
         $content = $this->view->render('CantoAssetBrowser/Search');

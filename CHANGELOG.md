@@ -1,5 +1,6 @@
 ### Update
 
+1.0.8 - Implemented Canto folder structure with hierarchy display, access token configuration, CSS adjustments and updated dependencies
 1.0.7.6.2 - Fix images height greater 0 for frontend
 1.0.7.6.1 - Fix images size greater 0 for frontend
 1.0.7.6 - Fix image dimension in backend and file preview link with wrong asset type link

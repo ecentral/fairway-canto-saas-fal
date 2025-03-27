@@ -12,6 +12,8 @@ const Selectors = {
   formFilterFields: '[data-canto-search]',
   paginationPage: '[data-pagination-page]',
   searchFormType: '[data-canto-search="type"]',
+  folderToggle: '.folder-toggle',
+  folderLabel: '.folder-label',
 };
 
 const StorageKeys = {
@@ -35,11 +37,253 @@ class BrowseCantoAssets {
     this.storageUid = document.body.dataset.storageUid;
     this.allowedFileExtensions = document.body.dataset.allowedFileExtensions;
     this.searchForm = document.querySelector(Selectors.searchForm);
+
+    window.CantoTree = {
+      selectFolder: (parentId, folderId, element) => this.selectFolder(parentId, folderId, element),
+      toggleFolder: (element) => this.toggleFolder(element)
+    };
+
     DocumentService.ready().then(() => {
       this.registerEvents();
       this.initializeResults();
-      BrowseCantoAssets.updateForm(this.searchForm);
+
+      if (this.searchForm) {
+        BrowseCantoAssets.updateForm(this.searchForm);
+      }
+
+      this.initCantoTree();
     });
+  }
+
+  initCantoTree() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const albumId = urlParams.get('albumId');
+
+    if (albumId) {
+      const albumElement = document.querySelector(`${Selectors.folderLabel}[data-id="${albumId}"]`);
+      if (albumElement) {
+        albumElement.classList.add('selected');
+
+        let parentSubtree = albumElement.closest('.subtree');
+        while (parentSubtree) {
+          parentSubtree.style.display = 'block';
+          const toggleElement = parentSubtree.previousElementSibling.querySelector(Selectors.folderToggle);
+          if (toggleElement) {
+            toggleElement.classList.add('open');
+          }
+          parentSubtree = parentSubtree.parentElement.closest('.subtree');
+        }
+      }
+
+      this.processAlbumContents();
+    }
+
+    this.registerCantoTreeEvents();
+  }
+
+  selectFolder(parentId, folderId, element) {
+    document.querySelectorAll(`${Selectors.folderLabel}.selected`).forEach(el => {
+      el.classList.remove('selected');
+    });
+
+    if (element) {
+      element.classList.add('selected');
+    }
+
+    const parts = folderId.split('<>');
+    const scheme = parts[0];
+    const id = parts[1];
+
+    if (scheme === 'album') {
+      window.location.href = window.location.pathname +
+        '?albumId=' + id +
+        '&' + window.location.search.substring(1).replace(/&?albumId=[^&]*/, '');
+    } else {
+      const folderToggle = element.parentElement.querySelector(Selectors.folderToggle);
+      if (folderToggle) {
+        this.toggleFolder(folderToggle);
+      }
+    }
+  }
+
+  toggleFolder(element) {
+    const folderItem = element.closest('.canto-folder-item');
+    const subtree = folderItem?.nextElementSibling;
+
+    if (subtree && subtree.classList.contains('subtree')) {
+      if (subtree.style.display === 'none' || !subtree.style.display) {
+        subtree.style.display = 'block';
+        element.classList.add('open');
+      } else {
+        subtree.style.display = 'none';
+        element.classList.remove('open');
+      }
+    }
+  }
+
+
+  processAlbumContents() {
+    const PaginationSettings = {
+      itemsPerPage: 12,
+      maxPagesToShow: 5
+    };
+
+    const albumItems = document.querySelectorAll('.canto-asset-grid .canto-asset-item');
+    const resultContainer = document.querySelector(Selectors.resultContainer);
+
+    if (albumItems.length > 0 && resultContainer) {
+      const urlParams = new URLSearchParams(window.location.search);
+      const currentPage = parseInt(urlParams.get('page')) || 1;
+
+      const itemsPerPage = parseInt(localStorage.getItem('cantoItemsPerPage')) || PaginationSettings.itemsPerPage;
+
+      const totalItems = albumItems.length;
+      const totalPages = Math.ceil(totalItems / itemsPerPage);
+      const startIndex = (currentPage - 1) * itemsPerPage;
+      const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
+
+      const visibleItems = Array.from(albumItems).slice(startIndex, endIndex);
+
+      let html = `
+    <div class="row canto-result">
+      <div class="col-xs-12 d-flex justify-content-between align-items-center">
+        <p class="canto-result-count">
+          ${totalItems} results found
+        </p>
+        <div class="form-inline">
+          <label for="itemsPerPage">Items per page: </label>
+          <select id="itemsPerPage" class="form-control ml-2">
+            <option value="12" ${itemsPerPage === 12 ? 'selected' : ''}>12</option>
+            <option value="24" ${itemsPerPage === 24 ? 'selected' : ''}>24</option>
+            <option value="48" ${itemsPerPage === 48 ? 'selected' : ''}>48</option>
+            <option value="96" ${itemsPerPage === 96 ? 'selected' : ''}>96</option>
+          </select>
+        </div>
+      </div>
+    `;
+
+      visibleItems.forEach(item => {
+        const assetId = item.dataset.assetId;
+        const assetType = item.dataset.scheme || 'image';
+        const assetName = item.querySelector('.asset-name')?.textContent || '';
+        const previewImg = item.querySelector('img.asset-preview');
+        const previewUrl = previewImg ? previewImg.getAttribute('src') : '';
+
+        html += `
+      <a href="#" title="Add file" class="col-canto-search-result-item" data-scheme="${assetType}" data-identifier="${assetId}" data-close="1">
+        ${previewUrl ?
+          `<img src="${previewUrl}" alt="${assetName}">` :
+          `<div class="asset-type-icon ${assetType}">${assetType}</div>`}
+        <div class="canto-result-item-info">
+          <h5>${assetName}</h5>
+          <button class="btn canto-action-button canto-picker-import-file">Cloud</button>
+        </div>
+      </a>
+      `;
+      });
+
+      html += `</div>`;
+
+      if (totalPages > 1) {
+        html += this.createPaginationHTML(currentPage, totalPages);
+      }
+
+      resultContainer.innerHTML = html;
+
+      const itemsPerPageSelect = document.getElementById('itemsPerPage');
+      if (itemsPerPageSelect) {
+        itemsPerPageSelect.addEventListener('change', (event) => {
+          localStorage.setItem('cantoItemsPerPage', event.target.value);
+
+          const newUrl = new URL(window.location.href);
+          newUrl.searchParams.set('page', '1');
+          window.location.href = newUrl.toString();
+        });
+      }
+
+      const albumGrid = document.querySelector('.canto-asset-grid');
+      if (albumGrid) {
+        albumGrid.style.display = 'none';
+      }
+    }
+  }
+
+  createPaginationHTML(currentPage, totalPages) {
+    const maxPagesToShow = PaginationSettings.maxPagesToShow;
+    let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
+    let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
+
+    if (endPage - startPage + 1 < maxPagesToShow) {
+      startPage = Math.max(1, endPage - maxPagesToShow + 1);
+    }
+
+    let paginationHTML = `
+  <nav aria-label="Search result navigation" class="text-center">
+    <ul class="pagination pagination-lg">
+      <li class="${currentPage === 1 ? 'disabled' : ''}">
+        <a href="#" aria-label="Previous" data-pagination-page="${currentPage > 1 ? currentPage - 1 : ''}">
+          <span aria-hidden="true">«</span>
+        </a>
+      </li>
+  `;
+
+    if (startPage > 1) {
+      paginationHTML += `
+      <li>
+        <a href="#" data-pagination-page="1">1</a>
+      </li>
+    `;
+
+      if (startPage > 2) {
+        paginationHTML += `
+        <li class="disabled">
+          <span>...</span>
+        </li>
+      `;
+      }
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      paginationHTML += `
+      <li class="${i === currentPage ? 'active' : ''}">
+        <a href="#" data-pagination-page="${i}">${i}</a>
+      </li>
+    `;
+    }
+
+    if (endPage < totalPages) {
+      if (endPage < totalPages - 1) {
+        paginationHTML += `
+        <li class="disabled">
+          <span>...</span>
+        </li>
+      `;
+      }
+
+      paginationHTML += `
+      <li>
+        <a href="#" data-pagination-page="${totalPages}">${totalPages}</a>
+      </li>
+    `;
+    }
+
+    paginationHTML += `
+      <li class="${currentPage === totalPages ? 'disabled' : ''}">
+        <a href="#" aria-label="Next" data-pagination-page="${currentPage < totalPages ? currentPage + 1 : ''}">
+          <span aria-hidden="true">»</span>
+        </a>
+      </li>
+    </ul>
+  </nav>
+  `;
+
+    return paginationHTML;
+  }
+
+  registerCantoTreeEvents() {
+    new RegularEvent('click', (event, target) => {
+      this.toggleFolder(target);
+    }).delegateTo(document, Selectors.folderToggle);
   }
 
   isBetweenNumbers(number, a, b) {
@@ -71,10 +315,16 @@ class BrowseCantoAssets {
       }
     }).delegateTo(document, Selectors.close);
 
-    new RegularEvent('submit', (event, targetEl) => {
-      event.preventDefault();
-      BrowseCantoAssets.doSearch(targetEl, this.storageUid, 1, this.allowedFileExtensions);
-    }).delegateTo(document, Selectors.searchForm);
+    if (this.searchForm) {
+      new RegularEvent('submit', (event, targetEl) => {
+        event.preventDefault();
+        BrowseCantoAssets.doSearch(targetEl, this.storageUid, 1, this.allowedFileExtensions);
+      }).delegateTo(document, Selectors.searchForm);
+
+      new RegularEvent('change', () => {
+        BrowseCantoAssets.updateForm(this.searchForm);
+      }).delegateTo(this.searchForm, Selectors.searchFormType);
+    }
 
     new RegularEvent('click', (event, targetEl) => {
       event.preventDefault();
@@ -82,17 +332,29 @@ class BrowseCantoAssets {
       BrowseCantoAssets.doSearch(this.searchForm, this.storageUid, pageNumber, this.allowedFileExtensions);
     }).delegateTo(document, Selectors.paginationPage);
 
-    new RegularEvent('change', () => {
-      BrowseCantoAssets.updateForm(this.searchForm);
-    }).delegateTo(this.searchForm, Selectors.searchFormType);
+    new RegularEvent('click', (event, targetEl) => {
+      event.preventDefault();
+      const pageNumber = targetEl.dataset.paginationPage;
+      if (pageNumber) {
+        const newUrl = new URL(window.location.href);
+        newUrl.searchParams.set('page', pageNumber);
+        window.location.href = newUrl.toString();
+      }
+    }).delegateTo(document, Selectors.paginationPage);
   }
 
   initializeResults() {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('albumId') || !this.searchForm) {
+      return;
+    }
+
     const pageNumber = ClientStorage.isset(StorageKeys.currentPage) ? ClientStorage.get(StorageKeys.currentPage) : defaultValues.currentPage;
     const searchWord = ClientStorage.isset(StorageKeys.searchWord) ? ClientStorage.get(StorageKeys.searchWord) : defaultValues.searchWord;
     const type = ClientStorage.isset(StorageKeys.type) ? ClientStorage.get(StorageKeys.type) : defaultValues.type;
     const identifier = ClientStorage.isset(StorageKeys.identifier) ? ClientStorage.get(StorageKeys.identifier) : defaultValues.identifier;
     const scheme = ClientStorage.isset(StorageKeys.scheme) ? ClientStorage.get(StorageKeys.scheme) : defaultValues.scheme;
+
     const filterFormFields = this.searchForm.querySelectorAll(Selectors.formFilterFields);
     for (let i = 0; i < filterFormFields.length; i++) {
       let key = filterFormFields[i].dataset.cantoSearch;
@@ -104,7 +366,6 @@ class BrowseCantoAssets {
           filterFormFields[i].value = identifier;
           break;
         case 'scheme':
-          //filterFormFields[i].querySelector('[value="' + scheme + '"]').sel
           filterFormFields[i].value = scheme;
           break;
         case 'type':
@@ -112,11 +373,16 @@ class BrowseCantoAssets {
           break;
       }
     }
-    BrowseCantoAssets.doSearch(this.searchForm, this.storageUid, pageNumber, this.allowedFileExtensions);
+    //BrowseCantoAssets.doSearch(this.searchForm, this.storageUid, pageNumber, this.allowedFileExtensions);
   }
 
   static updateForm(filterForm) {
-    const type = filterForm.querySelector(Selectors.searchFormType + ':checked').value;
+    if (!filterForm) return;
+
+    const checkedRadio = filterForm.querySelector(Selectors.searchFormType + ':checked');
+    if (!checkedRadio) return;
+
+    const type = checkedRadio.value;
     [].forEach.call(filterForm.querySelectorAll('[data-canto-show-by-types]'), (container) => {
       if (container.dataset.cantoShowByTypes.split(',').indexOf(type) !== -1) {
         container.classList.remove('hidden');
@@ -127,8 +393,12 @@ class BrowseCantoAssets {
   }
 
   static doSearch(filterForm, storageUid, pageNumber, allowedFileExtensions) {
+    if (!filterForm) return Promise.reject(new Error('Suchformular nicht gefunden'));
+
     const resultContainer = document.querySelector(Selectors.resultContainer);
-    BrowseCantoAssets.submitSearch(filterForm, storageUid, pageNumber, allowedFileExtensions).then((data) => {
+    if (!resultContainer) return Promise.reject(new Error('Ergebniscontainer nicht gefunden'));
+
+    return BrowseCantoAssets.submitSearch(filterForm, storageUid, pageNumber, allowedFileExtensions).then((data) => {
       resultContainer.innerHTML = data;
     });
   }

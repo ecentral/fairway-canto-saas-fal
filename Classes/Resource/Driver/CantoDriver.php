@@ -883,7 +883,7 @@ class CantoDriver extends AbstractDriver implements StreamableDriverInterface
                 }
             }
             if (++$count > 15) {
-                $this->sendFlashMessageToUser('Timeout', 'File not fully processed. Please reload', FlashMessage::WARNING, );
+                $this->sendFlashMessageToUser('Timeout', 'File not fully processed. Please reload', FlashMessage::WARNING);
                 return '';
             }
         }
