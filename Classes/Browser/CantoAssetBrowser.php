@@ -21,6 +21,7 @@ use TYPO3\CMS\Backend\Tree\View\LinkParameterProviderInterface;
 use TYPO3\CMS\Core\Resource\ResourceStorage;
 use TYPO3\CMS\Core\Resource\StorageRepository;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\View\FluidViewAdapter;
 
 final class CantoAssetBrowser extends AbstractElementBrowser implements ElementBrowserInterface, LinkParameterProviderInterface
@@ -67,8 +68,10 @@ final class CantoAssetBrowser extends AbstractElementBrowser implements ElementB
         $cantoClientFactory = GeneralUtility::makeInstance(CantoClientFactory::class);
         $client = $cantoClientFactory->createClientFromDriverConfiguration($this->storage->getConfiguration());
 
-        $apiUrl = 'https://ecentral.canto.de/api/v1/tree/';
-        $accessToken = $this->extensionConfiguration->get('canto_saas_fal', 'access_token');
+        $extensionConfiguration = GeneralUtility::makeInstance(ExtensionConfiguration::class);
+        $accessToken = $extensionConfiguration->get('canto_saas_fal', 'access_token');
+        $getApiUrl = $extensionConfiguration->get('canto_saas_fal', 'api_url');
+        $apiUrl = $getApiUrl . 'tree/';
 
         $cantoHierarchy = $cantoClientFactory->getCantoHierarchy($apiUrl, $accessToken);
 

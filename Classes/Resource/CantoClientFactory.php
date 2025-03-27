@@ -100,9 +100,10 @@ class CantoClientFactory implements LoggerAwareInterface, SingletonInterface
     public function getCantoAlbumContents($albumId): array
     {
         try {
-            $apiUrl = 'https://ecentral.canto.de/api/v1/album/' . $albumId;
             $extensionConfiguration = GeneralUtility::makeInstance(ExtensionConfiguration::class);
             $accessToken = $extensionConfiguration->get('canto_saas_fal', 'access_token');
+            $getApiUrl = $extensionConfiguration->get('canto_saas_fal', 'api_url');
+            $apiUrl = $getApiUrl . 'album/' . $albumId;
 
             $gizzleClient = GeneralUtility::makeInstance(GuzzleClientFactory::class)->getClient();
 
