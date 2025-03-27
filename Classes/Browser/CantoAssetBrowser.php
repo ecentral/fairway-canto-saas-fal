@@ -18,10 +18,10 @@ use Fairway\CantoSaasFal\Resource\Repository\CantoRepository;
 use TYPO3\CMS\Backend\ElementBrowser\AbstractElementBrowser;
 use TYPO3\CMS\Backend\ElementBrowser\ElementBrowserInterface;
 use TYPO3\CMS\Backend\Tree\View\LinkParameterProviderInterface;
+use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Resource\ResourceStorage;
 use TYPO3\CMS\Core\Resource\StorageRepository;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\View\FluidViewAdapter;
 
 final class CantoAssetBrowser extends AbstractElementBrowser implements ElementBrowserInterface, LinkParameterProviderInterface
